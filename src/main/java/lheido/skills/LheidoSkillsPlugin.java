@@ -16,4 +16,24 @@ public class LheidoSkillsPlugin extends JavaPlugin {
     public LheidoSkillsPlugin(@NonNullDecl JavaPluginInit init) {
         super(init);
     }
+
+    /**
+     * Sets up the plugin. This method is called when the plugin is enabled.
+     * This is where you can register event listeners, commands, and perform any necessary initialization.
+     *
+     * Example:
+     *
+     * CommandRegistry commandRegistry = this.getCommandRegistry();
+     * commandRegistry.registerCommand(new FirstCommand());
+     *
+     * this.getEntityStoreRegistry().registerComponent(
+     *     MyComponent.class,
+     *     MyComponent::new
+     * );
+     *
+     * this.getEntityStoreRegistry().registerSystem(new MySystem());
+     *
+     */
+    @Override
+    protected void setup() {}
 }
