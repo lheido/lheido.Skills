@@ -1,0 +1,18 @@
+{
+  "Group": "lheido.skills",
+  "Name": "LheidoSkills",
+  "Version": "1.0.0",
+  "Description": "TODO description",
+  "Authors": [
+    {
+      "Name": "lheido"
+    }
+  ],
+  "Website": "",
+  "ServerVersion": "*",
+  "Dependencies": {},
+  "OptionalDependencies": {},
+  "DisabledByDefault": false,
+  "Main": "lheido.skills.LheidoSkillsPlugin",
+  "IncludesAssetPack": true
+}
