@@ -81,26 +81,52 @@ lheido.Skills/
 - **Gradle:** 9.2.0
 - **Dépendance:** `libs/HytaleServer.jar` (local)
 
-## Architecture
+## Architecture ECS (Entity Component System)
 
-Le projet utilise une architecture ECS (Entity Component System):
+Le projet utilise une architecture ECS pour les skills:
 
 | Dossier | Description |
 |---------|-------------|
-| `interactions/` | Classes d'interaction pour les skills (comportement) |
-| `components/` | Composants de données (à implémenter) |
-| `systems/` | Logique de jeu (à implémenter) |
+| `components/` | Components ECS attachés au player (données persistantes du skill) |
+| `interactions/` | Interactions pour ajouter les components au player |
+| `systems/` | Systèmes ECS pour la logique de jeu (réagissent aux components) |
+
+### Flux d'un skill
+
+1. **Item utilisé** → L'interaction est déclenchée
+2. **Interaction** → Ajoute le component au player
+3. **Component** → Données persistantes sauvegardées via CODEC
+4. **System** → Réagit au component pour la logique de jeu
+
+## Système de CODEC (persistence)
+
+Les CODECs permettent de sérialiser/désérialiser les données pour la sauvegarde.
+
+### Enregistrement dans `LheidoSkillsPlugin.java`, méthode `setup()`:
+
+```java
+// Enregistrer un component (pour la persistence)
+this.getCodecRegistry(Component.CODEC).register("component_id", MyComponent.class, MyComponent.CODEC);
+
+// Enregistrer une interaction
+this.getCodecRegistry(Interaction.CODEC).register("interaction_id", MyInteraction.class, MyInteraction.CODEC);
+```
+
+### Structure d'un component
+
+```java
+public class MySkillComponent implements Component {
+    public static final BuilderCodec<MySkillComponent> CODEC = BuilderCodec.builder(
+            MySkillComponent.class, MySkillComponent::new
+    ).build();
+
+    // Données du skill
+}
+```
 
 ## Système d'interactions
 
-Les skills utilisent le système d'interaction de Hytale pour définir leur comportement.
-
-### Enregistrement d'une interaction
-
-Dans `LheidoSkillsPlugin.java`, méthode `setup()`:
-```java
-this.getCodecRegistry(Interaction.CODEC).register("interaction_id", MyInteraction.class, MyInteraction.CODEC);
-```
+Les interactions permettent d'ajouter des components au player quand un item est utilisé.
 
 ### Structure d'une interaction
 
@@ -114,7 +140,7 @@ public class MySkillInteraction extends SimpleInstantInteraction {
     protected void firstRun(@Nonnull InteractionType interactionType, 
                            @Nonnull InteractionContext interactionContext, 
                            @Nonnull CooldownHandler cooldownHandler) {
-        // Comportement du skill
+        // Ajouter le component au player
     }
 }
 ```

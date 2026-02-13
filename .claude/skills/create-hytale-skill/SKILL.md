@@ -92,9 +92,35 @@ items.Skill_Swimming_A.name=Swimming (1)
 items.Skill_Swimming_A.description=Allows the player to swim faster
 ```
 
-### 3. Créer l'interaction Java (comportement du skill)
+### 3. Créer le component du skill (données persistantes)
 
-Chaque skill doit être lié à du code Java via le système d'interaction.
+Chaque skill nécessite un component ECS qui sera attaché au player. Ce component stocke les données du skill et est sauvegardé via le système de CODEC.
+
+**Chemin:** `src/main/java/lheido/skills/components/<NomDuSkill>SkillComponent.java`
+
+**Template:**
+```java
+package lheido.skills.components;
+
+import com.hypixel.hytale.server.util.codec.BuilderCodec;
+import com.hypixel.hytale.common.ecs.component.Component;
+
+/**
+ * Component pour le skill <NomDuSkill>
+ * Attaché au player pour persister les données du skill
+ */
+public class <NomDuSkill>SkillComponent implements Component {
+    public static final BuilderCodec<<NomDuSkill>SkillComponent> CODEC = BuilderCodec.builder(
+            <NomDuSkill>SkillComponent.class, <NomDuSkill>SkillComponent::new
+    ).build();
+
+    // Ajouter les données du skill ici (niveau, etc.)
+}
+```
+
+### 4. Créer l'interaction Java (ajout du component au player)
+
+L'interaction permet d'ajouter le component du skill au player quand l'item est utilisé.
 
 **Chemin:** `src/main/java/lheido/skills/interactions/Skill<NomDuSkill>Interaction.java`
 
@@ -107,11 +133,13 @@ import com.hypixel.hytale.common.interaction.CooldownHandler;
 import com.hypixel.hytale.common.interaction.InteractionContext;
 import com.hypixel.hytale.common.interaction.InteractionType;
 import com.hypixel.hytale.common.interaction.SimpleInstantInteraction;
+import lheido.skills.components.<NomDuSkill>SkillComponent;
 
 import javax.annotation.Nonnull;
 
 /**
  * Interaction pour le skill <NomDuSkill>
+ * Ajoute le component au player lors de l'utilisation de l'item
  */
 public class Skill<NomDuSkill>Interaction extends SimpleInstantInteraction {
     public static final BuilderCodec<Skill<NomDuSkill>Interaction> CODEC = BuilderCodec.builder(
@@ -120,26 +148,39 @@ public class Skill<NomDuSkill>Interaction extends SimpleInstantInteraction {
 
     @Override
     protected void firstRun(@Nonnull InteractionType interactionType, @Nonnull InteractionContext interactionContext, @Nonnull CooldownHandler cooldownHandler) {
-        // Comportement personnalisé quand le skill est utilisé
+        // Ajouter le component au player
+        // interactionContext.getPlayer().addComponent(new <NomDuSkill>SkillComponent());
     }
 }
 ```
 
-### 4. Enregistrer l'interaction dans le plugin
+### 5. Enregistrer le component et l'interaction dans le plugin
 
 **Chemin:** `src/main/java/lheido/skills/LheidoSkillsPlugin.java`
 
 Ajouter dans la méthode `setup()`:
 ```java
+// Enregistrer le component (pour la persistence/sauvegarde)
+this.getCodecRegistry(Component.CODEC).register("<nom_du_skill>_skill", <NomDuSkill>SkillComponent.class, <NomDuSkill>SkillComponent.CODEC);
+
+// Enregistrer l'interaction
 this.getCodecRegistry(Interaction.CODEC).register("skill_<nom_du_skill>", Skill<NomDuSkill>Interaction.class, Skill<NomDuSkill>Interaction.CODEC);
 ```
+
+### 6. (Optionnel) Créer un système ECS pour le comportement
+
+Si le skill nécessite une logique de jeu (ex: double jump, flying), créer un système qui réagit au component.
+
+**Chemin:** `src/main/java/lheido/skills/systems/<NomDuSkill>System.java`
 
 ## Convention de nommage
 
 | Élément | Format | Exemple |
 |---------|--------|---------|
 | Fichier JSON | `Skill_<NomDuSkill>_<Niveau>.json` | `Skill_DoubleJump_A.json` |
-| Classe Java | `Skill<NomDuSkill>Interaction` | `SkillDoubleJumpInteraction` |
+| Component | `<NomDuSkill>SkillComponent` | `DoubleJumpSkillComponent` |
+| Interaction | `Skill<NomDuSkill>Interaction` | `SkillDoubleJumpInteraction` |
+| ID component | `<nom_du_skill>_skill` | `double_jump_skill` |
 | ID interaction | `skill_<nom_du_skill>` | `skill_double_jump` |
 | Niveaux | A, B, C, D... (A=1, B=2, etc.) | A = niveau 1 |
 | Traduction | `<Nom lisible> (<niveau>)` | `Double Jump (1)` |
@@ -164,11 +205,16 @@ Pour créer un skill "Double Jump" niveau A:
    items.Skill_DoubleJump_A.name=Double Jump (1)
    items.Skill_DoubleJump_A.description=Allows the player to jump twice in the air
    ```
-3. Créer `src/main/java/lheido/skills/interactions/SkillDoubleJumpInteraction.java`
-4. Enregistrer dans `LheidoSkillsPlugin.java`:
+3. Créer le component `src/main/java/lheido/skills/components/DoubleJumpSkillComponent.java`
+4. Créer l'interaction `src/main/java/lheido/skills/interactions/SkillDoubleJumpInteraction.java`
+5. Enregistrer dans `LheidoSkillsPlugin.java`:
    ```java
+   // Component
+   this.getCodecRegistry(Component.CODEC).register("double_jump_skill", DoubleJumpSkillComponent.class, DoubleJumpSkillComponent.CODEC);
+   // Interaction
    this.getCodecRegistry(Interaction.CODEC).register("skill_double_jump", SkillDoubleJumpInteraction.class, SkillDoubleJumpInteraction.CODEC);
    ```
+6. (Optionnel) Créer un système `src/main/java/lheido/skills/systems/DoubleJumpSystem.java` pour la logique
 
 ## Documentation externe
 
