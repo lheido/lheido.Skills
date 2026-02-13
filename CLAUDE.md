@@ -24,6 +24,30 @@ Pour créer un skill, il faut:
 1. Créer le JSON dans `src/main/resources/Server/Item/Items/Upgrades/`
 2. Ajouter les traductions dans `src/main/resources/Server/Languages/en-US/server.lang`
 
+Un skill doit être lié à du code java en utilisant le system d'intéraction.
+
+```java
+/**
+ * Exemple d'interaction personnalisée pour un skill
+ */
+public class MyCustomInteraction extends SimpleInstantInteraction {
+    public static final BuilderCodec<MyCustomInteraction> CODEC = BuilderCodec.builder(
+            MyCustomInteraction.class, MyCustomInteraction::new, SimpleInstantInteraction.CODEC
+    ).build();
+
+    @Override
+    protected void firstRun(@Nonnull InteractionType interactionType, @Nonnull InteractionContext interactionContext, @Nonnull CooldownHandler cooldownHandler) {
+        // Custom behavior when the item is used
+    }
+}
+```
+Une intéraction est register dans la methode setup du plugin (`LheidoSkillsPlugin.java`):
+```java
+this.getCodecRegistry(Interaction.CODEC).register("my_custom_interaction_id", MyCustomInteraction.class, MyCustomInteraction.CODEC);
+```
+documentation interaction : https://hytalemodding.dev/en/docs/guides/plugin/item-interaction
+document codec : https://hytalemodding.dev/en/docs/guides/ecs/hytale-ecs-theory#codec
+
 ### Build
 
 ```bash

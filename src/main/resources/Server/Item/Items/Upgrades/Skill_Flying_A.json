@@ -3,6 +3,7 @@
     "Name": "server.items.Skill_Flying_A.name",
     "Description": "server.items.Skill_Flying_A.description"
   },
+  "Id": "Skill_Flying_A",
   "Icon": "Icons/ItemsGenerated/Skill_Flying_A.png",
   "Quality": "Uncommon",
   "MaxStack": 1,

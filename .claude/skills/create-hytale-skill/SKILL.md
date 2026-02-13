@@ -1,6 +1,9 @@
-# Skill: Créer un nouveau Skill Hytale
+---
+name: create-hytale-skill
+description: Guide pour créer un nouveau skill dans le mod LheidoSkills pour Hytale. Utiliser quand l'utilisateur demande de créer un skill, une compétence, ou un upgrade pour le mod.
+---
 
-Ce skill explique comment créer un nouveau skill dans le mod LheidoSkills pour Hytale.
+# Créer un nouveau Skill Hytale
 
 ## Prérequis
 
@@ -57,12 +60,12 @@ Pour créer un nouveau skill nommé `Skill_<NomDuSkill>_<Niveau>` (ex: `Skill_Sw
   "Interactions": {
     "Primary": {
       "Interactions": [
-        { "Type": "CheckUniqueItemUsage" }
+        { "Type": "skill_<nom_du_skill>" }
       ]
     },
     "Secondary": {
       "Interactions": [
-        { "Type": "CheckUniqueItemUsage" }
+        { "Type": "skill_<nom_du_skill>" }
       ]
     }
   },
@@ -89,11 +92,57 @@ items.Skill_Swimming_A.name=Swimming (1)
 items.Skill_Swimming_A.description=Allows the player to swim faster
 ```
 
+### 3. Créer l'interaction Java (comportement du skill)
+
+Chaque skill doit être lié à du code Java via le système d'interaction.
+
+**Chemin:** `src/main/java/lheido/skills/interactions/Skill<NomDuSkill>Interaction.java`
+
+**Template:**
+```java
+package lheido.skills.interactions;
+
+import com.hypixel.hytale.server.util.codec.BuilderCodec;
+import com.hypixel.hytale.common.interaction.CooldownHandler;
+import com.hypixel.hytale.common.interaction.InteractionContext;
+import com.hypixel.hytale.common.interaction.InteractionType;
+import com.hypixel.hytale.common.interaction.SimpleInstantInteraction;
+
+import javax.annotation.Nonnull;
+
+/**
+ * Interaction pour le skill <NomDuSkill>
+ */
+public class Skill<NomDuSkill>Interaction extends SimpleInstantInteraction {
+    public static final BuilderCodec<Skill<NomDuSkill>Interaction> CODEC = BuilderCodec.builder(
+            Skill<NomDuSkill>Interaction.class, Skill<NomDuSkill>Interaction::new, SimpleInstantInteraction.CODEC
+    ).build();
+
+    @Override
+    protected void firstRun(@Nonnull InteractionType interactionType, @Nonnull InteractionContext interactionContext, @Nonnull CooldownHandler cooldownHandler) {
+        // Comportement personnalisé quand le skill est utilisé
+    }
+}
+```
+
+### 4. Enregistrer l'interaction dans le plugin
+
+**Chemin:** `src/main/java/lheido/skills/LheidoSkillsPlugin.java`
+
+Ajouter dans la méthode `setup()`:
+```java
+this.getCodecRegistry(Interaction.CODEC).register("skill_<nom_du_skill>", Skill<NomDuSkill>Interaction.class, Skill<NomDuSkill>Interaction.CODEC);
+```
+
 ## Convention de nommage
 
-- **Nom du fichier:** `Skill_<NomDuSkill>_<Niveau>.json`
-- **Niveaux:** A, B, C, D... (A = niveau 1, B = niveau 2, etc.)
-- **Traduction du nom:** `<Nom lisible> (<niveau en chiffre>)`
+| Élément | Format | Exemple |
+|---------|--------|---------|
+| Fichier JSON | `Skill_<NomDuSkill>_<Niveau>.json` | `Skill_DoubleJump_A.json` |
+| Classe Java | `Skill<NomDuSkill>Interaction` | `SkillDoubleJumpInteraction` |
+| ID interaction | `skill_<nom_du_skill>` | `skill_double_jump` |
+| Niveaux | A, B, C, D... (A=1, B=2, etc.) | A = niveau 1 |
+| Traduction | `<Nom lisible> (<niveau>)` | `Double Jump (1)` |
 
 ## Paramètres personnalisables
 
@@ -115,6 +164,16 @@ Pour créer un skill "Double Jump" niveau A:
    items.Skill_DoubleJump_A.name=Double Jump (1)
    items.Skill_DoubleJump_A.description=Allows the player to jump twice in the air
    ```
+3. Créer `src/main/java/lheido/skills/interactions/SkillDoubleJumpInteraction.java`
+4. Enregistrer dans `LheidoSkillsPlugin.java`:
+   ```java
+   this.getCodecRegistry(Interaction.CODEC).register("skill_double_jump", SkillDoubleJumpInteraction.class, SkillDoubleJumpInteraction.CODEC);
+   ```
+
+## Documentation externe
+
+- **Interactions:** https://hytalemodding.dev/en/docs/guides/plugin/item-interaction
+- **Codec:** https://hytalemodding.dev/en/docs/guides/ecs/hytale-ecs-theory#codec
 
 ## Vérification
 
