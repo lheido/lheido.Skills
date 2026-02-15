@@ -1,7 +1,13 @@
 package lheido.skills;
 
+import com.hypixel.hytale.component.ComponentType;
+import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Interaction;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import lheido.skills.components.FlyingSkillComponent;
+import lheido.skills.interactions.SkillFlyingInteraction;
+import lheido.skills.systems.FlyingSystem;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 /**
@@ -19,21 +25,27 @@ public class LheidoSkillsPlugin extends JavaPlugin {
 
     /**
      * Sets up the plugin. This method is called when the plugin is enabled.
-     * This is where you can register event listeners, commands, and perform any necessary initialization.
-     *
-     * Example:
-     *
-     * CommandRegistry commandRegistry = this.getCommandRegistry();
-     * commandRegistry.registerCommand(new FirstCommand());
-     *
-     * this.getEntityStoreRegistry().registerComponent(
-     *     MyComponent.class,
-     *     MyComponent::new
-     * );
-     *
-     * this.getEntityStoreRegistry().registerSystem(new MySystem());
-     *
+     * Registers all skill components, interactions, and systems.
      */
     @Override
-    protected void setup() {}
+    protected void setup() {
+        // Register Flying Skill Interaction
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "skill_flying",
+            SkillFlyingInteraction.class,
+            SkillFlyingInteraction.CODEC
+        );
+
+        // Register Flying Skill Component with Codec for persistence
+        ComponentType<EntityStore, FlyingSkillComponent> flyingComponentType =
+            this.getEntityStoreRegistry().registerComponent(
+                FlyingSkillComponent.class,
+                "FlyingSkillComponent",
+                FlyingSkillComponent.CODEC
+            );
+        FlyingSkillComponent.setComponentType(flyingComponentType);
+
+        // Register Flying System
+        this.getEntityStoreRegistry().registerSystem(new FlyingSystem());
+    }
 }

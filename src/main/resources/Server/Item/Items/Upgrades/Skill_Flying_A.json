@@ -39,14 +39,20 @@
     "Primary": {
       "Interactions": [
         {
-          "Type": "CheckUniqueItemUsage"
+          "Type": "CheckUniqueItemUsage",
+          "Next": {
+            "Type": "skill_flying"
+          }
         }
       ]
     },
     "Secondary": {
       "Interactions": [
         {
-          "Type": "CheckUniqueItemUsage"
+          "Type": "CheckUniqueItemUsage",
+          "Next": {
+            "Type": "skill_flying"
+          }
         }
       ]
     }
