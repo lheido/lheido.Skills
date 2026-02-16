@@ -75,6 +75,12 @@ public class FlyingSkillComponent implements Component<EntityStore> {
                 data -> data.cooldownMs
             )
             .add()
+            .append(
+                new KeyedCodec<>("WasFlying", Codec.BOOLEAN),
+                (data, value) -> data.wasFlying = value,
+                data -> data.wasFlying
+            )
+            .add()
             .build();
 
     // ============================================
@@ -83,6 +89,18 @@ public class FlyingSkillComponent implements Component<EntityStore> {
 
     private FlyingState state;
     private long stateStartTime;
+    
+    /**
+     * Flag persisté indiquant si le joueur était en vol lors de la sauvegarde.
+     * Utilisé pour restaurer l'état de vol après reconnexion (Flying X).
+     */
+    private boolean wasFlying = false;
+    
+    /**
+     * Flag indiquant si le component vient d'être chargé (après reconnexion).
+     * Utilisé pour forcer la synchronisation de canFly avec le client.
+     */
+    private transient boolean needsResync = true;
 
     // ============================================
     // Configuration
@@ -98,6 +116,26 @@ public class FlyingSkillComponent implements Component<EntityStore> {
         this.flyDurationMs = DEFAULT_FLY_DURATION_MS;
         this.cooldownMs = DEFAULT_COOLDOWN_MS;
         this.level = 1;
+        this.needsResync = true; // Force resync après chargement
+    }
+
+    // ============================================
+    // Resync Management
+    // ============================================
+
+    /**
+     * Vérifie si le component nécessite une resynchronisation avec le client.
+     * @return true si une resync est nécessaire
+     */
+    public boolean needsResync() {
+        return needsResync;
+    }
+
+    /**
+     * Marque le component comme synchronisé.
+     */
+    public void markSynced() {
+        this.needsResync = false;
     }
 
     // ============================================
@@ -173,6 +211,7 @@ public class FlyingSkillComponent implements Component<EntityStore> {
     public void transitionToFlying() {
         this.state = FlyingState.FLYING;
         this.stateStartTime = System.currentTimeMillis();
+        this.wasFlying = true;
     }
 
     /**
@@ -182,6 +221,7 @@ public class FlyingSkillComponent implements Component<EntityStore> {
     public void transitionToCooldown() {
         this.state = FlyingState.COOLDOWN;
         this.stateStartTime = System.currentTimeMillis();
+        this.wasFlying = false;
     }
 
     /**
@@ -191,6 +231,7 @@ public class FlyingSkillComponent implements Component<EntityStore> {
     public void transitionToReady() {
         this.state = FlyingState.READY;
         this.stateStartTime = 0L;
+        this.wasFlying = false;
     }
 
     // ============================================
@@ -211,6 +252,15 @@ public class FlyingSkillComponent implements Component<EntityStore> {
 
     public boolean isOnCooldown() {
         return state == FlyingState.COOLDOWN;
+    }
+
+    /**
+     * Vérifie si le joueur était en vol lors de la dernière sauvegarde.
+     * Utilisé pour restaurer l'état de vol après reconnexion.
+     * @return true si le joueur était en vol
+     */
+    public boolean wasFlying() {
+        return wasFlying;
     }
 
     /**
@@ -284,6 +334,8 @@ public class FlyingSkillComponent implements Component<EntityStore> {
         copy.flyDurationMs = this.flyDurationMs;
         copy.cooldownMs = this.cooldownMs;
         copy.level = this.level;
+        copy.wasFlying = this.wasFlying;
+        copy.needsResync = false; // Le clone n'a pas besoin de resync
         return copy;
     }
 

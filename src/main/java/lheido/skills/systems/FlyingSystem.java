@@ -10,6 +10,7 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.tick.EntityTickingSystem;
 import com.hypixel.hytale.logger.HytaleLogger;
+import com.hypixel.hytale.protocol.MovementSettings;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.entity.entities.player.movement.MovementManager;
@@ -98,6 +99,7 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
         }
 
         // Traiter l'état actuel
+        // Note: Après reconnexion, state est toujours READY (non persisté)
         switch (flyingComponent.getState()) {
             case READY -> handleReadyState(
                 flyingComponent,
@@ -133,11 +135,48 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
         PacketHandler packetHandler,
         Player player
     ) {
-        // S'assurer que canFly est activé (ex: après reconnexion)
-        if (!movementManager.getSettings().canFly) {
+        MovementSettings settings = movementManager.getSettings();
+        
+        // Après reconnexion ou premier chargement
+        if (component.needsResync()) {
+            if (settings != null) {
+                // Forcer canFly = true et synchroniser avec le client
+                settings.canFly = true;
+                movementManager.update(packetHandler);
+            }
+            
+            // Si le joueur était en vol et a un vol illimité, restaurer l'état de vol
+            if (component.wasFlying() && component.isUnlimitedFlight()) {
+                MovementUtils.forceStartFlying(
+                    movementManager,
+                    statesComponent,
+                    packetHandler
+                );
+                component.transitionToFlying();
+                
+                player.sendMessage(
+                    Message.raw("Flight restored - unlimited duration!")
+                );
+                LOGGER.atInfo().log(
+                    "Player with Flying X reconnected, flight state restored"
+                );
+            } else {
+                LOGGER.atInfo().log(
+                    "Player with Flying skill level " + component.getLevel() 
+                    + " reconnected, canFly force-synced"
+                );
+            }
+            
+            component.markSynced();
+            return; // Ne pas continuer le traitement normal ce tick
+        }
+        
+        // Cas normal: réactiver canFly si désactivé
+        if (settings != null && !settings.canFly) {
             MovementUtils.setCanFly(movementManager, packetHandler, true);
             LOGGER.atInfo().log(
-                "Player reconnected with Flying skill, canFly re-enabled"
+                "Player with Flying skill level " + component.getLevel() 
+                + ", canFly re-enabled"
             );
         }
 

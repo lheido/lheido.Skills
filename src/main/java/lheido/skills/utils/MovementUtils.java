@@ -91,6 +91,39 @@ public final class MovementUtils {
     }
 
     /**
+     * Force le démarrage du vol pour un joueur.
+     * Utilisé pour restaurer l'état de vol après reconnexion.
+     *
+     * @param movement        Le MovementManager du joueur
+     * @param statesComponent Le MovementStatesComponent du joueur
+     * @param packetHandler   Le PacketHandler pour envoyer les updates au client
+     */
+    public static void forceStartFlying(
+            @Nonnull MovementManager movement,
+            @Nonnull MovementStatesComponent statesComponent,
+            @Nonnull PacketHandler packetHandler
+    ) {
+        // S'assurer que canFly est activé
+        MovementSettings settings = movement.getSettings();
+        if (settings != null) {
+            settings.canFly = true;
+            movement.update(packetHandler);
+        }
+        
+        // Forcer l'état de vol
+        MovementStates movementStates = statesComponent.getMovementStates();
+        if (movementStates == null) {
+            movementStates = new MovementStates();
+            statesComponent.setMovementStates(movementStates);
+        }
+        movementStates.flying = true;
+        statesComponent.setMovementStates(movementStates);
+        packetHandler.writeNoCache(
+            new SetMovementStates(new SavedMovementStates(true))
+        );
+    }
+
+    /**
      * Désactive complètement le vol pour un joueur.
      * Force l'arrêt du vol s'il est en cours, puis retire la capacité de voler.
      *
