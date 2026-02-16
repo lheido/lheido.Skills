@@ -6,13 +6,20 @@ import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import lheido.skills.components.FlyingSkillComponent;
+import lheido.skills.components.WaterBreathingSkillComponent;
 import lheido.skills.interactions.CheckFlyingUpgradeInteraction;
+import lheido.skills.interactions.CheckWaterBreathingUpgradeInteraction;
 import lheido.skills.interactions.SkillFlyingBInteraction;
 import lheido.skills.interactions.SkillFlyingCInteraction;
 import lheido.skills.interactions.SkillFlyingInteraction;
 import lheido.skills.interactions.SkillFlyingXInteraction;
+import lheido.skills.interactions.SkillWaterBreathingBInteraction;
+import lheido.skills.interactions.SkillWaterBreathingCInteraction;
+import lheido.skills.interactions.SkillWaterBreathingInteraction;
+import lheido.skills.interactions.SkillWaterBreathingXInteraction;
 import lheido.skills.systems.FlyingSystem;
 import lheido.skills.systems.SkillEssenceDropSystem;
+import lheido.skills.systems.WaterBreathingSystem;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 /**
@@ -85,5 +92,56 @@ public class LheidoSkillsPlugin extends JavaPlugin {
         this.getEntityStoreRegistry().registerSystem(
             new SkillEssenceDropSystem()
         );
+
+        // ============================================
+        // Water Breathing Skill
+        // ============================================
+
+        // Register Water Breathing Skill Interaction (level A)
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "skill_water_breathing",
+            SkillWaterBreathingInteraction.class,
+            SkillWaterBreathingInteraction.CODEC
+        );
+
+        // Register Water Breathing Skill B Interaction (upgrade)
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "skill_water_breathing_b",
+            SkillWaterBreathingBInteraction.class,
+            SkillWaterBreathingBInteraction.CODEC
+        );
+
+        // Register Water Breathing Skill C Interaction (upgrade)
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "skill_water_breathing_c",
+            SkillWaterBreathingCInteraction.class,
+            SkillWaterBreathingCInteraction.CODEC
+        );
+
+        // Register Water Breathing Skill X Interaction (ultimate upgrade)
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "skill_water_breathing_x",
+            SkillWaterBreathingXInteraction.class,
+            SkillWaterBreathingXInteraction.CODEC
+        );
+
+        // Register Check Water Breathing Upgrade Interaction (prerequisite checker)
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "check_water_breathing_upgrade",
+            CheckWaterBreathingUpgradeInteraction.class,
+            CheckWaterBreathingUpgradeInteraction.CODEC
+        );
+
+        // Register Water Breathing Skill Component with Codec for persistence
+        ComponentType<EntityStore, WaterBreathingSkillComponent> waterBreathingComponentType =
+            this.getEntityStoreRegistry().registerComponent(
+                WaterBreathingSkillComponent.class,
+                "WaterBreathingSkillComponent",
+                WaterBreathingSkillComponent.CODEC
+            );
+        WaterBreathingSkillComponent.setComponentType(waterBreathingComponentType);
+
+        // Register Water Breathing System
+        this.getEntityStoreRegistry().registerSystem(new WaterBreathingSystem());
     }
 }

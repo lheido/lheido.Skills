@@ -668,6 +668,149 @@ Fichiers Java:
 - `CheckFlyingUpgradeInteraction.java` - Vérification des prérequis
 - `FlyingSystem.java` - Logique de vol (activation/désactivation)
 
+---
+
+## API EntityStats (Modifier les stats du joueur)
+
+Hytale fournit une API pour manipuler les stats des entités (santé, oxygène, stamina, etc.) via le système `EntityStatMap`.
+
+### Classes principales
+
+| Classe | Package | Description |
+|--------|---------|-------------|
+| `EntityStatMap` | `com.hypixel.hytale.server.core.modules.entitystats` | Component attaché aux entités, stocke les valeurs des stats |
+| `EntityStatsModule` | `com.hypixel.hytale.server.core.modules.entitystats` | Module singleton pour accéder au ComponentType |
+| `DefaultEntityStatTypes` | `com.hypixel.hytale.server.core.modules.entitystats.asset` | Stats par défaut (Health, Oxygen, Stamina, etc.) |
+| `StaticModifier` | `com.hypixel.hytale.server.core.modules.entitystats.modifier` | Modificateur de stat (additif ou multiplicatif) |
+| `Modifier` | `com.hypixel.hytale.server.core.modules.entitystats.modifier` | Classe de base pour les modificateurs |
+
+### Stats disponibles par défaut
+
+```java
+int healthIndex = DefaultEntityStatTypes.getHealth();
+int oxygenIndex = DefaultEntityStatTypes.getOxygen();
+int staminaIndex = DefaultEntityStatTypes.getStamina();
+int manaIndex = DefaultEntityStatTypes.getMana();
+int signatureEnergyIndex = DefaultEntityStatTypes.getSignatureEnergy();
+int ammoIndex = DefaultEntityStatTypes.getAmmo();
+```
+
+### Récupérer l'EntityStatMap d'une entité
+
+```java
+import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
+import com.hypixel.hytale.server.core.modules.entitystats.EntityStatsModule;
+
+// Dans un System ou une Interaction
+ComponentType<EntityStore, EntityStatMap> statMapType =
+    EntityStatsModule.get().getEntityStatMapComponentType();
+
+EntityStatMap statMap = commandBuffer.getComponent(entityRef, statMapType);
+```
+
+### Ajouter un modificateur sur une stat
+
+```java
+import com.hypixel.hytale.server.core.modules.entitystats.modifier.Modifier;
+import com.hypixel.hytale.server.core.modules.entitystats.modifier.StaticModifier;
+
+// Créer un modificateur multiplicatif sur la valeur MAX d'une stat
+StaticModifier oxygenModifier = new StaticModifier(
+    Modifier.ModifierTarget.MAX,           // Cible: MAX, MIN, ou VALUE
+    StaticModifier.CalculationType.MULTIPLICATIVE,  // ADDITIVE ou MULTIPLICATIVE
+    1.5f  // Valeur du modificateur (ici x1.5)
+);
+
+// Appliquer le modificateur avec un ID unique
+String modifierId = "my_skill_modifier";
+int oxygenIndex = DefaultEntityStatTypes.getOxygen();
+
+Modifier previousModifier = statMap.putModifier(
+    EntityStatMap.Predictable.NONE,
+    oxygenIndex,
+    modifierId,
+    oxygenModifier
+);
+
+// previousModifier est null si c'est un nouveau modifier,
+// sinon c'est l'ancien modifier qui a été remplacé
+```
+
+### Types de modificateurs
+
+| ModifierTarget | Description |
+|----------------|-------------|
+| `MAX` | Modifie la valeur maximale de la stat |
+| `MIN` | Modifie la valeur minimale de la stat |
+| `VALUE` | Modifie la valeur courante de la stat |
+
+| CalculationType | Description |
+|-----------------|-------------|
+| `ADDITIVE` | Ajoute la valeur au total |
+| `MULTIPLICATIVE` | Multiplie la valeur |
+
+### Supprimer un modificateur
+
+```java
+Modifier removed = statMap.removeModifier(
+    EntityStatMap.Predictable.NONE,
+    oxygenIndex,
+    modifierId
+);
+```
+
+### Exemple complet : WaterBreathingSystem
+
+Le skill WaterBreathing utilise l'API EntityStats pour augmenter l'oxygène max du joueur :
+
+```java
+package lheido.skills.systems;
+
+import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
+import com.hypixel.hytale.server.core.modules.entitystats.EntityStatsModule;
+import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
+import com.hypixel.hytale.server.core.modules.entitystats.modifier.Modifier;
+import com.hypixel.hytale.server.core.modules.entitystats.modifier.StaticModifier;
+
+public class WaterBreathingSystem extends EntityTickingSystem<EntityStore> {
+    
+    private static final String MODIFIER_ID = "lheido_water_breathing";
+
+    @Override
+    public void tick(...) {
+        // Récupérer le component du skill
+        WaterBreathingSkillComponent skillComponent = ...;
+        
+        // Récupérer l'EntityStatMap
+        ComponentType<EntityStore, EntityStatMap> statMapType =
+            EntityStatsModule.get().getEntityStatMapComponentType();
+        EntityStatMap statMap = commandBuffer.getComponent(entityRef, statMapType);
+        
+        // Récupérer l'index de la stat Oxygen
+        int oxygenIndex = DefaultEntityStatTypes.getOxygen();
+        
+        // Calculer le multiplicateur selon le niveau du skill
+        float multiplier = skillComponent.getOxygenMultiplier(); // 1.5, 2.0, 3.0, etc.
+        
+        // Créer et appliquer le modifier
+        StaticModifier oxygenModifier = new StaticModifier(
+            Modifier.ModifierTarget.MAX,
+            StaticModifier.CalculationType.MULTIPLICATIVE,
+            multiplier
+        );
+        
+        statMap.putModifier(
+            EntityStatMap.Predictable.NONE,
+            oxygenIndex,
+            MODIFIER_ID,
+            oxygenModifier
+        );
+    }
+}
+```
+
+---
+
 ## Documentation externe
 
 - **Interactions:** https://hytalemodding.dev/en/docs/guides/plugin/item-interaction
