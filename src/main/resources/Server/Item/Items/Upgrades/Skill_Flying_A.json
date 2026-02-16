@@ -41,7 +41,11 @@
         {
           "Type": "CheckUniqueItemUsage",
           "Next": {
-            "Type": "skill_flying"
+            "Type": "skill_flying",
+            "Next": {
+              "Type": "ModifyInventory",
+              "AdjustHeldItemQuantity": -1
+            }
           }
         }
       ]
@@ -51,7 +55,11 @@
         {
           "Type": "CheckUniqueItemUsage",
           "Next": {
-            "Type": "skill_flying"
+            "Type": "skill_flying",
+            "Next": {
+              "Type": "ModifyInventory",
+              "AdjustHeldItemQuantity": -1
+            }
           }
         }
       ]
