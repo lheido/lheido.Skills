@@ -8,6 +8,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import lheido.skills.components.FlyingSkillComponent;
 import lheido.skills.interactions.SkillFlyingInteraction;
 import lheido.skills.systems.FlyingSystem;
+import lheido.skills.systems.SkillEssenceDropSystem;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 /**
@@ -47,5 +48,10 @@ public class LheidoSkillsPlugin extends JavaPlugin {
 
         // Register Flying System
         this.getEntityStoreRegistry().registerSystem(new FlyingSystem());
+
+        // Register Skill Essence Drop System (drops essence when NPCs die)
+        this.getEntityStoreRegistry().registerSystem(
+            new SkillEssenceDropSystem()
+        );
     }
 }
