@@ -21,13 +21,17 @@ import lheido.skills.components.FlyingSkillComponent;
 import lheido.skills.utils.MovementUtils;
 
 /**
- * Système ECS qui gère la logique du skill Flying.
+ * Système ECS qui gère la logique du skill Flying via une state machine.
  *
- * Cycle de vie :
- * 1. canFly = true (set par l'interaction lors du unlock)
- * 2. Joueur fait double-espace → movementStates.flying = true → démarrage du timer
- * 3. Timer à 0 → forceStopFlying + canFly = false + démarrage cooldown
- * 4. Cooldown à 0 → canFly = true
+ * États:
+ * - READY: Le joueur peut voler (double-espace disponible)
+ * - FLYING: Le joueur vole (timer actif)
+ * - COOLDOWN: Le skill est en cooldown
+ *
+ * Transitions:
+ * - READY → FLYING: Joueur fait double-espace
+ * - FLYING → COOLDOWN: Timer de vol expiré
+ * - COOLDOWN → READY: Cooldown expiré
  */
 public class FlyingSystem extends EntityTickingSystem<EntityStore> {
 
@@ -54,7 +58,6 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
     ) {
         Ref<EntityStore> entityRef = chunk.getReferenceTo(entityIndex);
 
-        // Récupérer le component Flying
         FlyingSkillComponent flyingComponent = commandBuffer.getComponent(
             entityRef,
             FlyingSkillComponent.getComponentType()
@@ -63,7 +66,6 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
             return;
         }
 
-        // Récupérer les composants nécessaires
         Player player = commandBuffer.getComponent(
             entityRef,
             Player.getComponentType()
@@ -95,123 +97,117 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
             return;
         }
 
-        // Vérifier si le joueur est en train de voler (via double-espace)
-        boolean isPlayerFlying = MovementUtils.isCurrentlyFlying(
-            statesComponent
-        );
-
-        // État 1: Le joueur vole et le timer n'a pas commencé → démarrer le timer
-        if (isPlayerFlying && !flyingComponent.isFlying()) {
-            startFlyingTimer(flyingComponent, player);
-            return;
-        }
-
-        // État 2: Le timer de vol est actif → vérifier si le temps est écoulé
-        if (flyingComponent.isFlying()) {
-            if (flyingComponent.getRemainingFlyTime() <= 0) {
-                // Temps de vol terminé → arrêter le vol et démarrer le cooldown
-                stopFlying(
-                    flyingComponent,
-                    movementManager,
-                    statesComponent,
-                    packetHandler,
-                    player
-                );
-            }
-            return;
-        }
-
-        // État 3: En cooldown → vérifier si le cooldown est terminé
-        if (flyingComponent.isOnCooldown()) {
-            if (flyingComponent.getRemainingCooldown() <= 0) {
-                // Cooldown terminé → réactiver canFly
-                enableCanFly(
-                    flyingComponent,
-                    movementManager,
-                    packetHandler,
-                    player
-                );
-            }
-            return;
-        }
-
-        // État 4: Le joueur a le component mais canFly n'est pas activé (ex: reconnexion)
-        // → Réactiver canFly pour permettre le double-espace
-        if (!movementManager.getSettings().canFly) {
-            MovementUtils.setCanFly(movementManager, packetHandler, true);
-            LOGGER.atInfo().log(
-                "Player reconnected with Flying skill, canFly re-enabled"
+        // Traiter l'état actuel
+        switch (flyingComponent.getState()) {
+            case READY -> handleReadyState(
+                flyingComponent,
+                movementManager,
+                statesComponent,
+                packetHandler,
+                player
+            );
+            case FLYING -> handleFlyingState(
+                flyingComponent,
+                movementManager,
+                statesComponent,
+                packetHandler,
+                player
+            );
+            case COOLDOWN -> handleCooldownState(
+                flyingComponent,
+                movementManager,
+                packetHandler,
+                player
             );
         }
     }
 
     /**
-     * Démarre le timer de vol quand le joueur fait double-espace.
+     * État READY: Le joueur peut voler.
+     * Transition vers FLYING si le joueur fait double-espace.
      */
-    private void startFlyingTimer(
-        FlyingSkillComponent component,
-        Player player
-    ) {
-        component.startFlying();
-
-        long durationSeconds = (long) msToSeconds(component.getFlyDurationMs());
-        player.sendMessage(
-            Message.raw("Flying for " + durationSeconds + " seconds!")
-        );
-
-        LOGGER.atInfo().log("Player started flying, timer started");
-    }
-
-    /**
-     * Arrête le vol, désactive canFly et démarre le cooldown.
-     */
-    private void stopFlying(
+    private void handleReadyState(
         FlyingSkillComponent component,
         MovementManager movementManager,
         MovementStatesComponent statesComponent,
         PacketHandler packetHandler,
         Player player
     ) {
-        // Arrêter le timer et démarrer le cooldown
-        component.stopFlying();
+        // S'assurer que canFly est activé (ex: après reconnexion)
+        if (!movementManager.getSettings().canFly) {
+            MovementUtils.setCanFly(movementManager, packetHandler, true);
+            LOGGER.atInfo().log(
+                "Player reconnected with Flying skill, canFly re-enabled"
+            );
+        }
 
-        // Forcer l'arrêt du vol et désactiver canFly
-        MovementUtils.disableFlying(
-            movementManager,
-            statesComponent,
-            packetHandler
-        );
+        // Vérifier si le joueur commence à voler (double-espace)
+        boolean isPlayerFlying = MovementUtils.isCurrentlyFlying(statesComponent);
+        if (isPlayerFlying) {
+            component.transitionToFlying();
 
-        // Notifier le joueur
-        long cooldownSeconds = (long) msToSeconds(component.getCooldownMs());
-        player.sendMessage(
-            Message.raw(
-                "Flying ended! Cooldown: " + cooldownSeconds + " seconds."
-            )
-        );
+            long durationSeconds = (long) msToSeconds(component.getFlyDurationMs());
+            player.sendMessage(
+                Message.raw("Flying for " + durationSeconds + " seconds!")
+            );
 
-        LOGGER.atInfo().log("Player flying ended, cooldown started");
+            LOGGER.atInfo().log("Player started flying, timer started");
+        }
     }
 
     /**
-     * Réactive canFly après la fin du cooldown.
+     * État FLYING: Le joueur est en vol.
+     * Transition vers COOLDOWN quand le timer expire.
      */
-    private void enableCanFly(
+    private void handleFlyingState(
+        FlyingSkillComponent component,
+        MovementManager movementManager,
+        MovementStatesComponent statesComponent,
+        PacketHandler packetHandler,
+        Player player
+    ) {
+        if (component.isFlyTimeExpired()) {
+            component.transitionToCooldown();
+
+            // Forcer l'arrêt du vol et désactiver canFly
+            MovementUtils.disableFlying(
+                movementManager,
+                statesComponent,
+                packetHandler
+            );
+
+            long cooldownSeconds = (long) msToSeconds(component.getCooldownMs());
+            player.sendMessage(
+                Message.raw(
+                    "Flying ended! Cooldown: " + cooldownSeconds + " seconds."
+                )
+            );
+
+            LOGGER.atInfo().log("Player flying ended, cooldown started");
+        }
+    }
+
+    /**
+     * État COOLDOWN: Le skill est en cooldown.
+     * Transition vers READY quand le cooldown expire.
+     */
+    private void handleCooldownState(
         FlyingSkillComponent component,
         MovementManager movementManager,
         PacketHandler packetHandler,
         Player player
     ) {
-        // Reset le cooldown end time pour éviter de réactiver en boucle
-        component.setCooldownEndTime(0L);
+        if (component.isCooldownExpired()) {
+            component.transitionToReady();
 
-        // Réactiver canFly
-        MovementUtils.setCanFly(movementManager, packetHandler, true);
+            // Réactiver canFly
+            MovementUtils.setCanFly(movementManager, packetHandler, true);
 
-        player.sendMessage(
-            Message.raw("Flying is ready! Double-tap space to fly.")
-        );
+            player.sendMessage(
+                Message.raw("Flying is ready! Double-tap space to fly.")
+            );
 
-        LOGGER.atInfo().log("Player flying cooldown ended, canFly re-enabled");
+            LOGGER.atInfo().log("Player flying cooldown ended, canFly re-enabled");
+        }
     }
 }
