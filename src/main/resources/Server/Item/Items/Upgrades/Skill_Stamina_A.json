@@ -1,0 +1,72 @@
+{
+  "TranslationProperties": {
+    "Name": "server.items.Skill_Stamina_A.name",
+    "Description": "server.items.Skill_Stamina_A.description"
+  },
+  "Id": "Skill_Stamina_A",
+  "Icon": "Icons/ItemsGenerated/Skill_Flying_A.png",
+  "Quality": "Uncommon",
+  "MaxStack": 1,
+  "ItemLevel": 300,
+  "Categories": ["Upgrade"],
+  "Recipe": {
+    "TimeSeconds": 2,
+    "Input": [
+      {
+        "ItemId": "Ingredient_Skill_Essence",
+        "Quantity": 100
+      }
+    ],
+    "BenchRequirement": [
+      {
+        "Id": "Arcanebench",
+        "Type": "Crafting",
+        "Categories": ["Arcane_Misc"],
+        "RequiredTierLevel": 1
+      }
+    ]
+  },
+  "PlayerAnimationsId": "Item",
+  "Model": "Items/Consumables/Recipes/Recipe.blockymodel",
+  "Texture": "Items/Consumables/Recipes/Recipe_Texture.png",
+  "IconProperties": {
+    "Scale": 0.76,
+    "Rotation": [33.92, 68.795, 40.67],
+    "Translation": [-0.895, -1.11]
+  },
+  "Consumable": true,
+  "Interactions": {
+    "Primary": {
+      "Interactions": [
+        {
+          "Type": "CheckUniqueItemUsage",
+          "Next": {
+            "Type": "skill_stamina",
+            "Next": {
+              "Type": "ModifyInventory",
+              "AdjustHeldItemQuantity": -1
+            }
+          }
+        }
+      ]
+    },
+    "Secondary": {
+      "Interactions": [
+        {
+          "Type": "CheckUniqueItemUsage",
+          "Next": {
+            "Type": "skill_stamina",
+            "Next": {
+              "Type": "ModifyInventory",
+              "AdjustHeldItemQuantity": -1
+            }
+          }
+        }
+      ]
+    }
+  },
+  "Tags": {
+    "Family": ["Skill"],
+    "Type": ["Upgrade"]
+  }
+}

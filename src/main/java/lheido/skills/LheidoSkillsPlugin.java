@@ -6,19 +6,26 @@ import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import lheido.skills.components.FlyingSkillComponent;
+import lheido.skills.components.StaminaSkillComponent;
 import lheido.skills.components.WaterBreathingSkillComponent;
 import lheido.skills.interactions.CheckFlyingUpgradeInteraction;
+import lheido.skills.interactions.CheckStaminaUpgradeInteraction;
 import lheido.skills.interactions.CheckWaterBreathingUpgradeInteraction;
 import lheido.skills.interactions.SkillFlyingBInteraction;
 import lheido.skills.interactions.SkillFlyingCInteraction;
 import lheido.skills.interactions.SkillFlyingInteraction;
 import lheido.skills.interactions.SkillFlyingXInteraction;
+import lheido.skills.interactions.SkillStaminaBInteraction;
+import lheido.skills.interactions.SkillStaminaCInteraction;
+import lheido.skills.interactions.SkillStaminaInteraction;
+import lheido.skills.interactions.SkillStaminaXInteraction;
 import lheido.skills.interactions.SkillWaterBreathingBInteraction;
 import lheido.skills.interactions.SkillWaterBreathingCInteraction;
 import lheido.skills.interactions.SkillWaterBreathingInteraction;
 import lheido.skills.interactions.SkillWaterBreathingXInteraction;
 import lheido.skills.systems.FlyingSystem;
 import lheido.skills.systems.SkillEssenceDropSystem;
+import lheido.skills.systems.StaminaSystem;
 import lheido.skills.systems.WaterBreathingSystem;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
@@ -143,5 +150,56 @@ public class LheidoSkillsPlugin extends JavaPlugin {
 
         // Register Water Breathing System
         this.getEntityStoreRegistry().registerSystem(new WaterBreathingSystem());
+
+        // ============================================
+        // Stamina Skill
+        // ============================================
+
+        // Register Stamina Skill Interaction (level A)
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "skill_stamina",
+            SkillStaminaInteraction.class,
+            SkillStaminaInteraction.CODEC
+        );
+
+        // Register Stamina Skill B Interaction (upgrade)
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "skill_stamina_b",
+            SkillStaminaBInteraction.class,
+            SkillStaminaBInteraction.CODEC
+        );
+
+        // Register Stamina Skill C Interaction (upgrade)
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "skill_stamina_c",
+            SkillStaminaCInteraction.class,
+            SkillStaminaCInteraction.CODEC
+        );
+
+        // Register Stamina Skill X Interaction (ultimate upgrade)
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "skill_stamina_x",
+            SkillStaminaXInteraction.class,
+            SkillStaminaXInteraction.CODEC
+        );
+
+        // Register Check Stamina Upgrade Interaction (prerequisite checker)
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "check_stamina_upgrade",
+            CheckStaminaUpgradeInteraction.class,
+            CheckStaminaUpgradeInteraction.CODEC
+        );
+
+        // Register Stamina Skill Component with Codec for persistence
+        ComponentType<EntityStore, StaminaSkillComponent> staminaComponentType =
+            this.getEntityStoreRegistry().registerComponent(
+                StaminaSkillComponent.class,
+                "StaminaSkillComponent",
+                StaminaSkillComponent.CODEC
+            );
+        StaminaSkillComponent.setComponentType(staminaComponentType);
+
+        // Register Stamina System
+        this.getEntityStoreRegistry().registerSystem(new StaminaSystem());
     }
 }
