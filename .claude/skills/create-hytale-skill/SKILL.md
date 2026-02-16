@@ -31,7 +31,7 @@ Pour créer un nouveau skill nommé `Skill_<NomDuSkill>_<Niveau>` (ex: `Skill_Sw
   "Icon": "Icons/ItemsGenerated/Skill_Flying_A.png",
   "Quality": "Uncommon",
   "MaxStack": 1,
-  "ItemLevel": 20,
+  "ItemLevel": 100,
   "Categories": ["Upgrade"],
   "Recipe": {
     "TimeSeconds": 2,
@@ -527,7 +527,7 @@ public class Skill<NomDuSkill>BInteraction extends SimpleInstantInteraction {
   "Icon": "Icons/ItemsGenerated/Skill_Flying_A.png",
   "Quality": "Rare",
   "MaxStack": 1,
-  "ItemLevel": 30,
+  "ItemLevel": 101,
   "Categories": ["Upgrade"],
   "Recipe": {
     "TimeSeconds": 3,
@@ -642,11 +642,31 @@ this.getCodecRegistry(Interaction.CODEC).register(
 | Paramètre | Description | Exemple par niveau |
 |-----------|-------------|-------------------|
 | `Quality` | Rareté de l'item | A=Uncommon, B=Rare, C=Epic, X=Legendary |
-| `ItemLevel` | Niveau requis | A=20, B=30, C=40, X=50 |
+| `ItemLevel` | Contrôle l'ordre d'affichage dans l'Arcane Workbench | Voir section ci-dessous |
 | `Recipe.Input[0].Quantity` | Coût en Skill Essence | A=100, B=200, C=400, X=1000 |
 | `Recipe.TimeSeconds` | Temps de craft | A=2, B=3, C=4, X=5 |
 | `RequiredLevel` | Niveau requis pour upgrade (dans JSON) | B=1, C=2, X=3 |
 | `TargetLevel` | Niveau cible de l'upgrade (dans JSON) | B=2, C=3, X=4 |
+
+### Ordre d'affichage via ItemLevel
+
+Le champ `ItemLevel` détermine l'ordre d'affichage des items dans l'Arcane Workbench. Pour regrouper les skills **par skill** (tous les niveaux d'un skill ensemble), utiliser une plage de valeurs par skill :
+
+| Skill | Niveau | ItemLevel |
+|-------|--------|-----------|
+| Flying | A | 100 |
+| Flying | B | 101 |
+| Flying | C | 102 |
+| Flying | X | 103 |
+| WaterBreathing | A | 200 |
+| WaterBreathing | B | 201 |
+| WaterBreathing | C | 202 |
+| WaterBreathing | X | 203 |
+| *ProchainSkill* | A | 300 |
+| *ProchainSkill* | B | 301 |
+| ... | ... | ... |
+
+**Convention :** Chaque nouveau skill commence à la centaine suivante (100, 200, 300...), et les niveaux A/B/C/X sont +0, +1, +2, +3.
 
 ## Exemple complet : Skill Flying
 

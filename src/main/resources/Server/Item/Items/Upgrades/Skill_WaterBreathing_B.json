@@ -7,7 +7,7 @@
   "Icon": "Icons/ItemsGenerated/Skill_Flying_A.png",
   "Quality": "Rare",
   "MaxStack": 1,
-  "ItemLevel": 30,
+  "ItemLevel": 201,
   "Categories": ["Upgrade"],
   "Recipe": {
     "TimeSeconds": 3,
