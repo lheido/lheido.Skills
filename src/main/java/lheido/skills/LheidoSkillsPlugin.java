@@ -6,6 +6,7 @@ import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import lheido.skills.components.FlyingSkillComponent;
+import lheido.skills.interactions.SkillFlyingBInteraction;
 import lheido.skills.interactions.SkillFlyingInteraction;
 import lheido.skills.systems.FlyingSystem;
 import lheido.skills.systems.SkillEssenceDropSystem;
@@ -35,6 +36,13 @@ public class LheidoSkillsPlugin extends JavaPlugin {
             "skill_flying",
             SkillFlyingInteraction.class,
             SkillFlyingInteraction.CODEC
+        );
+
+        // Register Flying Skill B Interaction (upgrade)
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "skill_flying_b",
+            SkillFlyingBInteraction.class,
+            SkillFlyingBInteraction.CODEC
         );
 
         // Register Flying Skill Component with Codec for persistence
