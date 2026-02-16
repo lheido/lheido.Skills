@@ -6,8 +6,11 @@ import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import lheido.skills.components.FlyingSkillComponent;
+import lheido.skills.interactions.CheckFlyingUpgradeInteraction;
 import lheido.skills.interactions.SkillFlyingBInteraction;
+import lheido.skills.interactions.SkillFlyingCInteraction;
 import lheido.skills.interactions.SkillFlyingInteraction;
+import lheido.skills.interactions.SkillFlyingXInteraction;
 import lheido.skills.systems.FlyingSystem;
 import lheido.skills.systems.SkillEssenceDropSystem;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
@@ -43,6 +46,27 @@ public class LheidoSkillsPlugin extends JavaPlugin {
             "skill_flying_b",
             SkillFlyingBInteraction.class,
             SkillFlyingBInteraction.CODEC
+        );
+
+        // Register Flying Skill C Interaction (upgrade)
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "skill_flying_c",
+            SkillFlyingCInteraction.class,
+            SkillFlyingCInteraction.CODEC
+        );
+
+        // Register Flying Skill X Interaction (ultimate upgrade)
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "skill_flying_x",
+            SkillFlyingXInteraction.class,
+            SkillFlyingXInteraction.CODEC
+        );
+
+        // Register Check Flying Upgrade Interaction (prerequisite checker)
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "check_flying_upgrade",
+            CheckFlyingUpgradeInteraction.class,
+            CheckFlyingUpgradeInteraction.CODEC
         );
 
         // Register Flying Skill Component with Codec for persistence

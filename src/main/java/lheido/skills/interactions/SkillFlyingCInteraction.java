@@ -16,16 +16,16 @@ import javax.annotation.Nonnull;
 import lheido.skills.components.FlyingSkillComponent;
 
 /**
- * Interaction pour upgrader le skill Flying vers le niveau B.
- * Requiert que le joueur possède déjà le skill Flying niveau A.
- * Améliore la durée de vol (15s au lieu de 10s) et réduit le cooldown (18s au lieu de 20s).
+ * Interaction pour upgrader le skill Flying vers le niveau C.
+ * Requiert que le joueur possède déjà le skill Flying niveau B.
+ * Améliore la durée de vol (20s) et réduit le cooldown (15s).
  */
-public class SkillFlyingBInteraction extends SimpleInstantInteraction {
+public class SkillFlyingCInteraction extends SimpleInstantInteraction {
 
-    public static final BuilderCodec<SkillFlyingBInteraction> CODEC =
+    public static final BuilderCodec<SkillFlyingCInteraction> CODEC =
         BuilderCodec.builder(
-            SkillFlyingBInteraction.class,
-            SkillFlyingBInteraction::new,
+            SkillFlyingCInteraction.class,
+            SkillFlyingCInteraction::new,
             SimpleInstantInteraction.CODEC
         ).build();
 
@@ -42,7 +42,7 @@ public class SkillFlyingBInteraction extends SimpleInstantInteraction {
         if (commandBuffer == null) {
             interactionContext.getState().state = InteractionState.Failed;
             LOGGER.atWarning().log(
-                "SkillFlyingBInteraction: CommandBuffer is null"
+                "SkillFlyingCInteraction: CommandBuffer is null"
             );
             return;
         }
@@ -54,7 +54,7 @@ public class SkillFlyingBInteraction extends SimpleInstantInteraction {
         );
         if (player == null) {
             interactionContext.getState().state = InteractionState.Failed;
-            LOGGER.atWarning().log("SkillFlyingBInteraction: Player is null");
+            LOGGER.atWarning().log("SkillFlyingCInteraction: Player is null");
             return;
         }
 
@@ -65,9 +65,9 @@ public class SkillFlyingBInteraction extends SimpleInstantInteraction {
             FlyingSkillComponent.getComponentType()
         );
 
-        // Upgrade vers le niveau B
-        FlyingSkillComponent upgradedComponent = FlyingSkillComponent.createLevelB();
-        
+        // Upgrade vers le niveau C
+        FlyingSkillComponent upgradedComponent = FlyingSkillComponent.createLevelC();
+
         // Conserver l'état actuel si le joueur était en vol ou en cooldown
         if (existingComponent != null) {
             if (existingComponent.isFlying()) {
@@ -85,9 +85,9 @@ public class SkillFlyingBInteraction extends SimpleInstantInteraction {
         );
 
         player.sendMessage(
-            Message.raw("Flying skill upgraded to level 2! Fly duration: 15s, Cooldown: 18s")
+            Message.raw("Flying skill upgraded to level 3! Fly duration: 20s, Cooldown: 15s")
         );
 
-        LOGGER.atInfo().log("Player upgraded Flying skill to level B");
+        LOGGER.atInfo().log("Player upgraded Flying skill to level C");
     }
 }

@@ -39,6 +39,14 @@ public class FlyingSkillComponent implements Component<EntityStore> {
     public static final long LEVEL_C_FLY_DURATION_MS = 20_000L;
     public static final long LEVEL_C_COOLDOWN_MS = 15_000L;
 
+    // ============================================
+    // Constantes Niveau X (Ultime - Vol illimité)
+    // ============================================
+
+    public static final int LEVEL_X = 4;
+    public static final long LEVEL_X_FLY_DURATION_MS = -1L; // -1 = illimité
+    public static final long LEVEL_X_COOLDOWN_MS = 0L;
+
     /**
      * ComponentType pour accéder à ce component dans l'ECS.
      */
@@ -134,11 +142,20 @@ public class FlyingSkillComponent implements Component<EntityStore> {
         return component;
     }
 
+    public static FlyingSkillComponent createLevelX() {
+        FlyingSkillComponent component = new FlyingSkillComponent();
+        component.setLevel(LEVEL_X);
+        component.setFlyDurationMs(LEVEL_X_FLY_DURATION_MS);
+        component.setCooldownMs(LEVEL_X_COOLDOWN_MS);
+        return component;
+    }
+
     public static FlyingSkillComponent createForLevel(int level) {
         return switch (level) {
             case 1 -> createLevelA();
             case 2 -> createLevelB();
             case 3 -> createLevelC();
+            case LEVEL_X -> createLevelX();
             default -> throw new IllegalArgumentException(
                 "Unsupported skill level: " + level
             );
@@ -208,10 +225,14 @@ public class FlyingSkillComponent implements Component<EntityStore> {
 
     /**
      * Retourne le temps restant de vol (0 si pas en vol).
+     * Retourne Long.MAX_VALUE si le vol est illimité.
      */
     public long getRemainingFlyTime() {
         if (!isFlying()) {
             return 0L;
+        }
+        if (isUnlimitedFlight()) {
+            return Long.MAX_VALUE;
         }
         return Math.max(0L, flyDurationMs - getTimeInCurrentState());
     }
@@ -227,9 +248,20 @@ public class FlyingSkillComponent implements Component<EntityStore> {
     }
 
     /**
+     * Vérifie si le vol est illimité (niveau X).
+     */
+    public boolean isUnlimitedFlight() {
+        return flyDurationMs < 0;
+    }
+
+    /**
      * Vérifie si le timer de vol est expiré.
+     * Retourne toujours false si le vol est illimité.
      */
     public boolean isFlyTimeExpired() {
+        if (isUnlimitedFlight()) {
+            return false;
+        }
         return isFlying() && getRemainingFlyTime() <= 0;
     }
 

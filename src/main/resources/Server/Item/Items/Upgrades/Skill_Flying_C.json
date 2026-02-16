@@ -1,20 +1,20 @@
 {
   "TranslationProperties": {
-    "Name": "server.items.Skill_Flying_B.name",
-    "Description": "server.items.Skill_Flying_B.description"
+    "Name": "server.items.Skill_Flying_C.name",
+    "Description": "server.items.Skill_Flying_C.description"
   },
-  "Id": "Skill_Flying_B",
+  "Id": "Skill_Flying_C",
   "Icon": "Icons/ItemsGenerated/Skill_Flying_A.png",
-  "Quality": "Rare",
+  "Quality": "Epic",
   "MaxStack": 1,
-  "ItemLevel": 30,
+  "ItemLevel": 40,
   "Categories": ["Upgrade"],
   "Recipe": {
-    "TimeSeconds": 3,
+    "TimeSeconds": 4,
     "Input": [
       {
         "ItemId": "Ingredient_Skill_Essence",
-        "Quantity": 200
+        "Quantity": 400
       }
     ],
     "BenchRequirement": [
@@ -40,12 +40,12 @@
       "Interactions": [
         {
           "Type": "check_flying_upgrade",
-          "RequiredLevel": 1,
-          "TargetLevel": 2,
+          "RequiredLevel": 2,
+          "TargetLevel": 3,
           "Next": {
             "Type": "CheckUniqueItemUsage",
             "Next": {
-              "Type": "skill_flying_b",
+              "Type": "skill_flying_c",
               "Next": {
                 "Type": "ModifyInventory",
                 "AdjustHeldItemQuantity": -1
@@ -59,12 +59,12 @@
       "Interactions": [
         {
           "Type": "check_flying_upgrade",
-          "RequiredLevel": 1,
-          "TargetLevel": 2,
+          "RequiredLevel": 2,
+          "TargetLevel": 3,
           "Next": {
             "Type": "CheckUniqueItemUsage",
             "Next": {
-              "Type": "skill_flying_b",
+              "Type": "skill_flying_c",
               "Next": {
                 "Type": "ModifyInventory",
                 "AdjustHeldItemQuantity": -1

@@ -146,10 +146,16 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
         if (isPlayerFlying) {
             component.transitionToFlying();
 
-            long durationSeconds = (long) msToSeconds(component.getFlyDurationMs());
-            player.sendMessage(
-                Message.raw("Flying for " + durationSeconds + " seconds!")
-            );
+            if (component.isUnlimitedFlight()) {
+                player.sendMessage(
+                    Message.raw("Flying with unlimited duration!")
+                );
+            } else {
+                long durationSeconds = (long) msToSeconds(component.getFlyDurationMs());
+                player.sendMessage(
+                    Message.raw("Flying for " + durationSeconds + " seconds!")
+                );
+            }
 
             LOGGER.atInfo().log("Player started flying, timer started");
         }
