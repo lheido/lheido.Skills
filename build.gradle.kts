@@ -23,3 +23,13 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+tasks.register<Copy>("copyToMods") {
+    dependsOn(tasks.named("jar"))
+    from(tasks.named<Jar>("jar").map { it.outputs.files.singleFile })
+    into("/var/home/lheido/.var/app/com.hypixel.HytaleLauncher/data/Hytale/UserData/Mods")
+}
+
+tasks.build {
+    dependsOn("copyToMods")
+}
