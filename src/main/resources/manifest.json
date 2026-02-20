@@ -9,7 +9,7 @@
     }
   ],
   "Website": "",
-  "ServerVersion": "*",
+  "ServerVersion": "${serverVersion}",
   "Dependencies": {},
   "OptionalDependencies": {},
   "DisabledByDefault": false,

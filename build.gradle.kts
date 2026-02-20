@@ -1,3 +1,5 @@
+import java.util.jar.JarFile
+
 plugins {
     id("java")
 }
@@ -18,6 +20,28 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     implementation(files("libs/HytaleServer.jar"))
+}
+
+val hytaleServerJar = file("libs/HytaleServer.jar")
+
+val serverVersion: String by lazy {
+    if (!hytaleServerJar.exists()) {
+        throw GradleException("Missing ${hytaleServerJar.path}")
+    }
+
+    JarFile(hytaleServerJar).use { jar ->
+        jar.manifest?.mainAttributes?.getValue("Implementation-Version")
+            ?: throw GradleException("Implementation-Version not found in ${hytaleServerJar.path}")
+    }
+}
+
+tasks.processResources {
+    inputs.file(hytaleServerJar)
+    inputs.property("serverVersion", serverVersion)
+
+    filesMatching("manifest.json") {
+        expand(mapOf("serverVersion" to serverVersion))
+    }
 }
 
 tasks.test {
