@@ -14,14 +14,11 @@ import com.hypixel.hytale.server.core.modules.entitystats.EntityStatsModule;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
 import com.hypixel.hytale.server.core.modules.entitystats.modifier.Modifier;
 import com.hypixel.hytale.server.core.modules.entitystats.modifier.StaticModifier;
-import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import lheido.skills.components.StaminaSkillComponent;
 
 public class StaminaSystem extends EntityTickingSystem<EntityStore> {
 
-    private static final ComponentType<EntityStore, PlayerRef> PLAYER_REF_TYPE =
-        PlayerRef.getComponentType();
     public static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
     private static final String MODIFIER_ID = "lheido_stamina";
@@ -66,7 +63,10 @@ public class StaminaSystem extends EntityTickingSystem<EntityStore> {
         ComponentType<EntityStore, EntityStatMap> statMapType =
             EntityStatsModule.get().getEntityStatMapComponentType();
 
-        EntityStatMap statMap = commandBuffer.getComponent(entityRef, statMapType);
+        EntityStatMap statMap = commandBuffer.getComponent(
+            entityRef,
+            statMapType
+        );
         if (statMap == null) {
             LOGGER.atWarning().log(
                 "StaminaSystem: EntityStatMap is null for player"
@@ -88,7 +88,12 @@ public class StaminaSystem extends EntityTickingSystem<EntityStore> {
 
         boolean isUnlimited = staminaComponent.isUnlimitedStamina();
 
-        applyStaminaModifier(statMap, staminaStatIndex, effectiveMultiplier, isUnlimited);
+        applyStaminaModifier(
+            statMap,
+            staminaStatIndex,
+            effectiveMultiplier,
+            isUnlimited
+        );
     }
 
     private void applyStaminaModifier(
@@ -103,7 +108,7 @@ public class StaminaSystem extends EntityTickingSystem<EntityStore> {
             multiplier
         );
 
-        Modifier previousModifier = statMap.putModifier(
+        statMap.putModifier(
             EntityStatMap.Predictable.NONE,
             staminaStatIndex,
             MODIFIER_ID,

@@ -52,7 +52,7 @@ public class SkillEssenceDropSystem extends DeathSystems.OnDeathSystem {
     /**
      * Maximum quantity of essence to drop.
      */
-    private static final int MAX_DROP_QUANTITY = 3;
+    private static final int MAX_DROP_QUANTITY = 5;
 
     private final Random random = new Random();
 
@@ -216,9 +216,6 @@ public class SkillEssenceDropSystem extends DeathSystems.OnDeathSystem {
      * @return the quantity to drop
      */
     private int calculateDropQuantity() {
-        if (MIN_DROP_QUANTITY >= MAX_DROP_QUANTITY) {
-            return MIN_DROP_QUANTITY;
-        }
         return (
             MIN_DROP_QUANTITY +
             random.nextInt(MAX_DROP_QUANTITY - MIN_DROP_QUANTITY + 1)

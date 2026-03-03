@@ -14,7 +14,7 @@
     "Input": [
       {
         "ItemId": "Ingredient_Skill_Essence",
-        "Quantity": 1000
+        "Quantity": 10000
       }
     ],
     "BenchRequirement": [

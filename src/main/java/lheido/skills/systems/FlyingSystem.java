@@ -1,7 +1,5 @@
 package lheido.skills.systems;
 
-import static lheido.skills.utils.SchedulerUtils.msToSeconds;
-
 import com.hypixel.hytale.component.ArchetypeChunk;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.ComponentType;
@@ -11,14 +9,16 @@ import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.tick.EntityTickingSystem;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.protocol.MovementSettings;
-import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.entity.entities.player.hud.CustomUIHud;
+import com.hypixel.hytale.server.core.entity.entities.player.hud.HudManager;
 import com.hypixel.hytale.server.core.entity.entities.player.movement.MovementManager;
 import com.hypixel.hytale.server.core.entity.movement.MovementStatesComponent;
 import com.hypixel.hytale.server.core.io.PacketHandler;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import lheido.skills.components.FlyingSkillComponent;
+import lheido.skills.hud.FlyingSkillHud;
 import lheido.skills.utils.MovementUtils;
 
 /**
@@ -115,16 +115,22 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
             case READY -> handleReadyState(
                 flyingComponent,
                 statesComponent,
-                player
+                player,
+                playerRef
             );
             case FLYING -> handleFlyingState(
                 flyingComponent,
                 movementManager,
                 statesComponent,
                 packetHandler,
-                player
+                player,
+                playerRef
             );
-            case COOLDOWN -> handleCooldownState(flyingComponent, player);
+            case COOLDOWN -> handleCooldownState(
+                flyingComponent,
+                player,
+                playerRef
+            );
         }
     }
 
@@ -155,12 +161,17 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
     /**
      * État READY: Le joueur peut voler.
      * Transition vers FLYING si le joueur fait double-espace.
+     * Le HUD est masqué dans cet état.
      */
     private void handleReadyState(
         FlyingSkillComponent component,
         MovementStatesComponent statesComponent,
-        Player player
+        Player player,
+        PlayerRef playerRef
     ) {
+        // Masquer le HUD quand le skill est prêt
+        updateHud(player, playerRef, component);
+
         // Vérifier si le joueur commence à voler (double-espace)
         boolean isPlayerFlying = MovementUtils.isCurrentlyFlying(
             statesComponent
@@ -168,19 +179,7 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
         if (isPlayerFlying) {
             component.transitionToFlying();
 
-            if (component.isUnlimitedFlight()) {
-                player.sendMessage(
-                    Message.raw("Flying with unlimited duration!")
-                );
-            } else {
-                long durationSeconds = (long) msToSeconds(
-                    component.getFlyDurationMs()
-                );
-                player.sendMessage(
-                    Message.raw("Flying for " + durationSeconds + " seconds!")
-                );
-            }
-
+            // Le HUD affiche maintenant le temps de vol
         }
     }
 
@@ -188,44 +187,104 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
      * État FLYING: Le timer de vol est actif.
      * Le joueur peut voler/atterrir librement.
      * Transition vers COOLDOWN uniquement quand le timer expire.
+     * Le HUD affiche le temps de vol restant.
      */
     private void handleFlyingState(
         FlyingSkillComponent component,
         MovementManager movementManager,
         MovementStatesComponent statesComponent,
         PacketHandler packetHandler,
-        Player player
+        Player player,
+        PlayerRef playerRef
     ) {
+        // Mettre à jour le HUD avec le temps de vol restant
+        updateHud(player, playerRef, component);
+
         // Timer de vol expiré → cooldown
         if (component.isFlyTimeExpired()) {
             component.transitionToCooldown();
 
             // Forcer l'arrêt du vol si le joueur est en l'air
-            boolean isActuallyFlying = MovementUtils.isCurrentlyFlying(statesComponent);
+            boolean isActuallyFlying = MovementUtils.isCurrentlyFlying(
+                statesComponent
+            );
             if (isActuallyFlying) {
                 MovementUtils.forceStopFlying(statesComponent, packetHandler);
             }
 
-            long cooldownSeconds = (long) msToSeconds(component.getCooldownMs());
-            player.sendMessage(
-                Message.raw("Flying ended! Cooldown: " + cooldownSeconds + " seconds.")
-            );
+            // Le HUD affiche le cooldown
         }
     }
 
     /**
      * État COOLDOWN: Le skill est en cooldown.
      * Transition vers READY quand le cooldown expire.
+     * Le HUD affiche le temps de cooldown restant.
      */
     private void handleCooldownState(
         FlyingSkillComponent component,
-        Player player
+        Player player,
+        PlayerRef playerRef
     ) {
+        // Mettre à jour le HUD avec le temps de cooldown restant
+        updateHud(player, playerRef, component);
+
         if (component.isCooldownExpired()) {
             component.transitionToReady();
-            player.sendMessage(
-                Message.raw("Flying is ready! Double-tap space to fly.")
-            );
+            // Le skill est prêt
+        }
+    }
+
+    /**
+     * Met à jour le HUD du skill Flying selon l'état actuel.
+     *
+     * - READY: HUD masqué
+     * - FLYING: Affiche le timer de vol (si pas illimité)
+     * - COOLDOWN: Affiche le timer de cooldown
+     */
+    private void updateHud(
+        Player player,
+        PlayerRef playerRef,
+        FlyingSkillComponent component
+    ) {
+        HudManager hudManager = player.getHudManager();
+        if (hudManager == null) {
+            return;
+        }
+
+        // Récupérer ou créer le HUD
+        CustomUIHud currentHud = hudManager.getCustomHud();
+        FlyingSkillHud flyingHud;
+
+        if (currentHud instanceof FlyingSkillHud existingHud) {
+            flyingHud = existingHud;
+        } else {
+            // Créer un nouveau HUD
+            flyingHud = new FlyingSkillHud(playerRef);
+            hudManager.setCustomHud(playerRef, flyingHud);
+            flyingHud.show();
+        }
+
+        // Mettre à jour le HUD selon l'état
+        switch (component.getState()) {
+            case READY -> flyingHud.hide();
+            case FLYING -> {
+                if (component.isUnlimitedFlight()) {
+                    // Vol illimité: pas besoin d'afficher le timer
+                    flyingHud.hide();
+                } else {
+                    int remainingSeconds = (int) Math.ceil(
+                        component.getRemainingFlyTimeMs() / 1000.0
+                    );
+                    flyingHud.showFlightTimer(remainingSeconds);
+                }
+            }
+            case COOLDOWN -> {
+                int remainingSeconds = (int) Math.ceil(
+                    component.getRemainingCooldownMs() / 1000.0
+                );
+                flyingHud.showCooldownTimer(remainingSeconds);
+            }
         }
     }
 }

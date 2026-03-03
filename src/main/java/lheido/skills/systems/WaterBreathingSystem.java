@@ -14,7 +14,6 @@ import com.hypixel.hytale.server.core.modules.entitystats.EntityStatsModule;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
 import com.hypixel.hytale.server.core.modules.entitystats.modifier.Modifier;
 import com.hypixel.hytale.server.core.modules.entitystats.modifier.StaticModifier;
-import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import lheido.skills.components.WaterBreathingSkillComponent;
 
@@ -33,8 +32,6 @@ import lheido.skills.components.WaterBreathingSkillComponent;
  */
 public class WaterBreathingSystem extends EntityTickingSystem<EntityStore> {
 
-    private static final ComponentType<EntityStore, PlayerRef> PLAYER_REF_TYPE =
-        PlayerRef.getComponentType();
     public static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
     /**
@@ -67,10 +64,11 @@ public class WaterBreathingSystem extends EntityTickingSystem<EntityStore> {
     ) {
         Ref<EntityStore> entityRef = chunk.getReferenceTo(entityIndex);
 
-        WaterBreathingSkillComponent waterBreathingComponent = commandBuffer.getComponent(
-            entityRef,
-            WaterBreathingSkillComponent.getComponentType()
-        );
+        WaterBreathingSkillComponent waterBreathingComponent =
+            commandBuffer.getComponent(
+                entityRef,
+                WaterBreathingSkillComponent.getComponentType()
+            );
         if (waterBreathingComponent == null) {
             return;
         }
@@ -87,7 +85,10 @@ public class WaterBreathingSystem extends EntityTickingSystem<EntityStore> {
         ComponentType<EntityStore, EntityStatMap> statMapType =
             EntityStatsModule.get().getEntityStatMapComponentType();
 
-        EntityStatMap statMap = commandBuffer.getComponent(entityRef, statMapType);
+        EntityStatMap statMap = commandBuffer.getComponent(
+            entityRef,
+            statMapType
+        );
         if (statMap == null) {
             LOGGER.atWarning().log(
                 "WaterBreathingSystem: EntityStatMap is null for player"
@@ -135,7 +136,7 @@ public class WaterBreathingSystem extends EntityTickingSystem<EntityStore> {
         );
 
         // putModifier remplace automatiquement si un modifier avec le même ID existe
-        Modifier previousModifier = statMap.putModifier(
+        statMap.putModifier(
             EntityStatMap.Predictable.NONE,
             oxygenStatIndex,
             MODIFIER_ID,
