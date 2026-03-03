@@ -97,16 +97,7 @@ public class SkillEssenceDropSystem extends DeathSystems.OnDeathSystem {
         int quantity = getDropQuantityForEntity(entityId);
 
         // Attempt to drop the Skill Essence
-        boolean success = dropSkillEssence(ref, store, commandBuffer, quantity);
-
-        if (success) {
-            LOGGER.atInfo().log(
-                "SkillEssenceDropSystem: Dropped " +
-                    quantity +
-                    " Skill Essence from " +
-                    entityId
-            );
-        }
+        dropSkillEssence(ref, store, commandBuffer, quantity);
     }
 
     /**

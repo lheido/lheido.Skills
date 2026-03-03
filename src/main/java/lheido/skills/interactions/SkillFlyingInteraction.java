@@ -94,7 +94,5 @@ public class SkillFlyingInteraction extends SimpleInstantInteraction {
         player.sendMessage(
             Message.raw("Flying skill unlocked! Double-tap space to fly.")
         );
-
-        LOGGER.atInfo().log("Player unlocked Flying skill");
     }
 }

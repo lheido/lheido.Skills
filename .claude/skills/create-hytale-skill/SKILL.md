@@ -270,7 +270,6 @@ public class Skill<NomDuSkill>Interaction extends SimpleInstantInteraction {
         );
 
         player.sendMessage(Message.raw("<NomDuSkill> skill unlocked!"));
-        LOGGER.atInfo().log("Player unlocked <NomDuSkill> skill");
     }
 }
 ```
@@ -424,8 +423,6 @@ public class Check<NomDuSkill>UpgradeInteraction extends SimpleInstantInteractio
             return;
         }
 
-        // Prérequis validés, l'interaction suivante peut s'exécuter
-        LOGGER.atInfo().log("<NomDuSkill> upgrade check passed: " + currentLevel + " -> " + targetLevel);
     }
 }
 ```
@@ -509,7 +506,6 @@ public class Skill<NomDuSkill>BInteraction extends SimpleInstantInteraction {
         );
 
         player.sendMessage(Message.raw("<NomDuSkill> skill upgraded to level 2!"));
-        LOGGER.atInfo().log("Player upgraded <NomDuSkill> skill to level B");
     }
 }
 ```

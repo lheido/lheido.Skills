@@ -50,7 +50,8 @@ public class CheckStaminaUpgradeInteraction extends SimpleInstantInteraction {
         @Nonnull InteractionContext interactionContext,
         @Nonnull CooldownHandler cooldownHandler
     ) {
-        CommandBuffer<EntityStore> commandBuffer = interactionContext.getCommandBuffer();
+        CommandBuffer<EntityStore> commandBuffer =
+            interactionContext.getCommandBuffer();
         if (commandBuffer == null) {
             interactionContext.getState().state = InteractionState.Failed;
             return;
@@ -71,21 +72,25 @@ public class CheckStaminaUpgradeInteraction extends SimpleInstantInteraction {
             StaminaSkillComponent.getComponentType()
         );
 
-        int currentLevel = existingComponent != null ? existingComponent.getLevel() : 0;
+        int currentLevel =
+            existingComponent != null ? existingComponent.getLevel() : 0;
 
         if (currentLevel < requiredLevel) {
-            String message = "You must have Stamina (" + requiredLevel + ") before upgrading!";
+            String message =
+                "You must have Stamina (" +
+                requiredLevel +
+                ") before upgrading!";
             player.sendMessage(Message.raw(message));
             interactionContext.getState().state = InteractionState.Failed;
             return;
         }
 
         if (currentLevel >= targetLevel) {
-            player.sendMessage(Message.raw("You already have this level or higher!"));
+            player.sendMessage(
+                Message.raw("You already have this level or higher!")
+            );
             interactionContext.getState().state = InteractionState.Failed;
             return;
         }
-
-        LOGGER.atInfo().log("Stamina upgrade check passed: " + currentLevel + " -> " + targetLevel);
     }
 }

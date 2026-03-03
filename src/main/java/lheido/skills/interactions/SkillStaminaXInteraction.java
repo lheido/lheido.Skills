@@ -3,7 +3,7 @@ package lheido.skills.interactions;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Ref;
-import com.hypixel.hytale.logger.HytaleLogger;
+
 import com.hypixel.hytale.protocol.InteractionState;
 import com.hypixel.hytale.protocol.InteractionType;
 import com.hypixel.hytale.server.core.Message;
@@ -24,8 +24,6 @@ public class SkillStaminaXInteraction extends SimpleInstantInteraction {
             SimpleInstantInteraction.CODEC
         ).build();
 
-    public static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
-
     @Override
     protected void firstRun(
         @Nonnull InteractionType interactionType,
@@ -35,9 +33,6 @@ public class SkillStaminaXInteraction extends SimpleInstantInteraction {
         CommandBuffer<EntityStore> commandBuffer = interactionContext.getCommandBuffer();
         if (commandBuffer == null) {
             interactionContext.getState().state = InteractionState.Failed;
-            LOGGER.atWarning().log(
-                "SkillStaminaXInteraction: CommandBuffer is null"
-            );
             return;
         }
 
@@ -48,7 +43,6 @@ public class SkillStaminaXInteraction extends SimpleInstantInteraction {
         );
         if (player == null) {
             interactionContext.getState().state = InteractionState.Failed;
-            LOGGER.atWarning().log("SkillStaminaXInteraction: Player is null");
             return;
         }
 
@@ -71,7 +65,5 @@ public class SkillStaminaXInteraction extends SimpleInstantInteraction {
         player.sendMessage(
             Message.raw("Stamina skill upgraded to X! Unlimited stamina capacity!")
         );
-
-        LOGGER.atInfo().log("Player upgraded Stamina skill to level X");
     }
 }

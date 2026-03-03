@@ -5,7 +5,6 @@ import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Ref;
-import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.protocol.InteractionState;
 import com.hypixel.hytale.protocol.InteractionType;
 import com.hypixel.hytale.server.core.Message;
@@ -20,22 +19,25 @@ import lheido.skills.components.WaterBreathingSkillComponent;
 /**
  * Interaction pour vérifier les prérequis d'upgrade du skill WaterBreathing.
  * Paramétrable via JSON avec RequiredLevel et TargetLevel.
- * 
+ *
  * - RequiredLevel: Le niveau minimum requis (0 = aucun prérequis, pour WaterBreathing A)
  * - TargetLevel: Le niveau vers lequel on upgrade
- * 
+ *
  * Échoue si:
  * - Le joueur n'a pas le niveau requis
  * - Le joueur a déjà le niveau cible ou supérieur
  */
-public class CheckWaterBreathingUpgradeInteraction extends SimpleInstantInteraction {
+public class CheckWaterBreathingUpgradeInteraction
+    extends SimpleInstantInteraction
+{
 
-    public static final BuilderCodec<CheckWaterBreathingUpgradeInteraction> CODEC =
-        BuilderCodec.builder(
-            CheckWaterBreathingUpgradeInteraction.class,
-            CheckWaterBreathingUpgradeInteraction::new,
-            SimpleInstantInteraction.CODEC
-        )
+    public static final BuilderCodec<
+        CheckWaterBreathingUpgradeInteraction
+    > CODEC = BuilderCodec.builder(
+        CheckWaterBreathingUpgradeInteraction.class,
+        CheckWaterBreathingUpgradeInteraction::new,
+        SimpleInstantInteraction.CODEC
+    )
         .append(
             new KeyedCodec<>("RequiredLevel", Codec.INTEGER),
             (data, value) -> data.requiredLevel = value,
@@ -50,8 +52,6 @@ public class CheckWaterBreathingUpgradeInteraction extends SimpleInstantInteract
         .add()
         .build();
 
-    public static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
-
     private int requiredLevel = 0;
     private int targetLevel = 1;
 
@@ -65,9 +65,6 @@ public class CheckWaterBreathingUpgradeInteraction extends SimpleInstantInteract
             interactionContext.getCommandBuffer();
         if (commandBuffer == null) {
             interactionContext.getState().state = InteractionState.Failed;
-            LOGGER.atWarning().log(
-                "CheckWaterBreathingUpgradeInteraction: CommandBuffer is null"
-            );
             return;
         }
 
@@ -78,49 +75,45 @@ public class CheckWaterBreathingUpgradeInteraction extends SimpleInstantInteract
         );
         if (player == null) {
             interactionContext.getState().state = InteractionState.Failed;
-            LOGGER.atWarning().log("CheckWaterBreathingUpgradeInteraction: Player is null");
             return;
         }
 
         // Récupérer le component WaterBreathing existant (peut être null)
-        WaterBreathingSkillComponent existingComponent = commandBuffer.getComponent(
-            ref,
-            WaterBreathingSkillComponent.getComponentType()
-        );
+        WaterBreathingSkillComponent existingComponent =
+            commandBuffer.getComponent(
+                ref,
+                WaterBreathingSkillComponent.getComponentType()
+            );
 
-        int currentLevel = existingComponent != null ? existingComponent.getLevel() : 0;
+        int currentLevel =
+            existingComponent != null ? existingComponent.getLevel() : 0;
 
         // Vérifier si le joueur a le niveau requis
         if (currentLevel < requiredLevel) {
-            String message = requiredLevel == 0 
-                ? "You cannot use this skill!"
-                : "You must have Water Breathing (" + requiredLevel + ") before upgrading!";
+            String message =
+                requiredLevel == 0
+                    ? "You cannot use this skill!"
+                    : "You must have Water Breathing (" +
+                      requiredLevel +
+                      ") before upgrading!";
             player.sendMessage(Message.raw(message));
             interactionContext.getState().state = InteractionState.Failed;
-            LOGGER.atInfo().log(
-                "Player tried to upgrade Water Breathing to level " + targetLevel 
-                + " but only has level " + currentLevel
-            );
             return;
         }
 
         // Vérifier si le joueur a déjà le niveau cible ou supérieur
         if (currentLevel >= targetLevel) {
-            String message = targetLevel == 4 
-                ? "You already have the ultimate Water Breathing skill!"
-                : "You already have Water Breathing level " + targetLevel + " or higher!";
+            String message =
+                targetLevel == 4
+                    ? "You already have the ultimate Water Breathing skill!"
+                    : "You already have Water Breathing level " +
+                      targetLevel +
+                      " or higher!";
             player.sendMessage(Message.raw(message));
             interactionContext.getState().state = InteractionState.Failed;
-            LOGGER.atInfo().log(
-                "Player tried to upgrade Water Breathing to level " + targetLevel 
-                + " but already has level " + currentLevel
-            );
             return;
         }
 
         // Prérequis validés, l'interaction suivante peut s'exécuter
-        LOGGER.atInfo().log(
-            "Water Breathing upgrade check passed: level " + currentLevel + " -> " + targetLevel
-        );
     }
 }

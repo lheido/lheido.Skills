@@ -68,13 +68,9 @@ public class SkillFlyingBInteraction extends SimpleInstantInteraction {
         // Upgrade vers le niveau B
         FlyingSkillComponent upgradedComponent = FlyingSkillComponent.createLevelB();
         
-        // Conserver l'état actuel si le joueur était en vol ou en cooldown
+        // Supprimer l'ancien component s'il existe
+        // Note: On ne conserve pas l'état car l'upgrade donne de nouveaux paramètres
         if (existingComponent != null) {
-            if (existingComponent.isFlying()) {
-                upgradedComponent.transitionToFlying();
-            } else if (existingComponent.isOnCooldown()) {
-                upgradedComponent.transitionToCooldown();
-            }
             commandBuffer.removeComponent(ref, FlyingSkillComponent.getComponentType());
         }
 
@@ -87,7 +83,5 @@ public class SkillFlyingBInteraction extends SimpleInstantInteraction {
         player.sendMessage(
             Message.raw("Flying skill upgraded to level 2! Fly duration: 15s, Cooldown: 18s")
         );
-
-        LOGGER.atInfo().log("Player upgraded Flying skill to level B");
     }
 }

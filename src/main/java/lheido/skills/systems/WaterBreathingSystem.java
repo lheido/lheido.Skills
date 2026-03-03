@@ -141,13 +141,6 @@ public class WaterBreathingSystem extends EntityTickingSystem<EntityStore> {
             MODIFIER_ID,
             oxygenModifier
         );
-
-        if (previousModifier == null) {
-            LOGGER.atInfo().log(
-                "WaterBreathingSystem: Applied oxygen modifier (x" + multiplier + ")"
-            );
-        }
         // Si previousModifier != null, le modifier existait déjà et a été remplacé
-        // On ne log pas à chaque tick pour éviter le spam
     }
 }

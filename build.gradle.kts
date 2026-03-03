@@ -48,6 +48,12 @@ tasks.test {
     useJUnitPlatform()
 }
 
+tasks.javadoc {
+    options {
+        (this as StandardJavadocDocletOptions).addStringOption("Xdoclint:none", "-quiet")
+    }
+}
+
 tasks.register<Copy>("copyToMods") {
     dependsOn(tasks.named("jar"))
     from(tasks.named<Jar>("jar").map { it.outputs.files.singleFile })

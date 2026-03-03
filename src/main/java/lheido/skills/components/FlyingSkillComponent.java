@@ -13,8 +13,12 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
  *
  * États:
  * - READY: Le joueur peut voler (double-espace disponible)
- * - FLYING: Le joueur vole (timer actif)
- * - COOLDOWN: Le skill est en cooldown
+ * - FLYING: Timer de vol actif (le joueur peut voler/atterrir librement)
+ * - COOLDOWN: Le skill est en cooldown (timer actif, décrémenté chaque tick)
+ *
+ * Comportement: Une fois le timer de vol démarré, il continue à décrémenter
+ * que le joueur soit en l'air ou au sol. Le cooldown commence uniquement
+ * quand le timer de vol atteint 0.
  */
 public class FlyingSkillComponent implements Component<EntityStore> {
 
@@ -54,6 +58,7 @@ public class FlyingSkillComponent implements Component<EntityStore> {
 
     /**
      * Codec pour la sérialisation/désérialisation du component.
+     * Persiste: level, flyDurationMs, cooldownMs, state, remainingFlyTimeMs, remainingCooldownMs
      */
     public static final BuilderCodec<FlyingSkillComponent> CODEC =
         BuilderCodec.builder(FlyingSkillComponent.class, FlyingSkillComponent::new)
@@ -76,9 +81,21 @@ public class FlyingSkillComponent implements Component<EntityStore> {
             )
             .add()
             .append(
-                new KeyedCodec<>("WasFlying", Codec.BOOLEAN),
-                (data, value) -> data.wasFlying = value,
-                data -> data.wasFlying
+                new KeyedCodec<>("State", Codec.STRING),
+                (data, value) -> data.state = FlyingState.valueOf(value),
+                data -> data.state.name()
+            )
+            .add()
+            .append(
+                new KeyedCodec<>("RemainingFlyTimeMs", Codec.LONG),
+                (data, value) -> data.remainingFlyTimeMs = value,
+                data -> data.remainingFlyTimeMs
+            )
+            .add()
+            .append(
+                new KeyedCodec<>("RemainingCooldownMs", Codec.LONG),
+                (data, value) -> data.remainingCooldownMs = value,
+                data -> data.remainingCooldownMs
             )
             .add()
             .build();
@@ -88,19 +105,17 @@ public class FlyingSkillComponent implements Component<EntityStore> {
     // ============================================
 
     private FlyingState state;
-    private long stateStartTime;
     
     /**
-     * Flag persisté indiquant si le joueur était en vol lors de la sauvegarde.
-     * Utilisé pour restaurer l'état de vol après reconnexion (Flying X).
+     * Temps de vol restant (en millisecondes).
+     * Continue à décrémenter même si le joueur est au sol.
      */
-    private boolean wasFlying = false;
+    private long remainingFlyTimeMs;
     
     /**
-     * Flag indiquant si le component vient d'être chargé (après reconnexion).
-     * Utilisé pour forcer la synchronisation de canFly avec le client.
+     * Temps de cooldown restant (en millisecondes).
      */
-    private transient boolean needsResync = true;
+    private long remainingCooldownMs;
 
     // ============================================
     // Configuration
@@ -112,30 +127,11 @@ public class FlyingSkillComponent implements Component<EntityStore> {
 
     public FlyingSkillComponent() {
         this.state = FlyingState.READY;
-        this.stateStartTime = 0L;
+        this.remainingFlyTimeMs = 0L;
+        this.remainingCooldownMs = 0L;
         this.flyDurationMs = DEFAULT_FLY_DURATION_MS;
         this.cooldownMs = DEFAULT_COOLDOWN_MS;
         this.level = 1;
-        this.needsResync = true; // Force resync après chargement
-    }
-
-    // ============================================
-    // Resync Management
-    // ============================================
-
-    /**
-     * Vérifie si le component nécessite une resynchronisation avec le client.
-     * @return true si une resync est nécessaire
-     */
-    public boolean needsResync() {
-        return needsResync;
-    }
-
-    /**
-     * Marque le component comme synchronisé.
-     */
-    public void markSynced() {
-        this.needsResync = false;
     }
 
     // ============================================
@@ -201,27 +197,62 @@ public class FlyingSkillComponent implements Component<EntityStore> {
     }
 
     // ============================================
+    // Timer Management (appelé par FlyingSystem)
+    // ============================================
+
+    /**
+     * Décrémente le timer approprié en fonction de l'état actuel.
+     * Appelé par FlyingSystem à chaque tick.
+     * 
+     * @param deltaTimeSeconds Le temps écoulé depuis le dernier tick (en secondes)
+     */
+    public void decrementTimer(float deltaTimeSeconds) {
+        long deltaMs = (long) (deltaTimeSeconds * 1000f);
+        
+        switch (state) {
+            case FLYING -> {
+                if (!isUnlimitedFlight()) {
+                    remainingFlyTimeMs -= deltaMs;
+                    if (remainingFlyTimeMs < 0) {
+                        remainingFlyTimeMs = 0;
+                    }
+                }
+            }
+            case COOLDOWN -> {
+                remainingCooldownMs -= deltaMs;
+                if (remainingCooldownMs < 0) {
+                    remainingCooldownMs = 0;
+                }
+            }
+            case READY -> {
+                // Rien à décrémenter
+            }
+        }
+    }
+
+    // ============================================
     // State Machine - Transitions
     // ============================================
 
     /**
      * Transition vers l'état FLYING.
-     * Appelé quand le joueur fait double-espace.
+     * Le timer est réinitialisé à la durée maximale.
      */
     public void transitionToFlying() {
         this.state = FlyingState.FLYING;
-        this.stateStartTime = System.currentTimeMillis();
-        this.wasFlying = true;
+        if (!isUnlimitedFlight()) {
+            this.remainingFlyTimeMs = flyDurationMs;
+        }
     }
 
     /**
      * Transition vers l'état COOLDOWN.
-     * Appelé quand le timer de vol est terminé.
+     * Le temps de vol restant est toujours réinitialisé (perd tout temps non utilisé).
      */
     public void transitionToCooldown() {
         this.state = FlyingState.COOLDOWN;
-        this.stateStartTime = System.currentTimeMillis();
-        this.wasFlying = false;
+        this.remainingCooldownMs = cooldownMs;
+        this.remainingFlyTimeMs = 0L;
     }
 
     /**
@@ -230,8 +261,7 @@ public class FlyingSkillComponent implements Component<EntityStore> {
      */
     public void transitionToReady() {
         this.state = FlyingState.READY;
-        this.stateStartTime = 0L;
-        this.wasFlying = false;
+        this.remainingCooldownMs = 0L;
     }
 
     // ============================================
@@ -255,46 +285,17 @@ public class FlyingSkillComponent implements Component<EntityStore> {
     }
 
     /**
-     * Vérifie si le joueur était en vol lors de la dernière sauvegarde.
-     * Utilisé pour restaurer l'état de vol après reconnexion.
-     * @return true si le joueur était en vol
+     * Retourne le temps de vol restant.
      */
-    public boolean wasFlying() {
-        return wasFlying;
+    public long getRemainingFlyTimeMs() {
+        return remainingFlyTimeMs;
     }
 
     /**
-     * Retourne le temps écoulé dans l'état actuel.
+     * Retourne le temps de cooldown restant.
      */
-    public long getTimeInCurrentState() {
-        if (stateStartTime == 0L) {
-            return 0L;
-        }
-        return System.currentTimeMillis() - stateStartTime;
-    }
-
-    /**
-     * Retourne le temps restant de vol (0 si pas en vol).
-     * Retourne Long.MAX_VALUE si le vol est illimité.
-     */
-    public long getRemainingFlyTime() {
-        if (!isFlying()) {
-            return 0L;
-        }
-        if (isUnlimitedFlight()) {
-            return Long.MAX_VALUE;
-        }
-        return Math.max(0L, flyDurationMs - getTimeInCurrentState());
-    }
-
-    /**
-     * Retourne le temps restant de cooldown (0 si pas en cooldown).
-     */
-    public long getRemainingCooldown() {
-        if (!isOnCooldown()) {
-            return 0L;
-        }
-        return Math.max(0L, cooldownMs - getTimeInCurrentState());
+    public long getRemainingCooldownMs() {
+        return remainingCooldownMs;
     }
 
     /**
@@ -312,14 +313,28 @@ public class FlyingSkillComponent implements Component<EntityStore> {
         if (isUnlimitedFlight()) {
             return false;
         }
-        return isFlying() && getRemainingFlyTime() <= 0;
+        return state == FlyingState.FLYING && remainingFlyTimeMs <= 0;
     }
 
     /**
      * Vérifie si le cooldown est expiré.
      */
     public boolean isCooldownExpired() {
-        return isOnCooldown() && getRemainingCooldown() <= 0;
+        return isOnCooldown() && remainingCooldownMs <= 0;
+    }
+
+    /**
+     * Retourne true si canFly devrait être activé pour l'état actuel.
+     */
+    public boolean shouldCanFly() {
+        return state != FlyingState.COOLDOWN;
+    }
+
+    /**
+     * Vérifie si le joueur a du temps de vol restant d'un vol précédent.
+     */
+    public boolean hasRemainingFlyTime() {
+        return remainingFlyTimeMs > 0 || isUnlimitedFlight();
     }
 
     // ============================================
@@ -330,12 +345,11 @@ public class FlyingSkillComponent implements Component<EntityStore> {
     public FlyingSkillComponent clone() {
         FlyingSkillComponent copy = new FlyingSkillComponent();
         copy.state = this.state;
-        copy.stateStartTime = this.stateStartTime;
+        copy.remainingFlyTimeMs = this.remainingFlyTimeMs;
+        copy.remainingCooldownMs = this.remainingCooldownMs;
         copy.flyDurationMs = this.flyDurationMs;
         copy.cooldownMs = this.cooldownMs;
         copy.level = this.level;
-        copy.wasFlying = this.wasFlying;
-        copy.needsResync = false; // Le clone n'a pas besoin de resync
         return copy;
     }
 

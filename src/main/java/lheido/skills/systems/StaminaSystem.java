@@ -113,11 +113,5 @@ public class StaminaSystem extends EntityTickingSystem<EntityStore> {
         if (isUnlimited) {
             statMap.maximizeStatValue(staminaStatIndex);
         }
-
-        if (previousModifier == null) {
-            LOGGER.atInfo().log(
-                "StaminaSystem: Applied stamina modifier (x" + multiplier + "), unlimited=" + isUnlimited
-            );
-        }
     }
 }

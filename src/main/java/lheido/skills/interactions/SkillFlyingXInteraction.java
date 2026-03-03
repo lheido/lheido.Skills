@@ -80,7 +80,5 @@ public class SkillFlyingXInteraction extends SimpleInstantInteraction {
         player.sendMessage(
             Message.raw("Flying skill upgraded to ULTIMATE! Unlimited flight, no cooldown!")
         );
-
-        LOGGER.atInfo().log("Player upgraded Flying skill to level X (ultimate)");
     }
 }
