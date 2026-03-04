@@ -10,6 +10,7 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import lheido.skills.components.ActiveSkillsComponent;
 import lheido.skills.components.FlyingSkillComponent;
+import lheido.skills.components.PoisonResistanceSkillComponent;
 import lheido.skills.components.StaminaSkillComponent;
 import lheido.skills.components.WaterBreathingSkillComponent;
 import lheido.skills.ui.SkillSelectionPage;
@@ -82,6 +83,15 @@ public class SkillsCommand extends AbstractPlayerCommand {
         StaminaSkillComponent staminaComponent = store.getComponent(ref, StaminaSkillComponent.getComponentType());
         if (staminaComponent != null) {
             String skillId = SkillIds.getStaminaSkillId(staminaComponent.getLevel());
+            if (skillId != null) {
+                ownedSkills.add(skillId);
+            }
+        }
+
+        // Verifier Poison Resistance Skill
+        PoisonResistanceSkillComponent poisonResistanceComponent = store.getComponent(ref, PoisonResistanceSkillComponent.getComponentType());
+        if (poisonResistanceComponent != null) {
+            String skillId = SkillIds.getPoisonResistanceSkillId(poisonResistanceComponent.getLevel());
             if (skillId != null) {
                 ownedSkills.add(skillId);
             }

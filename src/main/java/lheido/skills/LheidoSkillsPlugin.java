@@ -8,9 +8,11 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import lheido.skills.commands.SkillsCommand;
 import lheido.skills.components.ActiveSkillsComponent;
 import lheido.skills.components.FlyingSkillComponent;
+import lheido.skills.components.PoisonResistanceSkillComponent;
 import lheido.skills.components.StaminaSkillComponent;
 import lheido.skills.components.WaterBreathingSkillComponent;
 import lheido.skills.interactions.CheckFlyingUpgradeInteraction;
+import lheido.skills.interactions.CheckPoisonResistanceUpgradeInteraction;
 import lheido.skills.interactions.OpenSkillSelectionInteraction;
 import lheido.skills.interactions.CheckStaminaUpgradeInteraction;
 import lheido.skills.interactions.CheckWaterBreathingUpgradeInteraction;
@@ -18,6 +20,10 @@ import lheido.skills.interactions.SkillFlyingBInteraction;
 import lheido.skills.interactions.SkillFlyingCInteraction;
 import lheido.skills.interactions.SkillFlyingInteraction;
 import lheido.skills.interactions.SkillFlyingXInteraction;
+import lheido.skills.interactions.SkillPoisonResistanceBInteraction;
+import lheido.skills.interactions.SkillPoisonResistanceCInteraction;
+import lheido.skills.interactions.SkillPoisonResistanceInteraction;
+import lheido.skills.interactions.SkillPoisonResistanceXInteraction;
 import lheido.skills.interactions.SkillStaminaBInteraction;
 import lheido.skills.interactions.SkillStaminaCInteraction;
 import lheido.skills.interactions.SkillStaminaInteraction;
@@ -29,6 +35,7 @@ import lheido.skills.interactions.SkillWaterBreathingXInteraction;
 import lheido.skills.systems.FlyingSystem;
 import lheido.skills.systems.SkillEssenceDropSystem;
 import lheido.skills.systems.StaminaSystem;
+import lheido.skills.systems.PoisonResistanceSystem;
 import lheido.skills.systems.WaterBreathingSystem;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
@@ -204,6 +211,57 @@ public class LheidoSkillsPlugin extends JavaPlugin {
 
         // Register Stamina System
         this.getEntityStoreRegistry().registerSystem(new StaminaSystem());
+
+        // ============================================
+        // Poison Resistance Skill
+        // ============================================
+
+        // Register Poison Resistance Skill Interaction (level A)
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "skill_poison_resistance",
+            SkillPoisonResistanceInteraction.class,
+            SkillPoisonResistanceInteraction.CODEC
+        );
+
+        // Register Poison Resistance Skill B Interaction (upgrade)
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "skill_poison_resistance_b",
+            SkillPoisonResistanceBInteraction.class,
+            SkillPoisonResistanceBInteraction.CODEC
+        );
+
+        // Register Poison Resistance Skill C Interaction (upgrade)
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "skill_poison_resistance_c",
+            SkillPoisonResistanceCInteraction.class,
+            SkillPoisonResistanceCInteraction.CODEC
+        );
+
+        // Register Poison Resistance Skill X Interaction (ultimate upgrade)
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "skill_poison_resistance_x",
+            SkillPoisonResistanceXInteraction.class,
+            SkillPoisonResistanceXInteraction.CODEC
+        );
+
+        // Register Check Poison Resistance Upgrade Interaction (prerequisite checker)
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "check_poison_resistance_upgrade",
+            CheckPoisonResistanceUpgradeInteraction.class,
+            CheckPoisonResistanceUpgradeInteraction.CODEC
+        );
+
+        // Register Poison Resistance Skill Component with Codec for persistence
+        ComponentType<EntityStore, PoisonResistanceSkillComponent> poisonResistanceComponentType =
+            this.getEntityStoreRegistry().registerComponent(
+                PoisonResistanceSkillComponent.class,
+                "PoisonResistanceSkillComponent",
+                PoisonResistanceSkillComponent.CODEC
+            );
+        PoisonResistanceSkillComponent.setComponentType(poisonResistanceComponentType);
+
+        // Register Poison Resistance System
+        this.getEntityStoreRegistry().registerSystem(new PoisonResistanceSystem());
 
         // ============================================
         // Active Skills Selection System

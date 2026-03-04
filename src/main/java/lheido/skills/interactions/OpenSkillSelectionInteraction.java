@@ -14,6 +14,7 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import lheido.skills.components.ActiveSkillsComponent;
 import lheido.skills.components.FlyingSkillComponent;
+import lheido.skills.components.PoisonResistanceSkillComponent;
 import lheido.skills.components.StaminaSkillComponent;
 import lheido.skills.components.WaterBreathingSkillComponent;
 import lheido.skills.ui.SkillSelectionPage;
@@ -122,6 +123,15 @@ public class OpenSkillSelectionInteraction extends SimpleInstantInteraction {
         StaminaSkillComponent staminaComponent = commandBuffer.getComponent(ref, StaminaSkillComponent.getComponentType());
         if (staminaComponent != null) {
             String skillId = SkillIds.getStaminaSkillId(staminaComponent.getLevel());
+            if (skillId != null) {
+                ownedSkills.add(skillId);
+            }
+        }
+
+        // Verifier Poison Resistance Skill
+        PoisonResistanceSkillComponent poisonResistanceComponent = commandBuffer.getComponent(ref, PoisonResistanceSkillComponent.getComponentType());
+        if (poisonResistanceComponent != null) {
+            String skillId = SkillIds.getPoisonResistanceSkillId(poisonResistanceComponent.getLevel());
             if (skillId != null) {
                 ownedSkills.add(skillId);
             }

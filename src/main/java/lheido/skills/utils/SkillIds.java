@@ -15,6 +15,7 @@ public final class SkillIds {
     public static final String PREFIX_FLYING = "Skill_Flying_";
     public static final String PREFIX_WATER_BREATHING = "Skill_WaterBreathing_";
     public static final String PREFIX_STAMINA = "Skill_Stamina_";
+    public static final String PREFIX_POISON_RESISTANCE = "Skill_PoisonResistance_";
 
     // ============================================
     // Suffixes de niveaux
@@ -58,6 +59,16 @@ public final class SkillIds {
      */
     public static String getStaminaSkillId(int level) {
         return getSkillId(PREFIX_STAMINA, level);
+    }
+
+    /**
+     * Retourne l'ID de l'item PoisonResistance skill en fonction du niveau.
+     * 
+     * @param level Le niveau du skill (1-4)
+     * @return L'ID du skill ou null si niveau invalide
+     */
+    public static String getPoisonResistanceSkillId(int level) {
+        return getSkillId(PREFIX_POISON_RESISTANCE, level);
     }
 
     /**
@@ -106,5 +117,15 @@ public final class SkillIds {
      */
     public static boolean isStaminaSkill(String skillId) {
         return skillId != null && skillId.startsWith(PREFIX_STAMINA);
+    }
+
+    /**
+     * Verifie si un skill ID correspond au prefix PoisonResistance (tous niveaux).
+     * 
+     * @param skillId L'ID a verifier
+     * @return true si c'est un skill PoisonResistance
+     */
+    public static boolean isPoisonResistanceSkill(String skillId) {
+        return skillId != null && skillId.startsWith(PREFIX_POISON_RESISTANCE);
     }
 }
