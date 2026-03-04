@@ -17,6 +17,7 @@ import lheido.skills.components.FlyingSkillComponent;
 import lheido.skills.components.StaminaSkillComponent;
 import lheido.skills.components.WaterBreathingSkillComponent;
 import lheido.skills.ui.SkillSelectionPage;
+import lheido.skills.utils.SkillIds;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -102,7 +103,7 @@ public class OpenSkillSelectionInteraction extends SimpleInstantInteraction {
         FlyingSkillComponent flyingComponent = commandBuffer.getComponent(ref, FlyingSkillComponent.getComponentType());
         if (flyingComponent != null) {
             // Ajouter l'ID du skill en fonction du niveau
-            String skillId = getFlyingSkillId(flyingComponent.getLevel());
+            String skillId = SkillIds.getFlyingSkillId(flyingComponent.getLevel());
             if (skillId != null) {
                 ownedSkills.add(skillId);
             }
@@ -111,7 +112,7 @@ public class OpenSkillSelectionInteraction extends SimpleInstantInteraction {
         // Verifier Water Breathing Skill
         WaterBreathingSkillComponent waterBreathingComponent = commandBuffer.getComponent(ref, WaterBreathingSkillComponent.getComponentType());
         if (waterBreathingComponent != null) {
-            String skillId = getWaterBreathingSkillId(waterBreathingComponent.getLevel());
+            String skillId = SkillIds.getWaterBreathingSkillId(waterBreathingComponent.getLevel());
             if (skillId != null) {
                 ownedSkills.add(skillId);
             }
@@ -120,7 +121,7 @@ public class OpenSkillSelectionInteraction extends SimpleInstantInteraction {
         // Verifier Stamina Skill
         StaminaSkillComponent staminaComponent = commandBuffer.getComponent(ref, StaminaSkillComponent.getComponentType());
         if (staminaComponent != null) {
-            String skillId = getStaminaSkillId(staminaComponent.getLevel());
+            String skillId = SkillIds.getStaminaSkillId(staminaComponent.getLevel());
             if (skillId != null) {
                 ownedSkills.add(skillId);
             }
@@ -138,44 +139,5 @@ public class OpenSkillSelectionInteraction extends SimpleInstantInteraction {
             return activeComponent.getActiveSkills();
         }
         return new String[3];
-    }
-
-    /**
-     * Retourne l'ID de l'item Flying skill en fonction du niveau.
-     */
-    private String getFlyingSkillId(int level) {
-        return switch (level) {
-            case 1 -> "Skill_Flying_A";
-            case 2 -> "Skill_Flying_B";
-            case 3 -> "Skill_Flying_C";
-            case 4 -> "Skill_Flying_X";
-            default -> null;
-        };
-    }
-
-    /**
-     * Retourne l'ID de l'item Water Breathing skill en fonction du niveau.
-     */
-    private String getWaterBreathingSkillId(int level) {
-        return switch (level) {
-            case 1 -> "Skill_WaterBreathing_A";
-            case 2 -> "Skill_WaterBreathing_B";
-            case 3 -> "Skill_WaterBreathing_C";
-            case 4 -> "Skill_WaterBreathing_X";
-            default -> null;
-        };
-    }
-
-    /**
-     * Retourne l'ID de l'item Stamina skill en fonction du niveau.
-     */
-    private String getStaminaSkillId(int level) {
-        return switch (level) {
-            case 1 -> "Skill_Stamina_A";
-            case 2 -> "Skill_Stamina_B";
-            case 3 -> "Skill_Stamina_C";
-            case 4 -> "Skill_Stamina_X";
-            default -> null;
-        };
     }
 }

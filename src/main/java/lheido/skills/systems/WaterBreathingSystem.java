@@ -15,7 +15,9 @@ import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntitySta
 import com.hypixel.hytale.server.core.modules.entitystats.modifier.Modifier;
 import com.hypixel.hytale.server.core.modules.entitystats.modifier.StaticModifier;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import lheido.skills.components.ActiveSkillsComponent;
 import lheido.skills.components.WaterBreathingSkillComponent;
+import lheido.skills.utils.SkillIds;
 
 /**
  * Système ECS qui gère la logique du skill WaterBreathing.
@@ -105,6 +107,19 @@ public class WaterBreathingSystem extends EntityTickingSystem<EntityStore> {
             return;
         }
 
+        // Vérifier si le skill est actif dans ActiveSkillsComponent
+        ActiveSkillsComponent activeSkills = commandBuffer.getComponent(
+            entityRef,
+            ActiveSkillsComponent.getComponentType()
+        );
+        boolean isSkillActive = isSkillActiveForPlayer(activeSkills);
+
+        if (!isSkillActive) {
+            // Skill non actif: supprimer le modifier
+            removeOxygenModifier(statMap, oxygenStatIndex);
+            return;
+        }
+
         // Calculer le multiplicateur effectif
         float effectiveMultiplier = waterBreathingComponent.isUnlimitedOxygen()
             ? UNLIMITED_MULTIPLIER
@@ -113,6 +128,37 @@ public class WaterBreathingSystem extends EntityTickingSystem<EntityStore> {
         // Vérifier si le modifier existe déjà et s'il a la bonne valeur
         // On utilise putModifier qui remplace le modifier existant s'il existe
         applyOxygenModifier(statMap, oxygenStatIndex, effectiveMultiplier);
+    }
+
+    /**
+     * Vérifie si le skill WaterBreathing est actif pour le joueur.
+     * 
+     * Un skill est considéré actif si un des skills actifs est un skill
+     * WaterBreathing (commence par "Skill_WaterBreathing_")
+     */
+    private boolean isSkillActiveForPlayer(ActiveSkillsComponent activeSkills) {
+        if (activeSkills == null) {
+            return false;
+        }
+        
+        for (String activeSkill : activeSkills.getActiveSkills()) {
+            if (SkillIds.isWaterBreathingSkill(activeSkill)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Supprime le modificateur d'oxygène du joueur.
+     * Appelé quand le skill n'est pas actif.
+     */
+    private void removeOxygenModifier(EntityStatMap statMap, int oxygenStatIndex) {
+        statMap.removeModifier(
+            EntityStatMap.Predictable.NONE,
+            oxygenStatIndex,
+            MODIFIER_ID
+        );
     }
 
     /**

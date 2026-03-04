@@ -17,9 +17,11 @@ import com.hypixel.hytale.server.core.entity.movement.MovementStatesComponent;
 import com.hypixel.hytale.server.core.io.PacketHandler;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import lheido.skills.components.ActiveSkillsComponent;
 import lheido.skills.components.FlyingSkillComponent;
 import lheido.skills.hud.FlyingSkillHud;
 import lheido.skills.utils.MovementUtils;
+import lheido.skills.utils.SkillIds;
 
 /**
  * Système ECS qui gère la logique du skill Flying via une state machine.
@@ -103,6 +105,26 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
             return;
         }
 
+        // Vérifier si le skill est actif dans ActiveSkillsComponent
+        ActiveSkillsComponent activeSkills = commandBuffer.getComponent(
+            entityRef,
+            ActiveSkillsComponent.getComponentType()
+        );
+        boolean isSkillActive = isSkillActiveForPlayer(activeSkills, flyingComponent);
+
+        if (!isSkillActive) {
+            // Skill non actif: désactiver les effets et cacher le HUD
+            handleInactiveSkill(
+                flyingComponent,
+                movementManager,
+                statesComponent,
+                packetHandler,
+                player,
+                playerRef
+            );
+            return;
+        }
+
         // Décrémenter le timer approprié à chaque tick
         flyingComponent.decrementTimer(deltaTime);
 
@@ -131,6 +153,70 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
                 player,
                 playerRef
             );
+        }
+    }
+
+    /**
+     * Vérifie si le skill Flying est actif pour le joueur.
+     * 
+     * Un skill est considéré actif si:
+     * - Le joueur a un ActiveSkillsComponent
+     * - Un des skills actifs est un skill Flying (commence par "Skill_Flying_")
+     */
+    private boolean isSkillActiveForPlayer(
+        ActiveSkillsComponent activeSkills,
+        FlyingSkillComponent flyingComponent
+    ) {
+        if (activeSkills == null) {
+            return false;
+        }
+        
+        // Vérifier si un skill Flying est dans les slots actifs
+        for (String activeSkill : activeSkills.getActiveSkills()) {
+            if (SkillIds.isFlyingSkill(activeSkill)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gère le cas où le skill n'est pas actif.
+     * 
+     * - Désactive le vol si le joueur volait
+     * - Cache le HUD
+     * - Réinitialise l'état du skill
+     */
+    private void handleInactiveSkill(
+        FlyingSkillComponent component,
+        MovementManager movementManager,
+        MovementStatesComponent statesComponent,
+        PacketHandler packetHandler,
+        Player player,
+        PlayerRef playerRef
+    ) {
+        // Forcer l'arrêt du vol si le joueur est en l'air
+        boolean isActuallyFlying = MovementUtils.isCurrentlyFlying(statesComponent);
+        if (isActuallyFlying) {
+            MovementUtils.forceStopFlying(statesComponent, packetHandler);
+        }
+
+        // Désactiver canFly
+        MovementSettings settings = movementManager.getSettings();
+        if (settings != null && settings.canFly) {
+            MovementUtils.setCanFly(movementManager, packetHandler, false);
+        }
+
+        // Réinitialiser l'état du skill pour être prêt si réactivé
+        component.transitionToReady();
+
+        // Cacher le HUD
+        HudManager hudManager = player.getHudManager();
+        if (hudManager != null) {
+            CustomUIHud currentHud = hudManager.getCustomHud();
+            if (currentHud instanceof FlyingSkillHud flyingHud) {
+                flyingHud.hide();
+            }
         }
     }
 

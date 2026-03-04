@@ -15,7 +15,9 @@ import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntitySta
 import com.hypixel.hytale.server.core.modules.entitystats.modifier.Modifier;
 import com.hypixel.hytale.server.core.modules.entitystats.modifier.StaticModifier;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import lheido.skills.components.ActiveSkillsComponent;
 import lheido.skills.components.StaminaSkillComponent;
+import lheido.skills.utils.SkillIds;
 
 public class StaminaSystem extends EntityTickingSystem<EntityStore> {
 
@@ -82,6 +84,19 @@ public class StaminaSystem extends EntityTickingSystem<EntityStore> {
             return;
         }
 
+        // Vérifier si le skill est actif dans ActiveSkillsComponent
+        ActiveSkillsComponent activeSkills = commandBuffer.getComponent(
+            entityRef,
+            ActiveSkillsComponent.getComponentType()
+        );
+        boolean isSkillActive = isSkillActiveForPlayer(activeSkills);
+
+        if (!isSkillActive) {
+            // Skill non actif: supprimer le modifier
+            removeStaminaModifier(statMap, staminaStatIndex);
+            return;
+        }
+
         float effectiveMultiplier = staminaComponent.isUnlimitedStamina()
             ? UNLIMITED_MULTIPLIER
             : staminaComponent.getStaminaMultiplier();
@@ -93,6 +108,33 @@ public class StaminaSystem extends EntityTickingSystem<EntityStore> {
             staminaStatIndex,
             effectiveMultiplier,
             isUnlimited
+        );
+    }
+
+    /**
+     * Vérifie si le skill Stamina est actif pour le joueur.
+     */
+    private boolean isSkillActiveForPlayer(ActiveSkillsComponent activeSkills) {
+        if (activeSkills == null) {
+            return false;
+        }
+        
+        for (String activeSkill : activeSkills.getActiveSkills()) {
+            if (SkillIds.isStaminaSkill(activeSkill)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Supprime le modificateur de stamina du joueur.
+     */
+    private void removeStaminaModifier(EntityStatMap statMap, int staminaStatIndex) {
+        statMap.removeModifier(
+            EntityStatMap.Predictable.NONE,
+            staminaStatIndex,
+            MODIFIER_ID
         );
     }
 

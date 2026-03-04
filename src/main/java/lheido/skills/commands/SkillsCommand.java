@@ -13,6 +13,7 @@ import lheido.skills.components.FlyingSkillComponent;
 import lheido.skills.components.StaminaSkillComponent;
 import lheido.skills.components.WaterBreathingSkillComponent;
 import lheido.skills.ui.SkillSelectionPage;
+import lheido.skills.utils.SkillIds;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -62,7 +63,7 @@ public class SkillsCommand extends AbstractPlayerCommand {
         // Verifier Flying Skill
         FlyingSkillComponent flyingComponent = store.getComponent(ref, FlyingSkillComponent.getComponentType());
         if (flyingComponent != null) {
-            String skillId = getFlyingSkillId(flyingComponent.getLevel());
+            String skillId = SkillIds.getFlyingSkillId(flyingComponent.getLevel());
             if (skillId != null) {
                 ownedSkills.add(skillId);
             }
@@ -71,7 +72,7 @@ public class SkillsCommand extends AbstractPlayerCommand {
         // Verifier Water Breathing Skill
         WaterBreathingSkillComponent waterBreathingComponent = store.getComponent(ref, WaterBreathingSkillComponent.getComponentType());
         if (waterBreathingComponent != null) {
-            String skillId = getWaterBreathingSkillId(waterBreathingComponent.getLevel());
+            String skillId = SkillIds.getWaterBreathingSkillId(waterBreathingComponent.getLevel());
             if (skillId != null) {
                 ownedSkills.add(skillId);
             }
@@ -80,7 +81,7 @@ public class SkillsCommand extends AbstractPlayerCommand {
         // Verifier Stamina Skill
         StaminaSkillComponent staminaComponent = store.getComponent(ref, StaminaSkillComponent.getComponentType());
         if (staminaComponent != null) {
-            String skillId = getStaminaSkillId(staminaComponent.getLevel());
+            String skillId = SkillIds.getStaminaSkillId(staminaComponent.getLevel());
             if (skillId != null) {
                 ownedSkills.add(skillId);
             }
@@ -98,35 +99,5 @@ public class SkillsCommand extends AbstractPlayerCommand {
             return activeComponent.getActiveSkills();
         }
         return new String[3];
-    }
-
-    private String getFlyingSkillId(int level) {
-        return switch (level) {
-            case 1 -> "Skill_Flying_A";
-            case 2 -> "Skill_Flying_B";
-            case 3 -> "Skill_Flying_C";
-            case 4 -> "Skill_Flying_X";
-            default -> null;
-        };
-    }
-
-    private String getWaterBreathingSkillId(int level) {
-        return switch (level) {
-            case 1 -> "Skill_WaterBreathing_A";
-            case 2 -> "Skill_WaterBreathing_B";
-            case 3 -> "Skill_WaterBreathing_C";
-            case 4 -> "Skill_WaterBreathing_X";
-            default -> null;
-        };
-    }
-
-    private String getStaminaSkillId(int level) {
-        return switch (level) {
-            case 1 -> "Skill_Stamina_A";
-            case 2 -> "Skill_Stamina_B";
-            case 3 -> "Skill_Stamina_C";
-            case 4 -> "Skill_Stamina_X";
-            default -> null;
-        };
     }
 }

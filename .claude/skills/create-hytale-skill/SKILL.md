@@ -303,6 +303,203 @@ Si le skill nécessite une logique de jeu (ex: double jump, flying), créer un s
 
 **Chemin:** `src/main/java/lheido/skills/systems/<NomDuSkill>System.java`
 
+### 7. Ajouter le prefix du skill dans SkillIds
+
+Pour que le système de skills actifs fonctionne, il faut enregistrer le prefix du skill dans la classe utilitaire `SkillIds`.
+
+**Chemin:** `src/main/java/lheido/skills/utils/SkillIds.java`
+
+**Ajouter:**
+```java
+// Nouveau prefix
+public static final String PREFIX_<NOM_DU_SKILL> = "Skill_<NomDuSkill>_";
+
+// Methode de conversion niveau -> ID
+public static String get<NomDuSkill>SkillId(int level) {
+    return getSkillId(PREFIX_<NOM_DU_SKILL>, level);
+}
+
+// Methode de verification
+public static boolean is<NomDuSkill>Skill(String skillId) {
+    return skillId != null && skillId.startsWith(PREFIX_<NOM_DU_SKILL>);
+}
+```
+
+---
+
+## Système de Skills Actifs
+
+Le mod utilise un système de **skills actifs** où le joueur peut choisir jusqu'à 3 skills parmi ceux qu'il possède. **Seuls les skills actifs appliquent leurs effets.**
+
+### Fonctionnement
+
+1. **ActiveSkillsComponent** - Component attaché au joueur qui stocke les 3 slots de skills actifs
+2. **Chaque System** doit vérifier si le skill est actif avant d'appliquer ses effets
+3. **SkillIds** - Classe utilitaire pour identifier les skills par leur prefix
+
+### Vérifier si un skill est actif dans un System
+
+**IMPORTANT:** Chaque système ECS doit vérifier `ActiveSkillsComponent` avant d'appliquer les effets du skill.
+
+**Template pour un System:**
+```java
+package lheido.skills.systems;
+
+import lheido.skills.components.ActiveSkillsComponent;
+import lheido.skills.components.<NomDuSkill>SkillComponent;
+import lheido.skills.utils.SkillIds;
+
+public class <NomDuSkill>System extends EntityTickingSystem<EntityStore> {
+
+    @Override
+    public Query<EntityStore> getQuery() {
+        return <NomDuSkill>SkillComponent.getComponentType();
+    }
+
+    @Override
+    public void tick(
+        float deltaTime,
+        int entityIndex,
+        ArchetypeChunk<EntityStore> chunk,
+        Store<EntityStore> store,
+        CommandBuffer<EntityStore> commandBuffer
+    ) {
+        Ref<EntityStore> entityRef = chunk.getReferenceTo(entityIndex);
+
+        <NomDuSkill>SkillComponent skillComponent = commandBuffer.getComponent(
+            entityRef,
+            <NomDuSkill>SkillComponent.getComponentType()
+        );
+        if (skillComponent == null) {
+            return;
+        }
+
+        Player player = commandBuffer.getComponent(
+            entityRef,
+            Player.getComponentType()
+        );
+        if (player == null) {
+            return;
+        }
+
+        // ============================================
+        // VERIFICATION SKILL ACTIF - OBLIGATOIRE
+        // ============================================
+        ActiveSkillsComponent activeSkills = commandBuffer.getComponent(
+            entityRef,
+            ActiveSkillsComponent.getComponentType()
+        );
+        boolean isSkillActive = isSkillActiveForPlayer(activeSkills);
+
+        if (!isSkillActive) {
+            // Skill non actif: désactiver les effets
+            handleInactiveSkill(/* ... */);
+            return;
+        }
+
+        // ============================================
+        // LOGIQUE DU SKILL ACTIF
+        // ============================================
+        // Appliquer les effets du skill ici...
+    }
+
+    /**
+     * Vérifie si le skill est actif pour le joueur.
+     */
+    private boolean isSkillActiveForPlayer(ActiveSkillsComponent activeSkills) {
+        if (activeSkills == null) {
+            return false;
+        }
+        
+        for (String activeSkill : activeSkills.getActiveSkills()) {
+            if (SkillIds.is<NomDuSkill>Skill(activeSkill)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gère le cas où le skill n'est pas actif.
+     * Doit annuler/supprimer tous les effets du skill.
+     */
+    private void handleInactiveSkill(/* parametres selon le skill */) {
+        // Exemples d'actions:
+        // - Supprimer les modifiers de stats
+        // - Désactiver les capacités spéciales
+        // - Cacher le HUD du skill
+    }
+}
+```
+
+### Exemple: Gestion des skills basés sur des modifiers
+
+Pour les skills qui appliquent des modifiers (WaterBreathing, Stamina), quand le skill est inactif:
+
+```java
+if (!isSkillActive) {
+    // Supprimer le modifier
+    statMap.removeModifier(
+        EntityStatMap.Predictable.NONE,
+        statIndex,
+        MODIFIER_ID
+    );
+    return;
+}
+
+// Appliquer le modifier si actif
+applyModifier(statMap, statIndex, multiplier);
+```
+
+### Exemple: Gestion des skills avec capacités spéciales
+
+Pour les skills qui donnent des capacités (Flying), quand le skill est inactif:
+
+```java
+private void handleInactiveSkill(
+    FlyingSkillComponent component,
+    MovementManager movementManager,
+    MovementStatesComponent statesComponent,
+    PacketHandler packetHandler,
+    Player player,
+    PlayerRef playerRef
+) {
+    // 1. Forcer l'arrêt de la capacité
+    boolean isActuallyFlying = MovementUtils.isCurrentlyFlying(statesComponent);
+    if (isActuallyFlying) {
+        MovementUtils.forceStopFlying(statesComponent, packetHandler);
+    }
+
+    // 2. Désactiver la capacité
+    MovementSettings settings = movementManager.getSettings();
+    if (settings != null && settings.canFly) {
+        MovementUtils.setCanFly(movementManager, packetHandler, false);
+    }
+
+    // 3. Réinitialiser l'état du skill
+    component.transitionToReady();
+
+    // 4. Cacher le HUD
+    HudManager hudManager = player.getHudManager();
+    if (hudManager != null) {
+        CustomUIHud currentHud = hudManager.getCustomHud();
+        if (currentHud instanceof FlyingSkillHud flyingHud) {
+            flyingHud.hide();
+        }
+    }
+}
+```
+
+### Classes importantes
+
+| Classe | Chemin | Description |
+|--------|--------|-------------|
+| `ActiveSkillsComponent` | `components/ActiveSkillsComponent.java` | Stocke les 3 skills actifs du joueur |
+| `SkillIds` | `utils/SkillIds.java` | Prefixes et methodes utilitaires pour identifier les skills |
+| `SkillSelectionPage` | `ui/SkillSelectionPage.java` | Interface de sélection des skills actifs |
+| `OpenSkillSelectionInteraction` | `interactions/OpenSkillSelectionInteraction.java` | Ouvre la page de sélection |
+| `SkillsCommand` | `commands/SkillsCommand.java` | Commande `/skills` pour ouvrir la sélection |
+
 ---
 
 ## Créer des niveaux d'upgrade (B, C, X, etc.)
