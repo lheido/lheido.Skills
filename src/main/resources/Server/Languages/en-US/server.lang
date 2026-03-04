@@ -22,3 +22,9 @@ items.Skill_Stamina_C.name=Stamina (3)
 items.Skill_Stamina_C.description=Advanced endurance: +200% stamina capacity
 items.Skill_Stamina_X.name=Stamina (X)
 items.Skill_Stamina_X.description=Ultimate endurance: Unlimited stamina!
+
+# Skill Selection UI
+skills.ui.title=Select Active Skills
+skills.ui.active_skills=Active Skills (3 max)
+skills.ui.available_skills=Available Skills
+ui.close=Close

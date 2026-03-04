@@ -1,0 +1,132 @@
+package lheido.skills.commands;
+
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.server.core.command.system.CommandContext;
+import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
+import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import lheido.skills.components.ActiveSkillsComponent;
+import lheido.skills.components.FlyingSkillComponent;
+import lheido.skills.components.StaminaSkillComponent;
+import lheido.skills.components.WaterBreathingSkillComponent;
+import lheido.skills.ui.SkillSelectionPage;
+
+import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Commande /skills pour ouvrir l'interface de selection des skills actifs.
+ */
+public class SkillsCommand extends AbstractPlayerCommand {
+
+    public SkillsCommand() {
+        super("skills", "Open the skill selection menu");
+    }
+
+    @Override
+    protected void execute(
+            @Nonnull CommandContext commandContext,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull Ref<EntityStore> ref,
+            @Nonnull PlayerRef playerRef,
+            @Nonnull World world) {
+
+        Player player = store.getComponent(ref, Player.getComponentType());
+        if (player == null) {
+            return;
+        }
+
+        // Recuperer la liste des skills possedes par le joueur
+        List<String> ownedSkills = getOwnedSkills(store, ref);
+
+        // Recuperer les skills actuellement actifs
+        String[] currentActiveSkills = getCurrentActiveSkills(store, ref);
+
+        // Creer et ouvrir la page de selection
+        SkillSelectionPage page = new SkillSelectionPage(playerRef, ownedSkills, currentActiveSkills);
+
+        // Ouvrir la page via le PageManager
+        player.getPageManager().openCustomPage(ref, store, page);
+    }
+
+    /**
+     * Recupere la liste des IDs de skills que le joueur possede.
+     */
+    private List<String> getOwnedSkills(Store<EntityStore> store, Ref<EntityStore> ref) {
+        List<String> ownedSkills = new ArrayList<>();
+
+        // Verifier Flying Skill
+        FlyingSkillComponent flyingComponent = store.getComponent(ref, FlyingSkillComponent.getComponentType());
+        if (flyingComponent != null) {
+            String skillId = getFlyingSkillId(flyingComponent.getLevel());
+            if (skillId != null) {
+                ownedSkills.add(skillId);
+            }
+        }
+
+        // Verifier Water Breathing Skill
+        WaterBreathingSkillComponent waterBreathingComponent = store.getComponent(ref, WaterBreathingSkillComponent.getComponentType());
+        if (waterBreathingComponent != null) {
+            String skillId = getWaterBreathingSkillId(waterBreathingComponent.getLevel());
+            if (skillId != null) {
+                ownedSkills.add(skillId);
+            }
+        }
+
+        // Verifier Stamina Skill
+        StaminaSkillComponent staminaComponent = store.getComponent(ref, StaminaSkillComponent.getComponentType());
+        if (staminaComponent != null) {
+            String skillId = getStaminaSkillId(staminaComponent.getLevel());
+            if (skillId != null) {
+                ownedSkills.add(skillId);
+            }
+        }
+
+        return ownedSkills;
+    }
+
+    /**
+     * Recupere les skills actuellement actifs du joueur.
+     */
+    private String[] getCurrentActiveSkills(Store<EntityStore> store, Ref<EntityStore> ref) {
+        ActiveSkillsComponent activeComponent = store.getComponent(ref, ActiveSkillsComponent.getComponentType());
+        if (activeComponent != null) {
+            return activeComponent.getActiveSkills();
+        }
+        return new String[3];
+    }
+
+    private String getFlyingSkillId(int level) {
+        return switch (level) {
+            case 1 -> "Skill_Flying_A";
+            case 2 -> "Skill_Flying_B";
+            case 3 -> "Skill_Flying_C";
+            case 4 -> "Skill_Flying_X";
+            default -> null;
+        };
+    }
+
+    private String getWaterBreathingSkillId(int level) {
+        return switch (level) {
+            case 1 -> "Skill_WaterBreathing_A";
+            case 2 -> "Skill_WaterBreathing_B";
+            case 3 -> "Skill_WaterBreathing_C";
+            case 4 -> "Skill_WaterBreathing_X";
+            default -> null;
+        };
+    }
+
+    private String getStaminaSkillId(int level) {
+        return switch (level) {
+            case 1 -> "Skill_Stamina_A";
+            case 2 -> "Skill_Stamina_B";
+            case 3 -> "Skill_Stamina_C";
+            case 4 -> "Skill_Stamina_X";
+            default -> null;
+        };
+    }
+}

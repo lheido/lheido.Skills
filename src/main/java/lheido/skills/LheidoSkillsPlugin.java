@@ -5,10 +5,13 @@ import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Int
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import lheido.skills.commands.SkillsCommand;
+import lheido.skills.components.ActiveSkillsComponent;
 import lheido.skills.components.FlyingSkillComponent;
 import lheido.skills.components.StaminaSkillComponent;
 import lheido.skills.components.WaterBreathingSkillComponent;
 import lheido.skills.interactions.CheckFlyingUpgradeInteraction;
+import lheido.skills.interactions.OpenSkillSelectionInteraction;
 import lheido.skills.interactions.CheckStaminaUpgradeInteraction;
 import lheido.skills.interactions.CheckWaterBreathingUpgradeInteraction;
 import lheido.skills.interactions.SkillFlyingBInteraction;
@@ -201,5 +204,32 @@ public class LheidoSkillsPlugin extends JavaPlugin {
 
         // Register Stamina System
         this.getEntityStoreRegistry().registerSystem(new StaminaSystem());
+
+        // ============================================
+        // Active Skills Selection System
+        // ============================================
+
+        // Register Open Skill Selection Interaction
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "open_skill_selection",
+            OpenSkillSelectionInteraction.class,
+            OpenSkillSelectionInteraction.CODEC
+        );
+
+        // Register Active Skills Component with Codec for persistence
+        ComponentType<EntityStore, ActiveSkillsComponent> activeSkillsComponentType =
+            this.getEntityStoreRegistry().registerComponent(
+                ActiveSkillsComponent.class,
+                "ActiveSkillsComponent",
+                ActiveSkillsComponent.CODEC
+            );
+        ActiveSkillsComponent.setComponentType(activeSkillsComponentType);
+
+        // ============================================
+        // Commands
+        // ============================================
+
+        // Register /skills command
+        this.getCommandRegistry().registerCommand(new SkillsCommand());
     }
 }
