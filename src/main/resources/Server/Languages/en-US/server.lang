@@ -1,5 +1,6 @@
 items.Ingredient_Skill_Essence.name=Essence of skill
 items.Skill_Flying_A.name=Flying (1)
+items.Skill_Flying_A.description=Basic flying skill: 10s flight, 20s cooldown
 items.Skill_Flying_B.name=Flying (2)
 items.Skill_Flying_B.description=Upgrade your flying skill: 15s flight, 18s cooldown
 items.Skill_Flying_C.name=Flying (3)

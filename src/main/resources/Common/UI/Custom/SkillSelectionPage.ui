@@ -36,7 +36,7 @@ Group #Root {
             Anchor: (Height: 72);
             LayoutMode: CenterMiddle;
             
-            Button #Slot0 {
+            ItemSlotButton #Slot0 {
                 Anchor: (Width: 64, Height: 64);
                 Style: (
                     Default: (Background: #3a3a5e),
@@ -49,7 +49,7 @@ Group #Root {
                 }
             }
             
-            Button #Slot1 {
+            ItemSlotButton #Slot1 {
                 Anchor: (Width: 64, Height: 64);
                 Style: (
                     Default: (Background: #3a3a5e),
@@ -62,7 +62,7 @@ Group #Root {
                 }
             }
             
-            Button #Slot2 {
+            ItemSlotButton #Slot2 {
                 Anchor: (Width: 64, Height: 64);
                 Style: (
                     Default: (Background: #3a3a5e),

@@ -231,12 +231,13 @@ public class SkillSelectionPage extends InteractiveCustomUIPage<EventAction> {
         String slotSelector = "#Slot" + slotIndex;
         
         if (skillId != null && !skillId.isEmpty()) {
-            // Slot avec un skill
+            // Slot avec un skill - afficher l'item
+            builder.set(slotSelector + " #Item.Visible", true);
             builder.set(slotSelector + " #Item.ItemId", skillId);
             builder.set(slotSelector + " #Item.Quantity", 1);
         } else {
-            // Slot vide
-            builder.set(slotSelector + " #Item.ItemId", "");
+            // Slot vide - masquer l'ItemSlot pour eviter le tooltip "Invalid Item"
+            builder.set(slotSelector + " #Item.Visible", false);
         }
     }
     

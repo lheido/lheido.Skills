@@ -1,6 +1,6 @@
 // SkillSlotTemplate.ui
 
-Button #SkillBtn {
+ItemSlotButton #SkillBtn {
     Anchor: (Width: 64, Height: 64);
     Style: (
         Default: (Background: #2a2a4e),
