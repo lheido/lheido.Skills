@@ -13,6 +13,7 @@ import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Sim
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import lheido.skills.components.ActiveSkillsComponent;
+import lheido.skills.components.FireResistanceSkillComponent;
 import lheido.skills.components.FlyingSkillComponent;
 import lheido.skills.components.PoisonResistanceSkillComponent;
 import lheido.skills.components.StaminaSkillComponent;
@@ -21,15 +22,15 @@ import lheido.skills.ui.SkillSelectionPage;
 import lheido.skills.utils.SkillIds;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Interaction pour ouvrir la page de selection des skills actifs.
  * 
  * Quand l'item associe est utilise, cette interaction:
- * - Recupere la liste des skills possedes par le joueur
- * - Recupere les skills actuellement actifs
+ * - Recupere la liste des skills possedes par le joueur (prefix -> niveau)
+ * - Recupere les skills actuellement actifs (prefixes)
  * - Ouvre la page de selection de skills
  */
 public class OpenSkillSelectionInteraction extends SimpleInstantInteraction {
@@ -74,10 +75,10 @@ public class OpenSkillSelectionInteraction extends SimpleInstantInteraction {
             return;
         }
 
-        // Recuperer la liste des skills possedes par le joueur
-        List<String> ownedSkills = getOwnedSkills(commandBuffer, ref);
+        // Recuperer la map des skills possedes (prefix -> niveau)
+        Map<String, Integer> ownedSkills = getOwnedSkills(commandBuffer, ref);
         
-        // Recuperer les skills actuellement actifs
+        // Recuperer les skills actuellement actifs (prefixes)
         String[] currentActiveSkills = getCurrentActiveSkills(commandBuffer, ref);
 
         // Creer et ouvrir la page de selection
@@ -92,56 +93,47 @@ public class OpenSkillSelectionInteraction extends SimpleInstantInteraction {
     }
 
     /**
-     * Recupere la liste des IDs de skills que le joueur possede.
-     * 
-     * Parcourt les composants de skills connus et retourne les IDs
-     * des skills debloques.
+     * Recupere la map des skills possedes par le joueur.
+     * Cle = prefix du skill, Valeur = niveau actuel
      */
-    private List<String> getOwnedSkills(CommandBuffer<EntityStore> commandBuffer, Ref<EntityStore> ref) {
-        List<String> ownedSkills = new ArrayList<>();
+    private Map<String, Integer> getOwnedSkills(CommandBuffer<EntityStore> commandBuffer, Ref<EntityStore> ref) {
+        Map<String, Integer> ownedSkills = new HashMap<>();
 
         // Verifier Flying Skill
         FlyingSkillComponent flyingComponent = commandBuffer.getComponent(ref, FlyingSkillComponent.getComponentType());
         if (flyingComponent != null) {
-            // Ajouter l'ID du skill en fonction du niveau
-            String skillId = SkillIds.getFlyingSkillId(flyingComponent.getLevel());
-            if (skillId != null) {
-                ownedSkills.add(skillId);
-            }
+            ownedSkills.put(SkillIds.PREFIX_FLYING, flyingComponent.getLevel());
         }
 
         // Verifier Water Breathing Skill
         WaterBreathingSkillComponent waterBreathingComponent = commandBuffer.getComponent(ref, WaterBreathingSkillComponent.getComponentType());
         if (waterBreathingComponent != null) {
-            String skillId = SkillIds.getWaterBreathingSkillId(waterBreathingComponent.getLevel());
-            if (skillId != null) {
-                ownedSkills.add(skillId);
-            }
+            ownedSkills.put(SkillIds.PREFIX_WATER_BREATHING, waterBreathingComponent.getLevel());
         }
 
         // Verifier Stamina Skill
         StaminaSkillComponent staminaComponent = commandBuffer.getComponent(ref, StaminaSkillComponent.getComponentType());
         if (staminaComponent != null) {
-            String skillId = SkillIds.getStaminaSkillId(staminaComponent.getLevel());
-            if (skillId != null) {
-                ownedSkills.add(skillId);
-            }
+            ownedSkills.put(SkillIds.PREFIX_STAMINA, staminaComponent.getLevel());
         }
 
         // Verifier Poison Resistance Skill
         PoisonResistanceSkillComponent poisonResistanceComponent = commandBuffer.getComponent(ref, PoisonResistanceSkillComponent.getComponentType());
         if (poisonResistanceComponent != null) {
-            String skillId = SkillIds.getPoisonResistanceSkillId(poisonResistanceComponent.getLevel());
-            if (skillId != null) {
-                ownedSkills.add(skillId);
-            }
+            ownedSkills.put(SkillIds.PREFIX_POISON_RESISTANCE, poisonResistanceComponent.getLevel());
+        }
+
+        // Verifier Fire Resistance Skill
+        FireResistanceSkillComponent fireResistanceComponent = commandBuffer.getComponent(ref, FireResistanceSkillComponent.getComponentType());
+        if (fireResistanceComponent != null) {
+            ownedSkills.put(SkillIds.PREFIX_FIRE_RESISTANCE, fireResistanceComponent.getLevel());
         }
 
         return ownedSkills;
     }
 
     /**
-     * Recupere les skills actuellement actifs du joueur.
+     * Recupere les skills actuellement actifs du joueur (prefixes).
      */
     private String[] getCurrentActiveSkills(CommandBuffer<EntityStore> commandBuffer, Ref<EntityStore> ref) {
         ActiveSkillsComponent activeComponent = commandBuffer.getComponent(ref, ActiveSkillsComponent.getComponentType());

@@ -9,6 +9,7 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import lheido.skills.components.ActiveSkillsComponent;
+import lheido.skills.components.FireResistanceSkillComponent;
 import lheido.skills.components.FlyingSkillComponent;
 import lheido.skills.components.PoisonResistanceSkillComponent;
 import lheido.skills.components.StaminaSkillComponent;
@@ -17,8 +18,8 @@ import lheido.skills.ui.SkillSelectionPage;
 import lheido.skills.utils.SkillIds;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Commande /skills pour ouvrir l'interface de selection des skills actifs.
@@ -42,10 +43,10 @@ public class SkillsCommand extends AbstractPlayerCommand {
             return;
         }
 
-        // Recuperer la liste des skills possedes par le joueur
-        List<String> ownedSkills = getOwnedSkills(store, ref);
+        // Recuperer la map des skills possedes (prefix -> niveau)
+        Map<String, Integer> ownedSkills = getOwnedSkills(store, ref);
 
-        // Recuperer les skills actuellement actifs
+        // Recuperer les skills actuellement actifs (prefixes)
         String[] currentActiveSkills = getCurrentActiveSkills(store, ref);
 
         // Creer et ouvrir la page de selection
@@ -56,52 +57,47 @@ public class SkillsCommand extends AbstractPlayerCommand {
     }
 
     /**
-     * Recupere la liste des IDs de skills que le joueur possede.
+     * Recupere la map des skills possedes par le joueur.
+     * Cle = prefix du skill, Valeur = niveau actuel
      */
-    private List<String> getOwnedSkills(Store<EntityStore> store, Ref<EntityStore> ref) {
-        List<String> ownedSkills = new ArrayList<>();
+    private Map<String, Integer> getOwnedSkills(Store<EntityStore> store, Ref<EntityStore> ref) {
+        Map<String, Integer> ownedSkills = new HashMap<>();
 
         // Verifier Flying Skill
         FlyingSkillComponent flyingComponent = store.getComponent(ref, FlyingSkillComponent.getComponentType());
         if (flyingComponent != null) {
-            String skillId = SkillIds.getFlyingSkillId(flyingComponent.getLevel());
-            if (skillId != null) {
-                ownedSkills.add(skillId);
-            }
+            ownedSkills.put(SkillIds.PREFIX_FLYING, flyingComponent.getLevel());
         }
 
         // Verifier Water Breathing Skill
         WaterBreathingSkillComponent waterBreathingComponent = store.getComponent(ref, WaterBreathingSkillComponent.getComponentType());
         if (waterBreathingComponent != null) {
-            String skillId = SkillIds.getWaterBreathingSkillId(waterBreathingComponent.getLevel());
-            if (skillId != null) {
-                ownedSkills.add(skillId);
-            }
+            ownedSkills.put(SkillIds.PREFIX_WATER_BREATHING, waterBreathingComponent.getLevel());
         }
 
         // Verifier Stamina Skill
         StaminaSkillComponent staminaComponent = store.getComponent(ref, StaminaSkillComponent.getComponentType());
         if (staminaComponent != null) {
-            String skillId = SkillIds.getStaminaSkillId(staminaComponent.getLevel());
-            if (skillId != null) {
-                ownedSkills.add(skillId);
-            }
+            ownedSkills.put(SkillIds.PREFIX_STAMINA, staminaComponent.getLevel());
         }
 
         // Verifier Poison Resistance Skill
         PoisonResistanceSkillComponent poisonResistanceComponent = store.getComponent(ref, PoisonResistanceSkillComponent.getComponentType());
         if (poisonResistanceComponent != null) {
-            String skillId = SkillIds.getPoisonResistanceSkillId(poisonResistanceComponent.getLevel());
-            if (skillId != null) {
-                ownedSkills.add(skillId);
-            }
+            ownedSkills.put(SkillIds.PREFIX_POISON_RESISTANCE, poisonResistanceComponent.getLevel());
+        }
+
+        // Verifier Fire Resistance Skill
+        FireResistanceSkillComponent fireResistanceComponent = store.getComponent(ref, FireResistanceSkillComponent.getComponentType());
+        if (fireResistanceComponent != null) {
+            ownedSkills.put(SkillIds.PREFIX_FIRE_RESISTANCE, fireResistanceComponent.getLevel());
         }
 
         return ownedSkills;
     }
 
     /**
-     * Recupere les skills actuellement actifs du joueur.
+     * Recupere les skills actuellement actifs du joueur (prefixes).
      */
     private String[] getCurrentActiveSkills(Store<EntityStore> store, Ref<EntityStore> ref) {
         ActiveSkillsComponent activeComponent = store.getComponent(ref, ActiveSkillsComponent.getComponentType());

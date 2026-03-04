@@ -6,6 +6,7 @@ import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import lheido.skills.utils.SkillIds;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -141,16 +142,43 @@ public class ActiveSkillsComponent implements Component<EntityStore> {
 
     /**
      * Verifie si un skill est actuellement actif.
+     * Supporte les IDs complets ET les prefixes.
      * 
-     * @param skillId L'ID du skill a verifier
+     * @param skillIdOrPrefix L'ID du skill ou le prefix a verifier
      * @return true si le skill est dans un des slots actifs
      */
-    public boolean isSkillActive(String skillId) {
-        if (skillId == null || skillId.isEmpty()) {
+    public boolean isSkillActive(String skillIdOrPrefix) {
+        if (skillIdOrPrefix == null || skillIdOrPrefix.isEmpty()) {
             return false;
         }
         for (String active : activeSkills) {
-            if (skillId.equals(active)) {
+            if (active == null || active.isEmpty()) {
+                continue;
+            }
+            // Comparaison exacte (pour les prefixes stockes)
+            if (skillIdOrPrefix.equals(active)) {
+                return true;
+            }
+            // Comparaison par prefix (pour retrocompatibilite avec anciens IDs complets)
+            if (active.startsWith(skillIdOrPrefix) || skillIdOrPrefix.startsWith(active)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Verifie si un skill avec le prefix donne est actif.
+     * 
+     * @param prefix Le prefix du skill (ex: "Skill_Flying_")
+     * @return true si un skill avec ce prefix est actif
+     */
+    public boolean isSkillPrefixActive(String prefix) {
+        if (prefix == null || prefix.isEmpty()) {
+            return false;
+        }
+        for (String active : activeSkills) {
+            if (active != null && active.equals(prefix)) {
                 return true;
             }
         }

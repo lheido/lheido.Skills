@@ -31,6 +31,14 @@ items.Skill_PoisonResistance_C.name=Poison Resistance (3)
 items.Skill_PoisonResistance_C.description=Advanced poison resistance: 75% damage reduction
 items.Skill_PoisonResistance_X.name=Poison Resistance (X)
 items.Skill_PoisonResistance_X.description=Ultimate poison resistance: Full immunity!
+items.Skill_FireResistance_A.name=Fire Resistance (1)
+items.Skill_FireResistance_A.description=Basic fire resistance: 25% damage reduction
+items.Skill_FireResistance_B.name=Fire Resistance (2)
+items.Skill_FireResistance_B.description=Improved fire resistance: 50% damage reduction
+items.Skill_FireResistance_C.name=Fire Resistance (3)
+items.Skill_FireResistance_C.description=Advanced fire resistance: 75% damage reduction
+items.Skill_FireResistance_X.name=Fire Resistance (X)
+items.Skill_FireResistance_X.description=Ultimate fire resistance: Full immunity!
 
 # Skill Selection UI
 skills.ui.title=Select Active Skills

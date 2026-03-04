@@ -7,10 +7,12 @@ import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import lheido.skills.commands.SkillsCommand;
 import lheido.skills.components.ActiveSkillsComponent;
+import lheido.skills.components.FireResistanceSkillComponent;
 import lheido.skills.components.FlyingSkillComponent;
 import lheido.skills.components.PoisonResistanceSkillComponent;
 import lheido.skills.components.StaminaSkillComponent;
 import lheido.skills.components.WaterBreathingSkillComponent;
+import lheido.skills.interactions.CheckFireResistanceUpgradeInteraction;
 import lheido.skills.interactions.CheckFlyingUpgradeInteraction;
 import lheido.skills.interactions.CheckPoisonResistanceUpgradeInteraction;
 import lheido.skills.interactions.OpenSkillSelectionInteraction;
@@ -24,6 +26,10 @@ import lheido.skills.interactions.SkillPoisonResistanceBInteraction;
 import lheido.skills.interactions.SkillPoisonResistanceCInteraction;
 import lheido.skills.interactions.SkillPoisonResistanceInteraction;
 import lheido.skills.interactions.SkillPoisonResistanceXInteraction;
+import lheido.skills.interactions.SkillFireResistanceBInteraction;
+import lheido.skills.interactions.SkillFireResistanceCInteraction;
+import lheido.skills.interactions.SkillFireResistanceInteraction;
+import lheido.skills.interactions.SkillFireResistanceXInteraction;
 import lheido.skills.interactions.SkillStaminaBInteraction;
 import lheido.skills.interactions.SkillStaminaCInteraction;
 import lheido.skills.interactions.SkillStaminaInteraction;
@@ -32,6 +38,7 @@ import lheido.skills.interactions.SkillWaterBreathingBInteraction;
 import lheido.skills.interactions.SkillWaterBreathingCInteraction;
 import lheido.skills.interactions.SkillWaterBreathingInteraction;
 import lheido.skills.interactions.SkillWaterBreathingXInteraction;
+import lheido.skills.systems.FireResistanceSystem;
 import lheido.skills.systems.FlyingSystem;
 import lheido.skills.systems.SkillEssenceDropSystem;
 import lheido.skills.systems.StaminaSystem;
@@ -262,6 +269,57 @@ public class LheidoSkillsPlugin extends JavaPlugin {
 
         // Register Poison Resistance System
         this.getEntityStoreRegistry().registerSystem(new PoisonResistanceSystem());
+
+        // ============================================
+        // Fire Resistance Skill
+        // ============================================
+
+        // Register Fire Resistance Skill Interaction (level A)
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "skill_fire_resistance",
+            SkillFireResistanceInteraction.class,
+            SkillFireResistanceInteraction.CODEC
+        );
+
+        // Register Fire Resistance Skill B Interaction (upgrade)
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "skill_fire_resistance_b",
+            SkillFireResistanceBInteraction.class,
+            SkillFireResistanceBInteraction.CODEC
+        );
+
+        // Register Fire Resistance Skill C Interaction (upgrade)
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "skill_fire_resistance_c",
+            SkillFireResistanceCInteraction.class,
+            SkillFireResistanceCInteraction.CODEC
+        );
+
+        // Register Fire Resistance Skill X Interaction (ultimate upgrade)
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "skill_fire_resistance_x",
+            SkillFireResistanceXInteraction.class,
+            SkillFireResistanceXInteraction.CODEC
+        );
+
+        // Register Check Fire Resistance Upgrade Interaction (prerequisite checker)
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "check_fire_resistance_upgrade",
+            CheckFireResistanceUpgradeInteraction.class,
+            CheckFireResistanceUpgradeInteraction.CODEC
+        );
+
+        // Register Fire Resistance Skill Component with Codec for persistence
+        ComponentType<EntityStore, FireResistanceSkillComponent> fireResistanceComponentType =
+            this.getEntityStoreRegistry().registerComponent(
+                FireResistanceSkillComponent.class,
+                "FireResistanceSkillComponent",
+                FireResistanceSkillComponent.CODEC
+            );
+        FireResistanceSkillComponent.setComponentType(fireResistanceComponentType);
+
+        // Register Fire Resistance System
+        this.getEntityStoreRegistry().registerSystem(new FireResistanceSystem());
 
         // ============================================
         // Active Skills Selection System

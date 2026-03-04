@@ -16,6 +16,7 @@ public final class SkillIds {
     public static final String PREFIX_WATER_BREATHING = "Skill_WaterBreathing_";
     public static final String PREFIX_STAMINA = "Skill_Stamina_";
     public static final String PREFIX_POISON_RESISTANCE = "Skill_PoisonResistance_";
+    public static final String PREFIX_FIRE_RESISTANCE = "Skill_FireResistance_";
 
     // ============================================
     // Suffixes de niveaux
@@ -69,6 +70,16 @@ public final class SkillIds {
      */
     public static String getPoisonResistanceSkillId(int level) {
         return getSkillId(PREFIX_POISON_RESISTANCE, level);
+    }
+
+    /**
+     * Retourne l'ID de l'item FireResistance skill en fonction du niveau.
+     * 
+     * @param level Le niveau du skill (1-4)
+     * @return L'ID du skill ou null si niveau invalide
+     */
+    public static String getFireResistanceSkillId(int level) {
+        return getSkillId(PREFIX_FIRE_RESISTANCE, level);
     }
 
     /**
@@ -127,5 +138,67 @@ public final class SkillIds {
      */
     public static boolean isPoisonResistanceSkill(String skillId) {
         return skillId != null && skillId.startsWith(PREFIX_POISON_RESISTANCE);
+    }
+
+    /**
+     * Verifie si un skill ID correspond au prefix FireResistance (tous niveaux).
+     * 
+     * @param skillId L'ID a verifier
+     * @return true si c'est un skill FireResistance
+     */
+    public static boolean isFireResistanceSkill(String skillId) {
+        return skillId != null && skillId.startsWith(PREFIX_FIRE_RESISTANCE);
+    }
+
+    // ============================================
+    // Methodes utilitaires pour les prefixes
+    // ============================================
+
+    /**
+     * Extrait le prefix d'un skill ID complet.
+     * Ex: "Skill_Flying_A" -> "Skill_Flying_"
+     * 
+     * @param skillId L'ID complet du skill
+     * @return Le prefix ou null si invalide
+     */
+    public static String extractPrefix(String skillId) {
+        if (skillId == null || skillId.isEmpty()) {
+            return null;
+        }
+        
+        // Chercher le dernier underscore pour extraire le prefix
+        int lastUnderscore = skillId.lastIndexOf('_');
+        if (lastUnderscore > 0) {
+            return skillId.substring(0, lastUnderscore + 1);
+        }
+        return null;
+    }
+
+    /**
+     * Verifie si un prefix de skill correspond a un skill actif.
+     * Compare le prefix stocke avec un prefix donne.
+     * 
+     * @param activePrefix Le prefix stocke dans ActiveSkillsComponent
+     * @param targetPrefix Le prefix a verifier
+     * @return true si les prefixes correspondent
+     */
+    public static boolean prefixMatches(String activePrefix, String targetPrefix) {
+        if (activePrefix == null || targetPrefix == null) {
+            return false;
+        }
+        return activePrefix.equals(targetPrefix);
+    }
+
+    /**
+     * Retourne tous les prefixes connus.
+     */
+    public static String[] getAllPrefixes() {
+        return new String[] {
+            PREFIX_FLYING,
+            PREFIX_WATER_BREATHING,
+            PREFIX_STAMINA,
+            PREFIX_POISON_RESISTANCE,
+            PREFIX_FIRE_RESISTANCE
+        };
     }
 }

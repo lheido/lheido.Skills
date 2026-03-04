@@ -1,0 +1,82 @@
+{
+  "TranslationProperties": {
+    "Name": "server.items.Skill_FireResistance_X.name",
+    "Description": "server.items.Skill_FireResistance_X.description"
+  },
+  "Id": "Skill_FireResistance_X",
+  "Icon": "Icons/ItemsGenerated/Skill_Flying_A.png",
+  "Quality": "Legendary",
+  "MaxStack": 1,
+  "ItemLevel": 503,
+  "Categories": ["Upgrade"],
+  "Recipe": {
+    "TimeSeconds": 5,
+    "Input": [
+      {
+        "ItemId": "Ingredient_Skill_Essence",
+        "Quantity": 10000
+      }
+    ],
+    "BenchRequirement": [
+      {
+        "Id": "Arcanebench",
+        "Type": "Crafting",
+        "Categories": ["Arcane_Misc"],
+        "RequiredTierLevel": 1
+      }
+    ]
+  },
+  "PlayerAnimationsId": "Item",
+  "Model": "Items/Consumables/Recipes/Recipe.blockymodel",
+  "Texture": "Items/Consumables/Recipes/Recipe_Texture.png",
+  "IconProperties": {
+    "Scale": 0.76,
+    "Rotation": [33.92, 68.795, 40.67],
+    "Translation": [-0.895, -1.11]
+  },
+  "Consumable": true,
+  "Interactions": {
+    "Primary": {
+      "Interactions": [
+        {
+          "Type": "check_fire_resistance_upgrade",
+          "RequiredLevel": 3,
+          "TargetLevel": 4,
+          "Next": {
+            "Type": "CheckUniqueItemUsage",
+            "Next": {
+              "Type": "skill_fire_resistance_x",
+              "Next": {
+                "Type": "ModifyInventory",
+                "AdjustHeldItemQuantity": -1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Secondary": {
+      "Interactions": [
+        {
+          "Type": "check_fire_resistance_upgrade",
+          "RequiredLevel": 3,
+          "TargetLevel": 4,
+          "Next": {
+            "Type": "CheckUniqueItemUsage",
+            "Next": {
+              "Type": "skill_fire_resistance_x",
+              "Next": {
+                "Type": "ModifyInventory",
+                "AdjustHeldItemQuantity": -1
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "Tags": {
+    "Family": ["Skill"],
+    "Type": ["Upgrade"]
+  }
+}
