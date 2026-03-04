@@ -1,11 +1,12 @@
 // SkillSlotTemplate.ui
+// Template pour un skill dans la liste des disponibles
 
 ItemSlotButton #SkillBtn {
-    Anchor: (Width: 64, Height: 64);
+    Anchor: (Width: 60, Height: 60);
     Style: (
-        Default: (Background: #2a2a4e),
-        Hovered: (Background: #4a4a7e),
-        Pressed: (Background: #1a1a3e)
+        Default: (Background: #1e1e40),
+        Hovered: (Background: #2a2a55),
+        Pressed: (Background: #181835)
     );
     
     ItemSlot #Item {

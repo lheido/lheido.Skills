@@ -7,28 +7,45 @@ Group #Root {
     // Fond semi-transparent
     Group #Backdrop {
         Anchor: (Full: 0);
-        Background: #000000(0.6);
+        Background: #0a0a14(0.85);
     }
     
     // Panneau principal centre
     Group #MainPanel {
-        Anchor: (Width: 400, Height: 350);
-        Background: #1e1e3f(0.95);
-        Padding: (Full: 20);
+        Anchor: (Width: 420, Height: 360);
+        Background: #12122a(0.98);
+        Padding: (Full: 24);
         LayoutMode: Top;
         
-        // Titre
+        // Titre principal
         Label #Title {
-            Anchor: (Height: 36);
-            Text: "Select Active Skills";
-            Style: (FontSize: 22, TextColor: #ffffff, HorizontalAlignment: Center);
+            Anchor: (Height: 32);
+            Text: "Active Skills";
+            Style: (FontSize: 22, TextColor: #e8e8ff, HorizontalAlignment: Center);
         }
         
-        // Sous-titre
+        // Sous-titre descriptif
+        Label #Subtitle {
+            Anchor: (Height: 24);
+            Text: "Select up to 3 skills to activate";
+            Style: (FontSize: 12, TextColor: #7878a8, HorizontalAlignment: Center);
+        }
+        
+        // Espacement
+        Group #Spacer1 {
+            Anchor: (Height: 8);
+        }
+        
+        // Label de section equipes
         Label #ActiveLabel {
             Anchor: (Height: 24);
-            Text: "Active Skills (3 max)";
-            Style: (FontSize: 14, TextColor: #aaaaaa, HorizontalAlignment: Center);
+            Text: "EQUIPPED";
+            Style: (FontSize: 14, TextColor: #5a8aff, HorizontalAlignment: Center);
+        }
+        
+        // Espacement
+        Group #Spacer2 {
+            Anchor: (Height: 4);
         }
         
         // Section des 3 slots actifs
@@ -36,80 +53,109 @@ Group #Root {
             Anchor: (Height: 72);
             LayoutMode: CenterMiddle;
             
-            ItemSlotButton #Slot0 {
-                Anchor: (Width: 64, Height: 64);
-                Style: (
-                    Default: (Background: #3a3a5e),
-                    Hovered: (Background: #4a4a7e),
-                    Pressed: (Background: #2a2a4e)
-                );
+            // Slot 0
+            Group #SlotWrapper0 {
+                Anchor: (Width: 68, Height: 68);
+                Background: #1a1a3a;
+                Padding: (Full: 2);
                 
-                ItemSlot #Item {
-                    Anchor: (Full: 4);
+                ItemSlotButton #Slot0 {
+                    Anchor: (Full: 0);
+                    Style: (
+                        Default: (Background: #252550),
+                        Hovered: (Background: #353570),
+                        Pressed: (Background: #202045)
+                    );
+                    
+                    ItemSlot #Item {
+                        Anchor: (Full: 4);
+                    }
                 }
             }
             
-            ItemSlotButton #Slot1 {
-                Anchor: (Width: 64, Height: 64);
-                Style: (
-                    Default: (Background: #3a3a5e),
-                    Hovered: (Background: #4a4a7e),
-                    Pressed: (Background: #2a2a4e)
-                );
+            // Slot 1
+            Group #SlotWrapper1 {
+                Anchor: (Width: 68, Height: 68);
+                Background: #1a1a3a;
+                Padding: (Full: 2);
                 
-                ItemSlot #Item {
-                    Anchor: (Full: 4);
+                ItemSlotButton #Slot1 {
+                    Anchor: (Full: 0);
+                    Style: (
+                        Default: (Background: #252550),
+                        Hovered: (Background: #353570),
+                        Pressed: (Background: #202045)
+                    );
+                    
+                    ItemSlot #Item {
+                        Anchor: (Full: 4);
+                    }
                 }
             }
             
-            ItemSlotButton #Slot2 {
-                Anchor: (Width: 64, Height: 64);
-                Style: (
-                    Default: (Background: #3a3a5e),
-                    Hovered: (Background: #4a4a7e),
-                    Pressed: (Background: #2a2a4e)
-                );
+            // Slot 2
+            Group #SlotWrapper2 {
+                Anchor: (Width: 68, Height: 68);
+                Background: #1a1a3a;
+                Padding: (Full: 2);
                 
-                ItemSlot #Item {
-                    Anchor: (Full: 4);
+                ItemSlotButton #Slot2 {
+                    Anchor: (Full: 0);
+                    Style: (
+                        Default: (Background: #252550),
+                        Hovered: (Background: #353570),
+                        Pressed: (Background: #202045)
+                    );
+                    
+                    ItemSlot #Item {
+                        Anchor: (Full: 4);
+                    }
                 }
             }
+        }
+        
+        // Espacement
+        Group #Spacer3 {
+            Anchor: (Height: 12);
         }
         
         // Separateur
         Group #Separator {
-            Anchor: (Height: 2);
-            Background: #444466;
+            Anchor: (Height: 1);
+            Background: #2a2a4e;
         }
         
-        // Sous-titre skills disponibles
+        // Espacement
+        Group #Spacer4 {
+            Anchor: (Height: 12);
+        }
+        
+        // Label de section disponibles
         Label #AvailableLabel {
             Anchor: (Height: 24);
-            Text: "Available Skills";
-            Style: (FontSize: 14, TextColor: #aaaaaa, HorizontalAlignment: Center);
+            Text: "AVAILABLE";
+            Style: (FontSize: 14, TextColor: #78a878, HorizontalAlignment: Center);
         }
         
-        // Liste des skills
+        // Espacement
+        Group #Spacer5 {
+            Anchor: (Height: 4);
+        }
+        
+        // Liste des skills avec scroll si necessaire
         Group #SkillsList {
-            Anchor: (Height: 100);
-            Background: #1a1a2e(0.5);
-            LayoutMode: Left;
+            Anchor: (Height: 80);
+            Background: #0e0e1e(0.6);
+            Padding: (Full: 8);
+            LayoutMode: CenterMiddle;
         }
         
-        // Bouton fermer (Button avec Label enfant)
-        Button #CloseBtn {
-            Anchor: (Height: 36, Width: 120);
-            Style: (
-                Default: (Background: #4a4a6e),
-                Hovered: (Background: #5a5a8e),
-                Pressed: (Background: #3a3a5e)
-            );
-            
-            Label {
-                Anchor: (Full: 0);
-                Text: "Close";
-                Style: (FontSize: 14, TextColor: #ffffff, HorizontalAlignment: Center, VerticalAlignment: Center);
-            }
+        // Message quand aucun skill disponible
+        Label #NoSkillsMessage {
+            Anchor: (Height: 24);
+            Text: "No skills available";
+            Style: (FontSize: 12, TextColor: #5a5a7a, HorizontalAlignment: Center);
+            Visible: false;
         }
     }
 }

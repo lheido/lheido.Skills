@@ -26,6 +26,8 @@ import java.util.Map;
  * - Voir ses skills actuellement actifs (3 slots maximum)
  * - Selectionner un skill de la liste pour l'ajouter aux slots actifs
  * - Retirer un skill d'un slot actif
+ * 
+ * Les changements sont sauvegardes automatiquement.
  */
 public class SkillSelectionPage extends InteractiveCustomUIPage<EventAction> {
 
@@ -95,8 +97,8 @@ public class SkillSelectionPage extends InteractiveCustomUIPage<EventAction> {
         for (int i = 0; i < MAX_ACTIVE_SKILLS; i++) {
             updateActiveSlotUI(uiCommandBuilder, i);
             
-            // Enregistrer l'evenement de clic sur le slot pour retirer le skill
-            String slotSelector = "#Slot" + i;
+            // Enregistrer l'evenement de clic sur le slot wrapper pour retirer le skill
+            String slotSelector = "#SlotWrapper" + i + " #Slot" + i;
             uiEventBuilder.addEventBinding(
                 CustomUIEventBindingType.Activating,
                 slotSelector,
@@ -108,13 +110,11 @@ public class SkillSelectionPage extends InteractiveCustomUIPage<EventAction> {
         // Remplir la liste des skills disponibles
         populateAvailableSkills(uiCommandBuilder, uiEventBuilder);
         
-        // Evenement pour le bouton fermer - utilise une seule clé "data"
-        uiEventBuilder.addEventBinding(
-            CustomUIEventBindingType.Activating,
-            "#CloseBtn",
-            EventData.of("Data", "close"),
-            false
-        );
+        // Afficher le message si aucun skill disponible
+        if (ownedSkillPrefixes.isEmpty()) {
+            uiCommandBuilder.set("#NoSkillsMessage.Visible", true);
+            uiCommandBuilder.set("#SkillsList.Visible", false);
+        }
     }
 
     // ============================================
@@ -139,22 +139,24 @@ public class SkillSelectionPage extends InteractiveCustomUIPage<EventAction> {
             param = data.substring(colonIndex + 1);
         }
 
+        boolean changed = false;
+        
         switch (action) {
             case "select":
-                handleSelectSkill(param);
+                changed = handleSelectSkill(param);
                 break;
                 
             case "remove":
-                handleRemoveSkill(parseSlotIndex(param));
+                changed = handleRemoveSkill(parseSlotIndex(param));
                 break;
-                
-            case "close":
-                saveAndClose(ref, store);
-                return;
                 
             default:
-                // Action inconnue, on met juste a jour l'UI
                 break;
+        }
+        
+        // Sauvegarder automatiquement si changement
+        if (changed) {
+            saveActiveSkills(ref, store);
         }
         
         // Mettre a jour l'UI apres chaque action
@@ -179,16 +181,17 @@ public class SkillSelectionPage extends InteractiveCustomUIPage<EventAction> {
     /**
      * Gere la selection d'un skill pour l'ajouter aux slots actifs.
      * @param prefix Le prefix du skill (ex: "Skill_Flying_")
+     * @return true si un changement a ete effectue
      */
-    private void handleSelectSkill(String prefix) {
+    private boolean handleSelectSkill(String prefix) {
         if (prefix == null || prefix.isEmpty()) {
-            return;
+            return false;
         }
         
         // Verifier si le skill est deja equipe
         for (String activeSkill : activeSkills) {
             if (prefix.equals(activeSkill)) {
-                return; // Deja equipe, ne rien faire
+                return false; // Deja equipe, ne rien faire
             }
         }
         
@@ -196,21 +199,24 @@ public class SkillSelectionPage extends InteractiveCustomUIPage<EventAction> {
         for (int i = 0; i < MAX_ACTIVE_SKILLS; i++) {
             if (activeSkills[i] == null || activeSkills[i].isEmpty()) {
                 activeSkills[i] = prefix;
-                return;
+                return true;
             }
         }
         
         // Tous les slots sont pleins - ne rien faire
-        // On pourrait afficher un message d'erreur ici
+        return false;
     }
     
     /**
      * Retire un skill d'un slot actif.
+     * @return true si un changement a ete effectue
      */
-    private void handleRemoveSkill(int slotIndex) {
-        if (slotIndex >= 0 && slotIndex < MAX_ACTIVE_SKILLS) {
+    private boolean handleRemoveSkill(int slotIndex) {
+        if (slotIndex >= 0 && slotIndex < MAX_ACTIVE_SKILLS && activeSkills[slotIndex] != null) {
             activeSkills[slotIndex] = null;
+            return true;
         }
+        return false;
     }
 
     // ============================================
@@ -237,7 +243,7 @@ public class SkillSelectionPage extends InteractiveCustomUIPage<EventAction> {
      */
     private void updateActiveSlotUI(UICommandBuilder builder, int slotIndex) {
         String prefix = activeSkills[slotIndex];
-        String slotSelector = "#Slot" + slotIndex;
+        String slotSelector = "#SlotWrapper" + slotIndex + " #Slot" + slotIndex;
         
         if (prefix != null && !prefix.isEmpty()) {
             // Recuperer le niveau du skill pour ce prefix
@@ -253,7 +259,7 @@ public class SkillSelectionPage extends InteractiveCustomUIPage<EventAction> {
                 builder.set(slotSelector + " #Item.Visible", false);
             }
         } else {
-            // Slot vide - masquer l'ItemSlot pour eviter le tooltip "Invalid Item"
+            // Slot vide - masquer l'ItemSlot
             builder.set(slotSelector + " #Item.Visible", false);
         }
     }
@@ -276,7 +282,7 @@ public class SkillSelectionPage extends InteractiveCustomUIPage<EventAction> {
             // Ajouter le template du skill
             builder.append("#SkillsList", "SkillSlotTemplate.ui");
             
-            // Configurer l'item du slot - #SkillsList[i] pointe vers #SkillBtn (racine du template)
+            // Configurer l'item du slot
             String selector = "#SkillsList[" + i + "]";
             builder.set(selector + " #Item.ItemId", fullSkillId);
             builder.set(selector + " #Item.Quantity", 1);
@@ -292,17 +298,16 @@ public class SkillSelectionPage extends InteractiveCustomUIPage<EventAction> {
     }
 
     // ============================================
-    // Sauvegarde et fermeture
+    // Sauvegarde
     // ============================================
     
     /**
-     * Sauvegarde les skills actifs et ferme la page.
+     * Sauvegarde les skills actifs dans le composant du joueur.
      */
-    private void saveAndClose(Ref<EntityStore> ref, Store<EntityStore> store) {
+    private void saveActiveSkills(Ref<EntityStore> ref, Store<EntityStore> store) {
         // Recuperer la reference du joueur pour acceder aux composants
         Ref<EntityStore> playerEntityRef = playerRef.getReference();
         if (playerEntityRef == null) {
-            close();
             return;
         }
         
@@ -316,9 +321,6 @@ public class SkillSelectionPage extends InteractiveCustomUIPage<EventAction> {
             newComponent.setActiveSkills(activeSkills);
             store.addComponent(playerEntityRef, ActiveSkillsComponent.getComponentType(), newComponent);
         }
-        
-        // Fermer la page
-        close();
     }
 
     // ============================================
