@@ -1,4 +1,6 @@
 items.Ingredient_Skill_Essence.name=Essence of skill
+items.Skill_Selection_Item.name=Skill Grimoire
+items.Skill_Selection_Item.description=Open the skill selection menu to choose your active skills
 items.Skill_Flying_A.name=Flying (1)
 items.Skill_Flying_A.description=Basic flying skill: 10s flight, 20s cooldown
 items.Skill_Flying_B.name=Flying (2)

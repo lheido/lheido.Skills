@@ -1,0 +1,73 @@
+{
+  "TranslationProperties": {
+    "Name": "server.items.Skill_Selection_Item.name",
+    "Description": "server.items.Skill_Selection_Item.description"
+  },
+  "Id": "Skill_Selection_Item",
+  "Categories": [
+    "Items.Tools"
+  ],
+  "Icon": "Icons/ItemsGenerated/Weapon_Spellbook_Grimoire_Purple.png",
+  "Quality": "Rare",
+  "ItemLevel": 1,
+  "Recipe": {
+    "TimeSeconds": 1,
+    "Input": [
+      {
+        "ItemId": "Ingredient_Skill_Essence",
+        "Quantity": 10
+      }
+    ],
+    "BenchRequirement": [
+      {
+        "Id": "Arcanebench",
+        "Type": "Crafting",
+        "Categories": ["Arcane_Misc"],
+        "RequiredTierLevel": 1
+      }
+    ]
+  },
+  "Model": "Items/Weapons/Spellbook/Grimoire.blockymodel",
+  "Texture": "Items/Weapons/Spellbook/Grimoire_Purple_Texture.png",
+  "PlayerAnimationsId": "Item",
+  "IconProperties": {
+    "Scale": 0.745,
+    "Translation": [
+      -7.8,
+      -7.8
+    ],
+    "Rotation": [
+      45,
+      90,
+      0
+    ]
+  },
+  "Interactions": {
+    "Primary": {
+      "Interactions": [
+        {
+          "Type": "open_skill_selection"
+        }
+      ]
+    },
+    "Secondary": {
+      "Interactions": [
+        {
+          "Type": "open_skill_selection"
+        }
+      ]
+    }
+  },
+  "MaxStack": 1,
+  "DropOnDeath": false,
+  "Scale": 1.2,
+  "Tags": {
+    "Type": [
+      "Tool"
+    ],
+    "Family": [
+      "SkillMenu"
+    ]
+  },
+  "ItemSoundSetId": "ISS_Weapons_Books"
+}
