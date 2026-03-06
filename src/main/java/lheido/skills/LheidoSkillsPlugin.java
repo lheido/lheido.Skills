@@ -1,6 +1,7 @@
 package lheido.skills;
 
 import com.hypixel.hytale.component.ComponentType;
+import com.hypixel.hytale.server.core.event.events.player.PlayerReadyEvent;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Interaction;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
@@ -12,12 +13,17 @@ import lheido.skills.components.FlyingSkillComponent;
 import lheido.skills.components.PoisonResistanceSkillComponent;
 import lheido.skills.components.StaminaSkillComponent;
 import lheido.skills.components.WaterBreathingSkillComponent;
+import lheido.skills.events.FlyingSkillResyncHandler;
 import lheido.skills.interactions.CheckFireResistanceUpgradeInteraction;
 import lheido.skills.interactions.CheckFlyingUpgradeInteraction;
 import lheido.skills.interactions.CheckPoisonResistanceUpgradeInteraction;
-import lheido.skills.interactions.OpenSkillSelectionInteraction;
 import lheido.skills.interactions.CheckStaminaUpgradeInteraction;
 import lheido.skills.interactions.CheckWaterBreathingUpgradeInteraction;
+import lheido.skills.interactions.OpenSkillSelectionInteraction;
+import lheido.skills.interactions.SkillFireResistanceBInteraction;
+import lheido.skills.interactions.SkillFireResistanceCInteraction;
+import lheido.skills.interactions.SkillFireResistanceInteraction;
+import lheido.skills.interactions.SkillFireResistanceXInteraction;
 import lheido.skills.interactions.SkillFlyingBInteraction;
 import lheido.skills.interactions.SkillFlyingCInteraction;
 import lheido.skills.interactions.SkillFlyingInteraction;
@@ -26,10 +32,6 @@ import lheido.skills.interactions.SkillPoisonResistanceBInteraction;
 import lheido.skills.interactions.SkillPoisonResistanceCInteraction;
 import lheido.skills.interactions.SkillPoisonResistanceInteraction;
 import lheido.skills.interactions.SkillPoisonResistanceXInteraction;
-import lheido.skills.interactions.SkillFireResistanceBInteraction;
-import lheido.skills.interactions.SkillFireResistanceCInteraction;
-import lheido.skills.interactions.SkillFireResistanceInteraction;
-import lheido.skills.interactions.SkillFireResistanceXInteraction;
 import lheido.skills.interactions.SkillStaminaBInteraction;
 import lheido.skills.interactions.SkillStaminaCInteraction;
 import lheido.skills.interactions.SkillStaminaInteraction;
@@ -40,9 +42,9 @@ import lheido.skills.interactions.SkillWaterBreathingInteraction;
 import lheido.skills.interactions.SkillWaterBreathingXInteraction;
 import lheido.skills.systems.FireResistanceSystem;
 import lheido.skills.systems.FlyingSystem;
+import lheido.skills.systems.PoisonResistanceSystem;
 import lheido.skills.systems.SkillEssenceDropSystem;
 import lheido.skills.systems.StaminaSystem;
-import lheido.skills.systems.PoisonResistanceSystem;
 import lheido.skills.systems.WaterBreathingSystem;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
@@ -157,16 +159,23 @@ public class LheidoSkillsPlugin extends JavaPlugin {
         );
 
         // Register Water Breathing Skill Component with Codec for persistence
-        ComponentType<EntityStore, WaterBreathingSkillComponent> waterBreathingComponentType =
+        ComponentType<
+            EntityStore,
+            WaterBreathingSkillComponent
+        > waterBreathingComponentType =
             this.getEntityStoreRegistry().registerComponent(
                 WaterBreathingSkillComponent.class,
                 "WaterBreathingSkillComponent",
                 WaterBreathingSkillComponent.CODEC
             );
-        WaterBreathingSkillComponent.setComponentType(waterBreathingComponentType);
+        WaterBreathingSkillComponent.setComponentType(
+            waterBreathingComponentType
+        );
 
         // Register Water Breathing System
-        this.getEntityStoreRegistry().registerSystem(new WaterBreathingSystem());
+        this.getEntityStoreRegistry().registerSystem(
+            new WaterBreathingSystem()
+        );
 
         // ============================================
         // Stamina Skill
@@ -259,16 +268,23 @@ public class LheidoSkillsPlugin extends JavaPlugin {
         );
 
         // Register Poison Resistance Skill Component with Codec for persistence
-        ComponentType<EntityStore, PoisonResistanceSkillComponent> poisonResistanceComponentType =
+        ComponentType<
+            EntityStore,
+            PoisonResistanceSkillComponent
+        > poisonResistanceComponentType =
             this.getEntityStoreRegistry().registerComponent(
                 PoisonResistanceSkillComponent.class,
                 "PoisonResistanceSkillComponent",
                 PoisonResistanceSkillComponent.CODEC
             );
-        PoisonResistanceSkillComponent.setComponentType(poisonResistanceComponentType);
+        PoisonResistanceSkillComponent.setComponentType(
+            poisonResistanceComponentType
+        );
 
         // Register Poison Resistance System
-        this.getEntityStoreRegistry().registerSystem(new PoisonResistanceSystem());
+        this.getEntityStoreRegistry().registerSystem(
+            new PoisonResistanceSystem()
+        );
 
         // ============================================
         // Fire Resistance Skill
@@ -310,16 +326,23 @@ public class LheidoSkillsPlugin extends JavaPlugin {
         );
 
         // Register Fire Resistance Skill Component with Codec for persistence
-        ComponentType<EntityStore, FireResistanceSkillComponent> fireResistanceComponentType =
+        ComponentType<
+            EntityStore,
+            FireResistanceSkillComponent
+        > fireResistanceComponentType =
             this.getEntityStoreRegistry().registerComponent(
                 FireResistanceSkillComponent.class,
                 "FireResistanceSkillComponent",
                 FireResistanceSkillComponent.CODEC
             );
-        FireResistanceSkillComponent.setComponentType(fireResistanceComponentType);
+        FireResistanceSkillComponent.setComponentType(
+            fireResistanceComponentType
+        );
 
         // Register Fire Resistance System
-        this.getEntityStoreRegistry().registerSystem(new FireResistanceSystem());
+        this.getEntityStoreRegistry().registerSystem(
+            new FireResistanceSystem()
+        );
 
         // ============================================
         // Active Skills Selection System
@@ -333,13 +356,27 @@ public class LheidoSkillsPlugin extends JavaPlugin {
         );
 
         // Register Active Skills Component with Codec for persistence
-        ComponentType<EntityStore, ActiveSkillsComponent> activeSkillsComponentType =
+        ComponentType<
+            EntityStore,
+            ActiveSkillsComponent
+        > activeSkillsComponentType =
             this.getEntityStoreRegistry().registerComponent(
                 ActiveSkillsComponent.class,
                 "ActiveSkillsComponent",
                 ActiveSkillsComponent.CODEC
             );
         ActiveSkillsComponent.setComponentType(activeSkillsComponentType);
+
+        // ============================================
+        // Event Handlers
+        // ============================================
+
+        // Register PlayerReadyEvent handler for Flying skill resync
+        // This ensures canFly is correctly set after player connects/respawns
+        this.getEventRegistry().registerGlobal(
+            PlayerReadyEvent.class,
+            FlyingSkillResyncHandler::onPlayerReady
+        );
 
         // ============================================
         // Commands

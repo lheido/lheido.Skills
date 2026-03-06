@@ -110,7 +110,10 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
             entityRef,
             ActiveSkillsComponent.getComponentType()
         );
-        boolean isSkillActive = isSkillActiveForPlayer(activeSkills, flyingComponent);
+        boolean isSkillActive = isSkillActiveForPlayer(
+            activeSkills,
+            flyingComponent
+        );
 
         if (!isSkillActive) {
             // Skill non actif: désactiver les effets et cacher le HUD
@@ -130,7 +133,15 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
 
         // Vérification périodique de la synchronisation canFly
         // Protection contre les désync (sommeil, téléportation, etc.)
-        syncCanFlyState(flyingComponent, movementManager, packetHandler);
+        // On utilise un resync forcé périodique pour garantir que le client
+        // a toujours la bonne valeur même après des événements de désync
+        boolean forceResync = flyingComponent.accumulateResyncTime(deltaTime);
+        syncCanFlyState(
+            flyingComponent,
+            movementManager,
+            packetHandler,
+            forceResync
+        );
 
         // Traiter l'état actuel
         switch (flyingComponent.getState()) {
@@ -158,7 +169,7 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
 
     /**
      * Vérifie si le skill Flying est actif pour le joueur.
-     * 
+     *
      * Un skill est considéré actif si:
      * - Le joueur a un ActiveSkillsComponent
      * - Un des skills actifs est un skill Flying (commence par "Skill_Flying_")
@@ -170,7 +181,7 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
         if (activeSkills == null) {
             return false;
         }
-        
+
         // Vérifier si un skill Flying est dans les slots actifs
         for (String activeSkill : activeSkills.getActiveSkills()) {
             if (SkillIds.isFlyingSkill(activeSkill)) {
@@ -182,7 +193,7 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
 
     /**
      * Gère le cas où le skill n'est pas actif.
-     * 
+     *
      * - Désactive le vol si le joueur volait
      * - Cache le HUD
      * - Réinitialise l'état du skill
@@ -196,7 +207,9 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
         PlayerRef playerRef
     ) {
         // Forcer l'arrêt du vol si le joueur est en l'air
-        boolean isActuallyFlying = MovementUtils.isCurrentlyFlying(statesComponent);
+        boolean isActuallyFlying = MovementUtils.isCurrentlyFlying(
+            statesComponent
+        );
         if (isActuallyFlying) {
             MovementUtils.forceStopFlying(statesComponent, packetHandler);
         }
@@ -223,11 +236,18 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
     /**
      * Vérifie et corrige la synchronisation de canFly avec l'état du skill.
      * Appelé à chaque tick pour détecter les désynchronisations.
+     *
+     * @param component        Le FlyingSkillComponent du joueur
+     * @param movementManager  Le MovementManager du joueur
+     * @param packetHandler    Le PacketHandler pour envoyer les packets
+     * @param forceResync      Si true, force l'envoi du packet même si la valeur
+     *                         serveur est déjà correcte (utile après réveil du lit, etc.)
      */
     private void syncCanFlyState(
         FlyingSkillComponent component,
         MovementManager movementManager,
-        PacketHandler packetHandler
+        PacketHandler packetHandler,
+        boolean forceResync
     ) {
         MovementSettings settings = movementManager.getSettings();
         if (settings == null) {
@@ -235,7 +255,16 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
         }
 
         boolean shouldCanFly = component.shouldCanFly();
-        if (settings.canFly != shouldCanFly) {
+
+        if (forceResync) {
+            // Forcer l'envoi du packet pour resync le client
+            MovementUtils.forceSetCanFly(
+                movementManager,
+                packetHandler,
+                shouldCanFly
+            );
+        } else if (settings.canFly != shouldCanFly) {
+            // Correction normale si désync détectée côté serveur
             MovementUtils.setCanFly(
                 movementManager,
                 packetHandler,

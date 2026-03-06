@@ -7,7 +7,6 @@ import com.hypixel.hytale.protocol.packets.player.SetMovementStates;
 import com.hypixel.hytale.server.core.entity.entities.player.movement.MovementManager;
 import com.hypixel.hytale.server.core.entity.movement.MovementStatesComponent;
 import com.hypixel.hytale.server.core.io.PacketHandler;
-
 import javax.annotation.Nonnull;
 
 /**
@@ -29,15 +28,38 @@ public final class MovementUtils {
      * @param canFly        true pour permettre le vol, false sinon
      */
     public static void setCanFly(
-            @Nonnull MovementManager movement,
-            @Nonnull PacketHandler packetHandler,
-            boolean canFly
+        @Nonnull MovementManager movement,
+        @Nonnull PacketHandler packetHandler,
+        boolean canFly
     ) {
         MovementSettings settings = movement.getSettings();
         if (settings.canFly == canFly) {
             return;
         }
         settings.canFly = canFly;
+        movement.update(packetHandler);
+    }
+
+    /**
+     * Force l'envoi du packet UpdateMovementSettings au client,
+     * même si la valeur côté serveur est déjà correcte.
+     *
+     * Utile après des événements qui peuvent désynchroniser le client
+     * (réveil du lit, téléportation, etc.) où le serveur a la bonne
+     * valeur mais le client a été réinitialisé.
+     *
+     * @param movement      Le MovementManager du joueur
+     * @param packetHandler Le PacketHandler pour envoyer les updates au client
+     * @param canFly        true pour permettre le vol, false sinon
+     */
+    public static void forceSetCanFly(
+        @Nonnull MovementManager movement,
+        @Nonnull PacketHandler packetHandler,
+        boolean canFly
+    ) {
+        MovementSettings settings = movement.getSettings();
+        settings.canFly = canFly;
+        // Toujours envoyer le packet, même si la valeur n'a pas changé
         movement.update(packetHandler);
     }
 
@@ -49,8 +71,8 @@ public final class MovementUtils {
      * @param packetHandler   Le PacketHandler pour envoyer les updates au client
      */
     public static void forceStopFlying(
-            @Nonnull MovementStatesComponent statesComponent,
-            @Nonnull PacketHandler packetHandler
+        @Nonnull MovementStatesComponent statesComponent,
+        @Nonnull PacketHandler packetHandler
     ) {
         MovementStates movementStates = statesComponent.getMovementStates();
         if (movementStates == null || !movementStates.flying) {
@@ -69,7 +91,9 @@ public final class MovementUtils {
      * @param statesComponent Le MovementStatesComponent du joueur
      * @return true si le joueur vole, false sinon
      */
-    public static boolean isCurrentlyFlying(@Nonnull MovementStatesComponent statesComponent) {
+    public static boolean isCurrentlyFlying(
+        @Nonnull MovementStatesComponent statesComponent
+    ) {
         MovementStates movementStates = statesComponent.getMovementStates();
         return movementStates != null && movementStates.flying;
     }
@@ -82,9 +106,9 @@ public final class MovementUtils {
      * @param packetHandler   Le PacketHandler pour envoyer les updates au client
      */
     public static void enableFlying(
-            @Nonnull MovementManager movement,
-            @Nonnull MovementStatesComponent statesComponent,
-            @Nonnull PacketHandler packetHandler
+        @Nonnull MovementManager movement,
+        @Nonnull MovementStatesComponent statesComponent,
+        @Nonnull PacketHandler packetHandler
     ) {
         // Permettre le vol
         setCanFly(movement, packetHandler, true);
@@ -99,9 +123,9 @@ public final class MovementUtils {
      * @param packetHandler   Le PacketHandler pour envoyer les updates au client
      */
     public static void forceStartFlying(
-            @Nonnull MovementManager movement,
-            @Nonnull MovementStatesComponent statesComponent,
-            @Nonnull PacketHandler packetHandler
+        @Nonnull MovementManager movement,
+        @Nonnull MovementStatesComponent statesComponent,
+        @Nonnull PacketHandler packetHandler
     ) {
         // S'assurer que canFly est activé
         MovementSettings settings = movement.getSettings();
@@ -109,7 +133,7 @@ public final class MovementUtils {
             settings.canFly = true;
             movement.update(packetHandler);
         }
-        
+
         // Forcer l'état de vol
         MovementStates movementStates = statesComponent.getMovementStates();
         if (movementStates == null) {
@@ -132,9 +156,9 @@ public final class MovementUtils {
      * @param packetHandler   Le PacketHandler pour envoyer les updates au client
      */
     public static void disableFlying(
-            @Nonnull MovementManager movement,
-            @Nonnull MovementStatesComponent statesComponent,
-            @Nonnull PacketHandler packetHandler
+        @Nonnull MovementManager movement,
+        @Nonnull MovementStatesComponent statesComponent,
+        @Nonnull PacketHandler packetHandler
     ) {
         // Force l'arrêt du vol si en cours
         forceStopFlying(statesComponent, packetHandler);

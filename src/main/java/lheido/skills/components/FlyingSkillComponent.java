@@ -54,14 +54,20 @@ public class FlyingSkillComponent implements Component<EntityStore> {
     /**
      * ComponentType pour accéder à ce component dans l'ECS.
      */
-    private static volatile ComponentType<EntityStore, FlyingSkillComponent> COMPONENT_TYPE;
+    private static volatile ComponentType<
+        EntityStore,
+        FlyingSkillComponent
+    > COMPONENT_TYPE;
 
     /**
      * Codec pour la sérialisation/désérialisation du component.
      * Persiste: level, flyDurationMs, cooldownMs, state, remainingFlyTimeMs, remainingCooldownMs
      */
     public static final BuilderCodec<FlyingSkillComponent> CODEC =
-        BuilderCodec.builder(FlyingSkillComponent.class, FlyingSkillComponent::new)
+        BuilderCodec.builder(
+            FlyingSkillComponent.class,
+            FlyingSkillComponent::new
+        )
             .append(
                 new KeyedCodec<>("Level", Codec.INTEGER),
                 (data, value) -> data.level = value,
@@ -105,13 +111,13 @@ public class FlyingSkillComponent implements Component<EntityStore> {
     // ============================================
 
     private FlyingState state;
-    
+
     /**
      * Temps de vol restant (en millisecondes).
      * Continue à décrémenter même si le joueur est au sol.
      */
     private long remainingFlyTimeMs;
-    
+
     /**
      * Temps de cooldown restant (en millisecondes).
      */
@@ -124,6 +130,24 @@ public class FlyingSkillComponent implements Component<EntityStore> {
     private long flyDurationMs;
     private long cooldownMs;
     private int level;
+
+    // ============================================
+    // Resync tracking (transient, not persisted)
+    // ============================================
+
+    /**
+     * Compteur pour forcer un resync périodique.
+     * Réinitialisé à 0 après chaque resync forcé.
+     * Non persisté car c'est un état temporaire.
+     */
+    private transient float resyncAccumulatorSeconds = 0f;
+
+    /**
+     * Intervalle entre chaque resync forcé (en secondes).
+     * Un resync forcé envoie le packet même si la valeur serveur est correcte,
+     * ce qui corrige les désync client (réveil du lit, etc.).
+     */
+    private static final float FORCE_RESYNC_INTERVAL_SECONDS = 2.0f;
 
     public FlyingSkillComponent() {
         this.state = FlyingState.READY;
@@ -144,7 +168,10 @@ public class FlyingSkillComponent implements Component<EntityStore> {
         COMPONENT_TYPE = componentType;
     }
 
-    public static ComponentType<EntityStore, FlyingSkillComponent> getComponentType() {
+    public static ComponentType<
+        EntityStore,
+        FlyingSkillComponent
+    > getComponentType() {
         return COMPONENT_TYPE;
     }
 
@@ -203,12 +230,12 @@ public class FlyingSkillComponent implements Component<EntityStore> {
     /**
      * Décrémente le timer approprié en fonction de l'état actuel.
      * Appelé par FlyingSystem à chaque tick.
-     * 
+     *
      * @param deltaTimeSeconds Le temps écoulé depuis le dernier tick (en secondes)
      */
     public void decrementTimer(float deltaTimeSeconds) {
         long deltaMs = (long) (deltaTimeSeconds * 1000f);
-        
+
         switch (state) {
             case FLYING -> {
                 if (!isUnlimitedFlight()) {
@@ -335,6 +362,34 @@ public class FlyingSkillComponent implements Component<EntityStore> {
      */
     public boolean hasRemainingFlyTime() {
         return remainingFlyTimeMs > 0 || isUnlimitedFlight();
+    }
+
+    // ============================================
+    // Resync Management
+    // ============================================
+
+    /**
+     * Accumule le temps écoulé pour le resync périodique.
+     * Retourne true si un resync forcé doit être effectué.
+     *
+     * @param deltaTimeSeconds Le temps écoulé depuis le dernier tick
+     * @return true si un resync forcé est nécessaire
+     */
+    public boolean accumulateResyncTime(float deltaTimeSeconds) {
+        resyncAccumulatorSeconds += deltaTimeSeconds;
+        if (resyncAccumulatorSeconds >= FORCE_RESYNC_INTERVAL_SECONDS) {
+            resyncAccumulatorSeconds = 0f;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Réinitialise le compteur de resync.
+     * Appelé après un resync forcé ou quand le skill change d'état.
+     */
+    public void resetResyncAccumulator() {
+        resyncAccumulatorSeconds = 0f;
     }
 
     // ============================================
