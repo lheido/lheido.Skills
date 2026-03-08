@@ -17,6 +17,7 @@ public final class SkillIds {
     public static final String PREFIX_STAMINA = "Skill_Stamina_";
     public static final String PREFIX_POISON_RESISTANCE = "Skill_PoisonResistance_";
     public static final String PREFIX_FIRE_RESISTANCE = "Skill_FireResistance_";
+    public static final String PREFIX_LIFE_STEAL = "Skill_LifeSteal_";
 
     // ============================================
     // Suffixes de niveaux
@@ -80,6 +81,16 @@ public final class SkillIds {
      */
     public static String getFireResistanceSkillId(int level) {
         return getSkillId(PREFIX_FIRE_RESISTANCE, level);
+    }
+
+    /**
+     * Retourne l'ID de l'item LifeSteal skill en fonction du niveau.
+     * 
+     * @param level Le niveau du skill (1-4)
+     * @return L'ID du skill ou null si niveau invalide
+     */
+    public static String getLifeStealSkillId(int level) {
+        return getSkillId(PREFIX_LIFE_STEAL, level);
     }
 
     /**
@@ -150,6 +161,16 @@ public final class SkillIds {
         return skillId != null && skillId.startsWith(PREFIX_FIRE_RESISTANCE);
     }
 
+    /**
+     * Verifie si un skill ID correspond au prefix LifeSteal (tous niveaux).
+     * 
+     * @param skillId L'ID a verifier
+     * @return true si c'est un skill LifeSteal
+     */
+    public static boolean isLifeStealSkill(String skillId) {
+        return skillId != null && skillId.startsWith(PREFIX_LIFE_STEAL);
+    }
+
     // ============================================
     // Methodes utilitaires pour les prefixes
     // ============================================
@@ -198,7 +219,8 @@ public final class SkillIds {
             PREFIX_WATER_BREATHING,
             PREFIX_STAMINA,
             PREFIX_POISON_RESISTANCE,
-            PREFIX_FIRE_RESISTANCE
+            PREFIX_FIRE_RESISTANCE,
+            PREFIX_LIFE_STEAL
         };
     }
 }

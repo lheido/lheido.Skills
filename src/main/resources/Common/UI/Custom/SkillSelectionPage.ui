@@ -142,12 +142,18 @@ Group #Root {
                     Anchor: (Height: 4);
                 }
 
-                // Liste des skills avec scroll si necessaire
-                Group #SkillsList {
-                    Anchor: (Height: 80);
+                // Grille de skills (container scrollable)
+                Group #SkillsListContainer {
+                    Anchor: (Height: 140);
                     Background: #0e0e1e(0.6);
-                    Padding: (Full: 8);
-                    LayoutMode: CenterMiddle;
+                    Padding: (Full: 4);
+                    LayoutMode: Full;
+
+                    // Les lignes seront ajoutées dynamiquement ici
+                    Group #SkillsList {
+                        Anchor: (Full: 0);
+                        LayoutMode: Top;
+                    }
                 }
 
                 // Message quand aucun skill disponible

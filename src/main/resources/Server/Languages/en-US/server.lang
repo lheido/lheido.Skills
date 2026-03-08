@@ -41,6 +41,14 @@ items.Skill_FireResistance_C.name=Fire Resistance (3)
 items.Skill_FireResistance_C.description=Advanced fire resistance: 75% damage reduction
 items.Skill_FireResistance_X.name=Fire Resistance (X)
 items.Skill_FireResistance_X.description=Ultimate fire resistance: Full immunity!
+items.Skill_LifeSteal_A.name=Life Steal (1)
+items.Skill_LifeSteal_A.description=Vampiric strikes: Recover 5% of damage dealt as health
+items.Skill_LifeSteal_B.name=Life Steal (2)
+items.Skill_LifeSteal_B.description=Improved vampirism: Recover 10% of damage dealt as health
+items.Skill_LifeSteal_C.name=Life Steal (3)
+items.Skill_LifeSteal_C.description=Advanced vampirism: Recover 15% of damage dealt as health
+items.Skill_LifeSteal_X.name=Life Steal (X)
+items.Skill_LifeSteal_X.description=Ultimate vampirism: Recover 25% of damage dealt as health!
 
 # Skill Selection UI
 skills.ui.title=Select Active Skills

@@ -15,6 +15,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import lheido.skills.components.ActiveSkillsComponent;
 import lheido.skills.components.FireResistanceSkillComponent;
 import lheido.skills.components.FlyingSkillComponent;
+import lheido.skills.components.LifeStealSkillComponent;
 import lheido.skills.components.PoisonResistanceSkillComponent;
 import lheido.skills.components.StaminaSkillComponent;
 import lheido.skills.components.WaterBreathingSkillComponent;
@@ -127,6 +128,12 @@ public class OpenSkillSelectionInteraction extends SimpleInstantInteraction {
         FireResistanceSkillComponent fireResistanceComponent = commandBuffer.getComponent(ref, FireResistanceSkillComponent.getComponentType());
         if (fireResistanceComponent != null) {
             ownedSkills.put(SkillIds.PREFIX_FIRE_RESISTANCE, fireResistanceComponent.getLevel());
+        }
+
+        // Verifier Life Steal Skill
+        LifeStealSkillComponent lifeStealComponent = commandBuffer.getComponent(ref, LifeStealSkillComponent.getComponentType());
+        if (lifeStealComponent != null) {
+            ownedSkills.put(SkillIds.PREFIX_LIFE_STEAL, lifeStealComponent.getLevel());
         }
 
         return ownedSkills;

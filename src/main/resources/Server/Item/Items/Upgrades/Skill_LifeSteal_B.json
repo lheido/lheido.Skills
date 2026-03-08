@@ -1,0 +1,82 @@
+{
+  "TranslationProperties": {
+    "Name": "server.items.Skill_LifeSteal_B.name",
+    "Description": "server.items.Skill_LifeSteal_B.description"
+  },
+  "Id": "Skill_LifeSteal_B",
+  "Icon": "Icons/ItemsGenerated/Skill_Flying_A.png",
+  "Quality": "Rare",
+  "MaxStack": 1,
+  "ItemLevel": 601,
+  "Categories": ["Upgrade"],
+  "Recipe": {
+    "TimeSeconds": 3,
+    "Input": [
+      {
+        "ItemId": "Ingredient_Skill_Essence",
+        "Quantity": 600
+      }
+    ],
+    "BenchRequirement": [
+      {
+        "Id": "Arcanebench",
+        "Type": "Crafting",
+        "Categories": ["Arcane_Misc"],
+        "RequiredTierLevel": 1
+      }
+    ]
+  },
+  "PlayerAnimationsId": "Item",
+  "Model": "Items/Consumables/Recipes/Recipe.blockymodel",
+  "Texture": "Items/Consumables/Recipes/Recipe_Texture.png",
+  "IconProperties": {
+    "Scale": 0.76,
+    "Rotation": [33.92, 68.795, 40.67],
+    "Translation": [-0.895, -1.11]
+  },
+  "Consumable": true,
+  "Interactions": {
+    "Primary": {
+      "Interactions": [
+        {
+          "Type": "check_life_steal_upgrade",
+          "RequiredLevel": 1,
+          "TargetLevel": 2,
+          "Next": {
+            "Type": "CheckUniqueItemUsage",
+            "Next": {
+              "Type": "skill_life_steal_b",
+              "Next": {
+                "Type": "ModifyInventory",
+                "AdjustHeldItemQuantity": -1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Secondary": {
+      "Interactions": [
+        {
+          "Type": "check_life_steal_upgrade",
+          "RequiredLevel": 1,
+          "TargetLevel": 2,
+          "Next": {
+            "Type": "CheckUniqueItemUsage",
+            "Next": {
+              "Type": "skill_life_steal_b",
+              "Next": {
+                "Type": "ModifyInventory",
+                "AdjustHeldItemQuantity": -1
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "Tags": {
+    "Family": ["Skill"],
+    "Type": ["Upgrade"]
+  }
+}

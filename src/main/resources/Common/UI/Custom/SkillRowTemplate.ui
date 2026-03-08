@@ -1,0 +1,7 @@
+// SkillRowTemplate.ui
+// Template pour une ligne de skills (max 5 par ligne)
+
+Group #SkillRow {
+    Anchor: (Height: 64);
+    LayoutMode: CenterMiddle;
+}

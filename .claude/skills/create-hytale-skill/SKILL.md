@@ -323,7 +323,58 @@ public static String get<NomDuSkill>SkillId(int level) {
 public static boolean is<NomDuSkill>Skill(String skillId) {
     return skillId != null && skillId.startsWith(PREFIX_<NOM_DU_SKILL>);
 }
+
+// Dans getAllPrefixes(), ajouter le nouveau prefix:
+public static String[] getAllPrefixes() {
+    return new String[] {
+        PREFIX_FLYING,
+        // ... autres prefixes
+        PREFIX_<NOM_DU_SKILL>  // <-- AJOUTER ICI
+    };
+}
 ```
+
+### 8. Ajouter le skill dans l'UI de sélection des skills actifs
+
+**IMPORTANT:** Pour que le skill apparaisse dans l'interface de sélection des skills actifs, il faut l'ajouter dans deux fichiers qui récupèrent les skills possédés par le joueur.
+
+#### 8.1 Modifier OpenSkillSelectionInteraction.java
+
+**Chemin:** `src/main/java/lheido/skills/interactions/OpenSkillSelectionInteraction.java`
+
+**Ajouter l'import:**
+```java
+import lheido.skills.components.<NomDuSkill>SkillComponent;
+```
+
+**Dans la méthode `getOwnedSkills()`, ajouter:**
+```java
+// Verifier <NomDuSkill> Skill
+<NomDuSkill>SkillComponent <nomDuSkill>Component = commandBuffer.getComponent(ref, <NomDuSkill>SkillComponent.getComponentType());
+if (<nomDuSkill>Component != null) {
+    ownedSkills.put(SkillIds.PREFIX_<NOM_DU_SKILL>, <nomDuSkill>Component.getLevel());
+}
+```
+
+#### 8.2 Modifier SkillsCommand.java
+
+**Chemin:** `src/main/java/lheido/skills/commands/SkillsCommand.java`
+
+**Ajouter l'import:**
+```java
+import lheido.skills.components.<NomDuSkill>SkillComponent;
+```
+
+**Dans la méthode `getOwnedSkills()`, ajouter:**
+```java
+// Verifier <NomDuSkill> Skill
+<NomDuSkill>SkillComponent <nomDuSkill>Component = store.getComponent(ref, <NomDuSkill>SkillComponent.getComponentType());
+if (<nomDuSkill>Component != null) {
+    ownedSkills.put(SkillIds.PREFIX_<NOM_DU_SKILL>, <nomDuSkill>Component.getLevel());
+}
+```
+
+**NOTE:** Sans ces modifications, le skill ne sera pas visible dans l'UI de sélection même si le joueur le possède!
 
 ---
 
@@ -1035,3 +1086,60 @@ Après création, builder le projet:
 ```bash
 ./gradlew clean build
 ```
+
+---
+
+## Checklist de création d'un nouveau skill
+
+Utiliser cette checklist pour s'assurer que tous les éléments sont créés :
+
+### Fichiers à créer
+
+- [ ] **JSON niveau A:** `src/main/resources/Server/Item/Items/Upgrades/Skill_<NomDuSkill>_A.json`
+- [ ] **JSON niveau B:** `src/main/resources/Server/Item/Items/Upgrades/Skill_<NomDuSkill>_B.json`
+- [ ] **JSON niveau C:** `src/main/resources/Server/Item/Items/Upgrades/Skill_<NomDuSkill>_C.json`
+- [ ] **JSON niveau X:** `src/main/resources/Server/Item/Items/Upgrades/Skill_<NomDuSkill>_X.json`
+- [ ] **Component:** `src/main/java/lheido/skills/components/<NomDuSkill>SkillComponent.java`
+- [ ] **Interaction A:** `src/main/java/lheido/skills/interactions/Skill<NomDuSkill>Interaction.java`
+- [ ] **Interaction B:** `src/main/java/lheido/skills/interactions/Skill<NomDuSkill>BInteraction.java`
+- [ ] **Interaction C:** `src/main/java/lheido/skills/interactions/Skill<NomDuSkill>CInteraction.java`
+- [ ] **Interaction X:** `src/main/java/lheido/skills/interactions/Skill<NomDuSkill>XInteraction.java`
+- [ ] **Check upgrade:** `src/main/java/lheido/skills/interactions/Check<NomDuSkill>UpgradeInteraction.java`
+- [ ] **System (optionnel):** `src/main/java/lheido/skills/systems/<NomDuSkill>System.java`
+
+### Fichiers à modifier
+
+- [ ] **Traductions:** `src/main/resources/Server/Languages/en-US/server.lang`
+  - Ajouter les 4 niveaux (A, B, C, X) avec name et description
+
+- [ ] **SkillIds.java:** `src/main/java/lheido/skills/utils/SkillIds.java`
+  - Ajouter `PREFIX_<NOM_DU_SKILL>`
+  - Ajouter `get<NomDuSkill>SkillId(int level)`
+  - Ajouter `is<NomDuSkill>Skill(String skillId)`
+  - Ajouter le prefix dans `getAllPrefixes()`
+
+- [ ] **LheidoSkillsPlugin.java:** `src/main/java/lheido/skills/LheidoSkillsPlugin.java`
+  - Enregistrer l'interaction niveau A (`skill_<nom_du_skill>`)
+  - Enregistrer l'interaction niveau B (`skill_<nom_du_skill>_b`)
+  - Enregistrer l'interaction niveau C (`skill_<nom_du_skill>_c`)
+  - Enregistrer l'interaction niveau X (`skill_<nom_du_skill>_x`)
+  - Enregistrer l'interaction de vérification (`check_<nom_du_skill>_upgrade`)
+  - Enregistrer le component avec son ComponentType
+  - Enregistrer le system (si applicable)
+
+- [ ] **OpenSkillSelectionInteraction.java:** `src/main/java/lheido/skills/interactions/OpenSkillSelectionInteraction.java`
+  - Ajouter l'import du component
+  - Ajouter la vérification dans `getOwnedSkills()`
+
+- [ ] **SkillsCommand.java:** `src/main/java/lheido/skills/commands/SkillsCommand.java`
+  - Ajouter l'import du component
+  - Ajouter la vérification dans `getOwnedSkills()`
+
+### Validation finale
+
+- [ ] `./gradlew clean build` réussit sans erreur
+- [ ] Le skill apparaît dans l'Arcane Workbench
+- [ ] L'item peut être utilisé pour débloquer le skill
+- [ ] Le skill apparaît dans l'UI de sélection (`/skills` ou Skill Grimoire)
+- [ ] Les upgrades fonctionnent correctement (B, C, X)
+- [ ] Le skill applique ses effets quand il est actif

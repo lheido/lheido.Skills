@@ -268,8 +268,17 @@ public class SkillSelectionPage extends InteractiveCustomUIPage<EventAction> {
      * Remplit la liste des skills disponibles.
      */
     private void populateAvailableSkills(UICommandBuilder builder, UIEventBuilder eventBuilder) {
-        // Pour chaque skill possede, ajouter un element cliquable
-        for (int i = 0; i < ownedSkillPrefixes.size(); i++) {
+        final int SLOTS_PER_ROW = 5;
+        int skillCount = ownedSkillPrefixes.size();
+        int rowCount = (skillCount + SLOTS_PER_ROW - 1) / SLOTS_PER_ROW; // Arrondi supérieur
+        
+        // Créer les lignes nécessaires
+        for (int row = 0; row < rowCount; row++) {
+            builder.append("#SkillsList", "SkillRowTemplate.ui");
+        }
+        
+        // Remplir chaque ligne avec les skills
+        for (int i = 0; i < skillCount; i++) {
             String prefix = ownedSkillPrefixes.get(i);
             Integer level = ownedSkills.get(prefix);
             
@@ -279,18 +288,24 @@ public class SkillSelectionPage extends InteractiveCustomUIPage<EventAction> {
                 continue;
             }
             
-            // Ajouter le template du skill
-            builder.append("#SkillsList", "SkillSlotTemplate.ui");
+            int rowIndex = i / SLOTS_PER_ROW;
+            int slotInRow = i % SLOTS_PER_ROW;
+            
+            // Sélecteur de la ligne
+            String rowSelector = "#SkillsList[" + rowIndex + "]";
+            
+            // Ajouter le template du skill dans la ligne
+            builder.append(rowSelector, "SkillSlotTemplate.ui");
             
             // Configurer l'item du slot
-            String selector = "#SkillsList[" + i + "]";
-            builder.set(selector + " #Item.ItemId", fullSkillId);
-            builder.set(selector + " #Item.Quantity", 1);
+            String slotSelector = rowSelector + "[" + slotInRow + "]";
+            builder.set(slotSelector + " #Item.ItemId", fullSkillId);
+            builder.set(slotSelector + " #Item.Quantity", 1);
             
-            // Enregistrer l'evenement de click - on envoie le PREFIX (pas l'ID complet)
+            // Enregistrer l'événement de click - on envoie le PREFIX (pas l'ID complet)
             eventBuilder.addEventBinding(
                 CustomUIEventBindingType.Activating,
-                selector,
+                slotSelector,
                 EventData.of("Data", "select:" + prefix),
                 false
             );

@@ -10,12 +10,14 @@ import lheido.skills.commands.SkillsCommand;
 import lheido.skills.components.ActiveSkillsComponent;
 import lheido.skills.components.FireResistanceSkillComponent;
 import lheido.skills.components.FlyingSkillComponent;
+import lheido.skills.components.LifeStealSkillComponent;
 import lheido.skills.components.PoisonResistanceSkillComponent;
 import lheido.skills.components.StaminaSkillComponent;
 import lheido.skills.components.WaterBreathingSkillComponent;
 import lheido.skills.events.FlyingSkillResyncHandler;
 import lheido.skills.interactions.CheckFireResistanceUpgradeInteraction;
 import lheido.skills.interactions.CheckFlyingUpgradeInteraction;
+import lheido.skills.interactions.CheckLifeStealUpgradeInteraction;
 import lheido.skills.interactions.CheckPoisonResistanceUpgradeInteraction;
 import lheido.skills.interactions.CheckStaminaUpgradeInteraction;
 import lheido.skills.interactions.CheckWaterBreathingUpgradeInteraction;
@@ -28,6 +30,10 @@ import lheido.skills.interactions.SkillFlyingBInteraction;
 import lheido.skills.interactions.SkillFlyingCInteraction;
 import lheido.skills.interactions.SkillFlyingInteraction;
 import lheido.skills.interactions.SkillFlyingXInteraction;
+import lheido.skills.interactions.SkillLifeStealBInteraction;
+import lheido.skills.interactions.SkillLifeStealCInteraction;
+import lheido.skills.interactions.SkillLifeStealInteraction;
+import lheido.skills.interactions.SkillLifeStealXInteraction;
 import lheido.skills.interactions.SkillPoisonResistanceBInteraction;
 import lheido.skills.interactions.SkillPoisonResistanceCInteraction;
 import lheido.skills.interactions.SkillPoisonResistanceInteraction;
@@ -42,6 +48,7 @@ import lheido.skills.interactions.SkillWaterBreathingInteraction;
 import lheido.skills.interactions.SkillWaterBreathingXInteraction;
 import lheido.skills.systems.FireResistanceSystem;
 import lheido.skills.systems.FlyingSystem;
+import lheido.skills.systems.LifeStealSystem;
 import lheido.skills.systems.PoisonResistanceSystem;
 import lheido.skills.systems.SkillEssenceDropSystem;
 import lheido.skills.systems.StaminaSystem;
@@ -343,6 +350,60 @@ public class LheidoSkillsPlugin extends JavaPlugin {
         this.getEntityStoreRegistry().registerSystem(
             new FireResistanceSystem()
         );
+
+        // ============================================
+        // Life Steal Skill
+        // ============================================
+
+        // Register Life Steal Skill Interaction (level A)
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "skill_life_steal",
+            SkillLifeStealInteraction.class,
+            SkillLifeStealInteraction.CODEC
+        );
+
+        // Register Life Steal Skill B Interaction (upgrade)
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "skill_life_steal_b",
+            SkillLifeStealBInteraction.class,
+            SkillLifeStealBInteraction.CODEC
+        );
+
+        // Register Life Steal Skill C Interaction (upgrade)
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "skill_life_steal_c",
+            SkillLifeStealCInteraction.class,
+            SkillLifeStealCInteraction.CODEC
+        );
+
+        // Register Life Steal Skill X Interaction (ultimate upgrade)
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "skill_life_steal_x",
+            SkillLifeStealXInteraction.class,
+            SkillLifeStealXInteraction.CODEC
+        );
+
+        // Register Check Life Steal Upgrade Interaction (prerequisite checker)
+        this.getCodecRegistry(Interaction.CODEC).register(
+            "check_life_steal_upgrade",
+            CheckLifeStealUpgradeInteraction.class,
+            CheckLifeStealUpgradeInteraction.CODEC
+        );
+
+        // Register Life Steal Skill Component with Codec for persistence
+        ComponentType<
+            EntityStore,
+            LifeStealSkillComponent
+        > lifeStealComponentType =
+            this.getEntityStoreRegistry().registerComponent(
+                LifeStealSkillComponent.class,
+                "LifeStealSkillComponent",
+                LifeStealSkillComponent.CODEC
+            );
+        LifeStealSkillComponent.setComponentType(lifeStealComponentType);
+
+        // Register Life Steal System
+        this.getEntityStoreRegistry().registerSystem(new LifeStealSystem());
 
         // ============================================
         // Active Skills Selection System
