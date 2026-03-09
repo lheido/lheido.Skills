@@ -4,7 +4,7 @@
     "Description": "server.items.Skill_FireResistance_A.description"
   },
   "Id": "Skill_FireResistance_A",
-  "Icon": "Icons/ItemsGenerated/Skill_Flying_A.png",
+  "Icon": "Icons/ItemsGenerated/skills-fire-resistance.png",
   "Quality": "Uncommon",
   "MaxStack": 1,
   "ItemLevel": 500,

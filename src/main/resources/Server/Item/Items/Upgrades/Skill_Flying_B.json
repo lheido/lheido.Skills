@@ -4,7 +4,7 @@
     "Description": "server.items.Skill_Flying_B.description"
   },
   "Id": "Skill_Flying_B",
-  "Icon": "Icons/ItemsGenerated/Skill_Flying_A.png",
+  "Icon": "Icons/ItemsGenerated/skills-flying.png",
   "Quality": "Rare",
   "MaxStack": 1,
   "ItemLevel": 101,

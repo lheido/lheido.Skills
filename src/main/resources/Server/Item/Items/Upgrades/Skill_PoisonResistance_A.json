@@ -4,7 +4,7 @@
     "Description": "server.items.Skill_PoisonResistance_A.description"
   },
   "Id": "Skill_PoisonResistance_A",
-  "Icon": "Icons/ItemsGenerated/Skill_Flying_A.png",
+  "Icon": "Icons/ItemsGenerated/skills-poison-resistance.png",
   "Quality": "Uncommon",
   "MaxStack": 1,
   "ItemLevel": 400,
