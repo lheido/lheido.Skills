@@ -51,6 +51,7 @@ import lheido.skills.systems.FlyingSystem;
 import lheido.skills.systems.LifeStealSystem;
 import lheido.skills.systems.PoisonResistanceSystem;
 import lheido.skills.systems.SkillEssenceDropSystem;
+import lheido.skills.systems.SkillBarSystem;
 import lheido.skills.systems.StaminaSystem;
 import lheido.skills.systems.WaterBreathingSystem;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
@@ -427,6 +428,9 @@ public class LheidoSkillsPlugin extends JavaPlugin {
                 ActiveSkillsComponent.CODEC
             );
         ActiveSkillsComponent.setComponentType(activeSkillsComponentType);
+
+        // Register SkillBar System (HUD for displaying active skills)
+        this.getEntityStoreRegistry().registerSystem(new SkillBarSystem());
 
         // ============================================
         // Event Handlers

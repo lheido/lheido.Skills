@@ -1,0 +1,161 @@
+// SkillBarHud.ui
+// HUD pour afficher les 3 skills actifs du joueur
+
+// Container principal
+Group #ScreenContainer {
+    Anchor: (Full: 0);
+    LayoutMode: Full;
+
+    // Container de la SkillBar (meme position que FlyingSkillHud)
+    Group #SkillBarContainer {
+        Anchor: (Bottom: 64, Left: 20, Width: 52, Height: 200);
+        Visible: true;
+        LayoutMode: Bottom;
+
+        // Slot 0 - Premier skill actif
+        Group #Slot0 {
+            Anchor: (Width: 52, Height: 52);
+            Background: #1a1a2e(0.85);
+            Padding: (Full: 2);
+            LayoutMode: Full;
+
+            // Conteneur du skill avec ItemSlot
+            Group #SkillContainer0 {
+                Anchor: (Full: 0);
+                Background: #252550;
+                LayoutMode: Full;
+
+                // ItemSlot pour afficher l'icone du skill
+                ItemSlot #Item0 {
+                    Anchor: (Full: 2);
+                }
+
+                // Overlay pour le cooldown (semi-transparent)
+                Group #CooldownOverlay0 {
+                    Anchor: (Full: 0);
+                    Background: #000000(0.6);
+                    Visible: false;
+                    LayoutMode: CenterMiddle;
+
+                    Label #CooldownText0 {
+                        Anchor: (Full: 0);
+                        Text: "";
+                        Style: (FontSize: 16, TextColor: #ff6b35, HorizontalAlignment: Center);
+                    }
+                }
+
+                // Overlay d'activation (en cours d'utilisation)
+                Group #ActiveOverlay0 {
+                    Anchor: (Full: 0);
+                    Background: #00ff88(0.25);
+                    Visible: false;
+                    LayoutMode: CenterMiddle;
+
+                    Label #ActiveText0 {
+                        Anchor: (Full: 0);
+                        Text: "";
+                        Style: (FontSize: 16, TextColor: #00ff88, HorizontalAlignment: Center);
+                    }
+                }
+            }
+        }
+
+        // Espacement entre slots
+        Group #Spacer01 {
+            Anchor: (Width: 52, Height: 8);
+        }
+
+        // Slot 1 - Deuxieme skill actif
+        Group #Slot1 {
+            Anchor: (Width: 52, Height: 52);
+            Background: #1a1a2e(0.85);
+            Padding: (Full: 2);
+            LayoutMode: Full;
+
+            Group #SkillContainer1 {
+                Anchor: (Full: 0);
+                Background: #252550;
+                LayoutMode: Full;
+
+                ItemSlot #Item1 {
+                    Anchor: (Full: 2);
+                }
+
+                Group #CooldownOverlay1 {
+                    Anchor: (Full: 0);
+                    Background: #000000(0.6);
+                    Visible: false;
+                    LayoutMode: CenterMiddle;
+
+                    Label #CooldownText1 {
+                        Anchor: (Full: 0);
+                        Text: "";
+                        Style: (FontSize: 16, TextColor: #ff6b35, HorizontalAlignment: Center);
+                    }
+                }
+
+                Group #ActiveOverlay1 {
+                    Anchor: (Full: 0);
+                    Background: #00ff88(0.25);
+                    Visible: false;
+                    LayoutMode: CenterMiddle;
+
+                    Label #ActiveText1 {
+                        Anchor: (Full: 0);
+                        Text: "";
+                        Style: (FontSize: 16, TextColor: #00ff88, HorizontalAlignment: Center);
+                    }
+                }
+            }
+        }
+
+        // Espacement entre slots
+        Group #Spacer12 {
+            Anchor: (Width: 52, Height: 8);
+        }
+
+        // Slot 2 - Troisieme skill actif
+        Group #Slot2 {
+            Anchor: (Width: 52, Height: 52);
+            Background: #1a1a2e(0.85);
+            Padding: (Full: 2);
+            LayoutMode: Full;
+
+            Group #SkillContainer2 {
+                Anchor: (Full: 0);
+                Background: #252550;
+                LayoutMode: Full;
+
+                ItemSlot #Item2 {
+                    Anchor: (Full: 2);
+                }
+
+                Group #CooldownOverlay2 {
+                    Anchor: (Full: 0);
+                    Background: #000000(0.6);
+                    Visible: false;
+                    LayoutMode: CenterMiddle;
+
+                    Label #CooldownText2 {
+                        Anchor: (Full: 0);
+                        Text: "";
+                        Style: (FontSize: 16, TextColor: #ff6b35, HorizontalAlignment: Center);
+                    }
+                }
+
+                Group #ActiveOverlay2 {
+                    Anchor: (Full: 0);
+                    Background: #00ff88(0.25);
+                    Visible: false;
+                    LayoutMode: CenterMiddle;
+
+                    Label #ActiveText2 {
+                        Anchor: (Full: 0);
+                        Text: "";
+                        Style: (FontSize: 16, TextColor: #00ff88, HorizontalAlignment: Center);
+                    }
+                }
+            }
+        }
+    }
+}
