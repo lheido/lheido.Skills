@@ -15,6 +15,7 @@ import lheido.skills.utils.SkillIds;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,6 +70,7 @@ public class SkillSelectionPage extends InteractiveCustomUIPage<EventAction> {
         
         this.ownedSkills = new HashMap<>(ownedSkills);
         this.ownedSkillPrefixes = new ArrayList<>(ownedSkills.keySet());
+        Collections.sort(this.ownedSkillPrefixes);
         this.activeSkills = new String[MAX_ACTIVE_SKILLS];
         
         // Copier les skills actifs actuels (ce sont des prefixes)
