@@ -7,13 +7,15 @@ import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.entity.ItemUtils;
 import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.entity.movement.MovementStatesComponent;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.modules.entity.EntityModule;
-import com.hypixel.hytale.server.core.modules.entity.component.PersistentModel;
 import com.hypixel.hytale.server.core.modules.entity.damage.DeathComponent;
 import com.hypixel.hytale.server.core.modules.entity.damage.DeathSystems;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.hypixel.hytale.server.npc.entities.NPCEntity;
+import com.hypixel.hytale.server.npc.role.Role;
 import java.util.Random;
 import javax.annotation.Nonnull;
 
@@ -21,7 +23,7 @@ import javax.annotation.Nonnull;
  * System that handles dropping Skill Essence when entities (NPCs/creatures) die.
  *
  * This system extends DeathSystems.OnDeathSystem to listen for entity deaths.
- * When an entity dies (excluding players), there's a chance to drop a Skill Essence item.
+ * When an entity dies (excluding players), hostile and neutral mobs can drop Skill Essence.
  *
  * Usage:
  * - Registered in LheidoSkillsPlugin.setup()
@@ -39,20 +41,31 @@ public class SkillEssenceDropSystem extends DeathSystems.OnDeathSystem {
         "Ingredient_Skill_Essence";
 
     /**
-     * Base drop chance (0.0 to 1.0).
-     * 0.25 = 25% chance to drop.
-     */
-    private static final float BASE_DROP_CHANCE = 1f;
-
-    /**
      * Minimum quantity of essence to drop.
      */
     private static final int MIN_DROP_QUANTITY = 1;
 
     /**
-     * Maximum quantity of essence to drop.
+     * Health thresholds that each grant +1 additional essence.
      */
-    private static final int MAX_DROP_QUANTITY = 5;
+    private static final int[] HEALTH_QUANTITY_THRESHOLDS = {
+        60,
+        80,
+        100,
+        120,
+        140,
+        190,
+        240,
+        260,
+        300,
+        350,
+        400,
+    };
+
+    /**
+     * Flying mobs get a small flat quantity bonus.
+     */
+    private static final int FLYING_QUANTITY_BONUS = 1;
 
     private final Random random = new Random();
 
@@ -79,60 +92,84 @@ public class SkillEssenceDropSystem extends DeathSystems.OnDeathSystem {
         @Nonnull Store<EntityStore> store,
         @Nonnull CommandBuffer<EntityStore> commandBuffer
     ) {
-        // Try to get the entity's identifier for customized drops
-        String entityId = getEntityId(ref, store);
+        // Build a simplified mob profile used for drop rules
+        MobDropProfile profile = getMobDropProfile(ref, store);
 
-        // Check if we should drop essence based on random chance (using entity-specific rates)
-        float dropChance = getDropChanceForEntity(entityId);
+        // Check if this mob should drop essence based on attitude rules
+        float dropChance = getDropChanceForEntity(profile);
         if (random.nextFloat() >= dropChance) {
-            LOGGER.atFine().log(
-                "SkillEssenceDropSystem: No drop for entity " +
-                    entityId +
-                    " (random chance failed)"
-            );
             return;
         }
 
-        // Calculate drop quantity (using entity-specific amounts)
-        int quantity = getDropQuantityForEntity(entityId);
+        // Calculate drop quantity using health thresholds and flying bonus
+        int quantity = getDropQuantityForEntity(profile);
 
         // Attempt to drop the Skill Essence
         dropSkillEssence(ref, store, commandBuffer, quantity);
     }
 
     /**
-     * Gets the entity's identifier/type name from its model.
+     * Builds a simplified profile used to determine drop rules.
      *
      * @param ref   The entity reference
      * @param store The entity store
-     * @return The entity ID string, or "unknown" if not found
+     * @return A profile containing attitude, health, and flying state
      */
-    private String getEntityId(
+    private MobDropProfile getMobDropProfile(
         @Nonnull Ref<EntityStore> ref,
         @Nonnull Store<EntityStore> store
     ) {
+        String playerAttitude = "unknown";
+        int maxHealth = 0;
+        boolean flying = false;
+
         try {
-            // Try to get the PersistentModel component to identify the entity type
-            PersistentModel persistentModel = store.getComponent(
+            NPCEntity npcEntity = store.getComponent(
                 ref,
-                PersistentModel.getComponentType()
+                NPCEntity.getComponentType()
             );
-            if (persistentModel != null) {
-                var modelRef = persistentModel.getModelReference();
-                if (modelRef != null) {
-                    String modelId = modelRef.toString();
-                    if (modelId != null && !modelId.isEmpty()) {
-                        return modelId;
+            if (npcEntity == null) {
+                return new MobDropProfile(playerAttitude, maxHealth, flying);
+            }
+
+            Role role = npcEntity.getRole();
+            if (role != null) {
+                var worldSupport = role.getWorldSupport();
+                if (worldSupport != null) {
+                    var defaultPlayerAttitude =
+                        worldSupport.getDefaultPlayerAttitude();
+                    if (defaultPlayerAttitude != null) {
+                        playerAttitude = defaultPlayerAttitude.name();
                     }
                 }
+
+                maxHealth = role.getInitialMaxHealth();
+            }
+
+            MovementStatesComponent movementStatesComponent =
+                store.getComponent(
+                    ref,
+                    MovementStatesComponent.getComponentType()
+                );
+            if (movementStatesComponent != null) {
+                var movementStates =
+                    movementStatesComponent.getMovementStates();
+                if (movementStates != null) {
+                    flying = movementStates.flying || movementStates.gliding;
+                }
+            }
+
+            if (!flying) {
+                flying = npcEntity.getHoverHeight() > 0;
             }
         } catch (Exception e) {
             LOGGER.atFine().log(
-                "SkillEssenceDropSystem: Could not get entity ID - " +
+                "SkillEssenceDropSystem: Could not build mob drop profile - " +
                     e.getMessage()
             );
         }
-        return "unknown";
+
+        return new MobDropProfile(playerAttitude, maxHealth, flying);
     }
 
     /**
@@ -210,87 +247,42 @@ public class SkillEssenceDropSystem extends DeathSystems.OnDeathSystem {
     }
 
     /**
-     * Calculates the quantity of essence to drop.
-     * Returns a random value between MIN_DROP_QUANTITY and MAX_DROP_QUANTITY (inclusive).
+     * Gets the drop chance from the mob attitude.
      *
-     * @return the quantity to drop
-     */
-    private int calculateDropQuantity() {
-        return (
-            MIN_DROP_QUANTITY +
-            random.nextInt(MAX_DROP_QUANTITY - MIN_DROP_QUANTITY + 1)
-        );
-    }
-
-    /**
-     * Gets the drop chance for a specific entity type.
-     * Customizes drop rates for different creatures.
-     *
-     * @param entityId The entity's identifier
+     * @param profile The mob difficulty profile
      * @return The drop chance (0.0 to 1.0)
      */
-    protected float getDropChanceForEntity(String entityId) {
-        if (entityId == null || entityId.equals("unknown")) {
-            return BASE_DROP_CHANCE;
-        }
-
-        String lowerEntityId = entityId.toLowerCase();
-
-        // Bosses have guaranteed drop
-        if (lowerEntityId.contains("boss")) {
+    protected float getDropChanceForEntity(@Nonnull MobDropProfile profile) {
+        if (
+            "HOSTILE".equalsIgnoreCase(profile.playerAttitude()) ||
+            "NEUTRAL".equalsIgnoreCase(profile.playerAttitude())
+        ) {
             return 1.0f;
         }
 
-        // Hostile creatures have higher chance
-        if (
-            lowerEntityId.contains("trork") ||
-            lowerEntityId.contains("scarak") ||
-            lowerEntityId.contains("hostile")
-        ) {
-            return 0.35f;
-        }
-
-        // Passive animals have lower chance
-        if (
-            lowerEntityId.contains("ram") ||
-            lowerEntityId.contains("chicken") ||
-            lowerEntityId.contains("cow") ||
-            lowerEntityId.contains("sheep")
-        ) {
-            return 0.10f;
-        }
-
-        return BASE_DROP_CHANCE;
+        return 0.0f;
     }
 
     /**
-     * Gets the drop quantity for a specific entity type.
-     * Customizes drop amounts for different creatures.
+     * Gets the drop quantity from health thresholds and flying bonus.
      *
-     * @param entityId The entity's identifier
+     * @param profile The mob difficulty profile
      * @return The quantity to drop
      */
-    protected int getDropQuantityForEntity(String entityId) {
-        if (entityId == null || entityId.equals("unknown")) {
-            return calculateDropQuantity();
+    protected int getDropQuantityForEntity(@Nonnull MobDropProfile profile) {
+        int quantity = MIN_DROP_QUANTITY;
+
+        for (int threshold : HEALTH_QUANTITY_THRESHOLDS) {
+            if (profile.maxHealth() >= threshold) {
+                quantity++;
+            }
         }
 
-        String lowerEntityId = entityId.toLowerCase();
-
-        // Bosses drop significantly more
-        if (lowerEntityId.contains("boss")) {
-            return 5 + random.nextInt(6); // 5-10
+        if (profile.flying()) {
+            quantity += FLYING_QUANTITY_BONUS;
         }
 
-        // Mini-bosses/elites drop moderately more
-        if (
-            lowerEntityId.contains("miniboss") ||
-            lowerEntityId.contains("elite")
-        ) {
-            return 3 + random.nextInt(4); // 3-6
-        }
-
-        return calculateDropQuantity();
+        return quantity;
     }
 
     /**
@@ -302,4 +294,10 @@ public class SkillEssenceDropSystem extends DeathSystems.OnDeathSystem {
     protected String getSkillEssenceItemId() {
         return SKILL_ESSENCE_ITEM_ID;
     }
+
+    private record MobDropProfile(
+        @Nonnull String playerAttitude,
+        int maxHealth,
+        boolean flying
+    ) {}
 }
