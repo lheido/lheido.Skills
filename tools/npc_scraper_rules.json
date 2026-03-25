@@ -1,0 +1,339 @@
+{
+  "version": 1,
+  "description": "Declarative rules used by the NPC asset scraper to derive normalized flags from asset paths and identifiers. These rules are intentionally generic and path-based so they remain stable as new NPCs or variants are added.",
+  "normalization": {
+    "variant_suffixes": [
+      "Black",
+      "Blue",
+      "Brown",
+      "Bull",
+      "Calf",
+      "Captain",
+      "Chick",
+      "Chieftain",
+      "Cow",
+      "Crystal",
+      "Cyan",
+      "Desert",
+      "Doe",
+      "Earth",
+      "Fire",
+      "Firesteel",
+      "Flame",
+      "Foal",
+      "Fighter",
+      "Frost",
+      "Golden",
+      "Gray",
+      "Green",
+      "Guard",
+      "Hammerhead",
+      "Hunter",
+      "Ice",
+      "Incandescent",
+      "Kid",
+      "Knight",
+      "Lamb",
+      "Lancer",
+      "Lava",
+      "Living",
+      "Magma",
+      "Man",
+      "Marine",
+      "Miner",
+      "Moray",
+      "Of",
+      "Ogre",
+      "Orange",
+      "Outlander",
+      "Peel",
+      "Piglet",
+      "Pirate",
+      "Plain",
+      "Polar",
+      "Praetorian",
+      "Puffer",
+      "Ranged",
+      "Rainbow",
+      "Red",
+      "Rhino",
+      "Sailfin",
+      "Sand",
+      "Silk",
+      "Skeleton",
+      "Slug",
+      "Snow",
+      "Soldier",
+      "Spawn",
+      "Stag",
+      "Striker",
+      "Tamed",
+      "Thunder",
+      "Trout",
+      "Turkey",
+      "Void",
+      "War",
+      "White",
+      "Wild",
+      "Yellow"
+    ],
+    "stop_segments": [
+      "Server",
+      "NPC",
+      "Roles",
+      "Role",
+      "Attitude",
+      "Items",
+      "Item",
+      "Audio",
+      "AudioCategories",
+      "SoundEvents",
+      "SFX",
+      "RootInteractions",
+      "Root",
+      "Interactions",
+      "Effects",
+      "SpawnNPC"
+    ],
+    "ignored_path_segments": ["_Deprecated", "_Debug", "Tests", "Test"]
+  },
+  "sources": {
+    "roles": {
+      "enabled": true,
+      "roots": ["Server/NPC/Roles"]
+    },
+    "attitudes": {
+      "enabled": true,
+      "roots": ["Server/NPC/Attitude/Roles"]
+    },
+    "audio_categories": {
+      "enabled": true,
+      "roots": ["Server/Audio/AudioCategories/NPC"]
+    },
+    "sound_events": {
+      "enabled": true,
+      "roots": ["Server/Audio/SoundEvents/SFX/NPC"]
+    },
+    "interactions": {
+      "enabled": true,
+      "roots": ["Server/Item/RootInteractions/NPCs"]
+    }
+  },
+  "filters": {
+    "exclude_exact_names": [
+      "Aggressive",
+      "Attack_Dummy",
+      "Attack_Tests",
+      "BlankTemplate",
+      "Critters",
+      "Death",
+      "Empty",
+      "Neutral",
+      "Passive",
+      "Predators",
+      "PredatorsBig",
+      "Prey",
+      "PreyBig",
+      "Vermin",
+      "Void"
+    ],
+    "exclude_name_prefixes": ["Attack_", "Component_", "Spawn_"],
+    "exclude_name_regexes": [
+      "^Attack(?:_|$)",
+      "^BlankTemplate$",
+      "^Component(?:_|$)",
+      "^Death$",
+      "^Empty$",
+      "^Spawn(?:_|$)"
+    ]
+  },
+  "flags": {
+    "flying_like": {
+      "any_segment": ["Avian", "Aerial", "Birds", "Bat", "Fly", "Flying"],
+      "any_id_token": [
+        "bat",
+        "bird",
+        "crow",
+        "duck",
+        "flamingo",
+        "owl",
+        "parrot",
+        "pigeon",
+        "raven",
+        "sparrow",
+        "tetrabird",
+        "vulture",
+        "woodpecker"
+      ]
+    },
+    "aquatic_like": {
+      "any_segment": ["Aquatic", "Ocean", "Marine", "Freshwater", "Abyssal"],
+      "any_id_token": [
+        "fish",
+        "shark",
+        "eel",
+        "whale",
+        "salmon",
+        "trout",
+        "catfish",
+        "pike",
+        "piranha",
+        "bluegill",
+        "clownfish",
+        "pufferfish",
+        "jellyfish",
+        "crab",
+        "lobster",
+        "shellfish",
+        "trilobite",
+        "tang",
+        "moray"
+      ]
+    },
+    "boss_like": {
+      "any_segment": ["Boss", "Mythic"],
+      "any_id_token": [
+        "boss",
+        "dragon",
+        "praetorian",
+        "chieftain",
+        "rex",
+        "yeti"
+      ]
+    },
+    "undead_like": {
+      "any_segment": ["Undead"],
+      "any_id_token": ["undead", "skeleton", "zombie", "wraith", "praetorian"]
+    },
+    "void_like": {
+      "any_segment": ["Void"],
+      "any_id_token": ["void"]
+    },
+    "elemental_like": {
+      "any_segment": ["Elemental", "Golem"],
+      "any_id_token": ["elemental", "golem"]
+    },
+    "tamed_like": {
+      "any_segment": ["Tamed"],
+      "any_id_token": ["tamed"]
+    },
+    "intelligent_like": {
+      "any_segment": ["Intelligent"],
+      "any_id_token": [
+        "goblin",
+        "trork",
+        "feran",
+        "outlander",
+        "klops",
+        "kweebec"
+      ]
+    },
+    "livestock_like": {
+      "any_segment": ["Livestock"],
+      "any_id_token": [
+        "bison",
+        "boar",
+        "bunny",
+        "camel",
+        "chicken",
+        "chick",
+        "cow",
+        "goat",
+        "horse",
+        "lamb",
+        "mouflon",
+        "pig",
+        "piglet",
+        "rabbit",
+        "ram",
+        "sheep",
+        "skrill",
+        "turkey",
+        "warthog"
+      ]
+    },
+    "critter_like": {
+      "any_segment": ["Critter"],
+      "any_id_token": ["frog", "gecko", "meerkat", "mouse", "squirrel"]
+    },
+    "predator_like": {
+      "any_segment": ["Predators", "PredatorsBig", "Raptor"],
+      "any_id_token": [
+        "bear",
+        "wolf",
+        "hyena",
+        "leopard",
+        "tiger",
+        "sabertooth",
+        "crocodile",
+        "raptor",
+        "rex",
+        "hawk",
+        "vulture",
+        "shark"
+      ]
+    },
+    "vermin_like": {
+      "any_segment": ["Vermin"],
+      "any_id_token": [
+        "rat",
+        "scorpion",
+        "snake",
+        "spider",
+        "larva",
+        "molerat",
+        "slug",
+        "snail"
+      ]
+    },
+    "passive_like": {
+      "any_segment": ["Passive", "Prey", "PreyBig", "Critter", "Livestock"],
+      "any_id_token": []
+    },
+    "aggressive_like": {
+      "any_segment": [
+        "Aggressive",
+        "Predators",
+        "PredatorsBig",
+        "Undead",
+        "Void"
+      ],
+      "any_id_token": []
+    }
+  },
+  "attitude_inference": {
+    "passive_segments": ["Passive", "Prey", "PreyBig", "Critter", "Livestock"],
+    "neutral_segments": ["Neutral", "LivingWorld"],
+    "hostile_segments": [
+      "Aggressive",
+      "Predators",
+      "PredatorsBig",
+      "Undead",
+      "Void",
+      "Vermin"
+    ]
+  },
+  "family_priority": [
+    "Boss",
+    "Mythic",
+    "Void",
+    "Undead",
+    "Intelligent",
+    "Elemental",
+    "Aquatic",
+    "Avian",
+    "Creature",
+    "Livestock",
+    "Critter",
+    "Mammal",
+    "Reptile",
+    "Vermin",
+    "Raptor"
+  ],
+  "output": {
+    "include_raw_segments": true,
+    "include_source_paths": true,
+    "include_variants": true,
+    "include_unmatched_records": true
+  }
+}
