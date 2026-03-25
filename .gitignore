@@ -44,3 +44,6 @@ bin/
 
 #libs
 libs/HytaleServer.jar
+docs/npc-assets-index.json
+docs/npc-tier-map.json
+src/main/resources/Common/Data/npc-tier-map.json
