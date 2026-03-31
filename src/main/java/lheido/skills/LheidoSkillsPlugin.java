@@ -11,6 +11,7 @@ import lheido.skills.components.ActiveSkillsComponent;
 import lheido.skills.components.FireResistanceSkillComponent;
 import lheido.skills.components.FlyingSkillComponent;
 import lheido.skills.components.LifeStealSkillComponent;
+import lheido.skills.components.PendingSkillEssenceComponent;
 import lheido.skills.components.PoisonResistanceSkillComponent;
 import lheido.skills.components.StaminaSkillComponent;
 import lheido.skills.components.WaterBreathingSkillComponent;
@@ -50,8 +51,9 @@ import lheido.skills.systems.FireResistanceSystem;
 import lheido.skills.systems.FlyingSystem;
 import lheido.skills.systems.LifeStealSystem;
 import lheido.skills.systems.PoisonResistanceSystem;
-import lheido.skills.systems.SkillEssenceDropSystem;
 import lheido.skills.systems.SkillBarSystem;
+import lheido.skills.systems.SkillEssenceDropSystem;
+import lheido.skills.systems.SkillEssenceDropTickSystem;
 import lheido.skills.systems.StaminaSystem;
 import lheido.skills.systems.WaterBreathingSystem;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
@@ -122,9 +124,27 @@ public class LheidoSkillsPlugin extends JavaPlugin {
         // Register Flying System
         this.getEntityStoreRegistry().registerSystem(new FlyingSystem());
 
-        // Register Skill Essence Drop System (drops essence when NPCs die)
+        // Register Pending Skill Essence Component (attached to NPCs at spawn)
+        ComponentType<
+            EntityStore,
+            PendingSkillEssenceComponent
+        > pendingEssenceComponentType =
+            this.getEntityStoreRegistry().registerComponent(
+                PendingSkillEssenceComponent.class,
+                PendingSkillEssenceComponent::new
+            );
+        PendingSkillEssenceComponent.setComponentType(
+            pendingEssenceComponentType
+        );
+
+        // Register Skill Essence Drop System (attaches pending essence at NPC spawn)
         this.getEntityStoreRegistry().registerSystem(
             new SkillEssenceDropSystem()
+        );
+
+        // Register Skill Essence Drop Tick System (drops essence after death animation)
+        this.getEntityStoreRegistry().registerSystem(
+            new SkillEssenceDropTickSystem()
         );
 
         // ============================================
