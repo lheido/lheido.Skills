@@ -15,9 +15,9 @@ import javax.annotation.Nonnull;
 import lheido.skills.components.FireResistanceSkillComponent;
 
 /**
- * Interaction pour upgrader le skill FireResistance vers le niveau B.
- * Requiert que le joueur possède déjà le skill FireResistance niveau A.
- * Améliore la résistance au feu (50% au lieu de 25%).
+ * Interaction to upgrade the FireResistance skill to level B.
+ * Requires the player to already have the FireResistance skill at level A.
+ * Improves fire resistance (50% instead of 25%).
  */
 public class SkillFireResistanceBInteraction extends SimpleInstantInteraction {
 
@@ -51,19 +51,24 @@ public class SkillFireResistanceBInteraction extends SimpleInstantInteraction {
             return;
         }
 
-        // Les prérequis sont vérifiés par CheckFireResistanceUpgradeInteraction
-        // Récupérer le component existant (garanti par le check)
-        FireResistanceSkillComponent existingComponent = commandBuffer.getComponent(
-            ref,
-            FireResistanceSkillComponent.getComponentType()
-        );
+        // Prerequisites are verified by CheckFireResistanceUpgradeInteraction
+        // Get the existing component (guaranteed by the check)
+        FireResistanceSkillComponent existingComponent =
+            commandBuffer.getComponent(
+                ref,
+                FireResistanceSkillComponent.getComponentType()
+            );
 
-        // Upgrade vers le niveau B
-        FireResistanceSkillComponent upgradedComponent = FireResistanceSkillComponent.createLevelB();
+        // Upgrade to level B
+        FireResistanceSkillComponent upgradedComponent =
+            FireResistanceSkillComponent.createLevelB();
 
-        // Supprimer l'ancien et ajouter le nouveau
+        // Remove the old one and add the new one
         if (existingComponent != null) {
-            commandBuffer.removeComponent(ref, FireResistanceSkillComponent.getComponentType());
+            commandBuffer.removeComponent(
+                ref,
+                FireResistanceSkillComponent.getComponentType()
+            );
         }
 
         commandBuffer.addComponent(
@@ -73,7 +78,9 @@ public class SkillFireResistanceBInteraction extends SimpleInstantInteraction {
         );
 
         player.sendMessage(
-            Message.raw("Fire Resistance skill upgraded to level 2! 50% fire damage reduction.")
+            Message.raw(
+                "Fire Resistance skill upgraded to level 2! 50% fire damage reduction."
+            )
         );
     }
 }

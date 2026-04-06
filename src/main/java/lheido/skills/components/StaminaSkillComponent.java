@@ -8,38 +8,44 @@ import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 /**
- * Component pour le skill Stamina.
- * Attaché au player pour gérer l'endurance.
+ * Component for the Stamina skill.
+ * Attached to the player to manage endurance.
  *
- * Niveaux:
- * - A (1): +50% stamina max (multiplier 1.5)
- * - B (2): +100% stamina max (multiplier 2.0)
- * - C (3): +200% stamina max (multiplier 3.0)
+ * Levels:
+ * - A (1): +50% max stamina (multiplier 1.5)
+ * - B (2): +100% max stamina (multiplier 2.0)
+ * - C (3): +200% max stamina (multiplier 3.0)
  * - X (4): Unlimited stamina
  */
 public class StaminaSkillComponent implements Component<EntityStore> {
 
     // ============================================
-    // Constantes par niveau - Multiplicateur de stamina
+    // Per-level constants - Stamina multiplier
     // ============================================
 
     public static final float LEVEL_A_MULTIPLIER = 1.5f;
     public static final float LEVEL_B_MULTIPLIER = 2.0f;
     public static final float LEVEL_C_MULTIPLIER = 3.0f;
-    public static final float LEVEL_X_MULTIPLIER = -1.0f; // -1 = illimité
+    public static final float LEVEL_X_MULTIPLIER = -1.0f; // -1 = unlimited
 
     public static final int LEVEL_X = 4;
 
     /**
-     * ComponentType pour accéder à ce component dans l'ECS.
+     * ComponentType to access this component in the ECS.
      */
-    private static volatile ComponentType<EntityStore, StaminaSkillComponent> COMPONENT_TYPE;
+    private static volatile ComponentType<
+        EntityStore,
+        StaminaSkillComponent
+    > COMPONENT_TYPE;
 
     /**
-     * Codec pour la sérialisation/désérialisation du component.
+     * Codec for serialization/deserialization of the component.
      */
     public static final BuilderCodec<StaminaSkillComponent> CODEC =
-        BuilderCodec.builder(StaminaSkillComponent.class, StaminaSkillComponent::new)
+        BuilderCodec.builder(
+            StaminaSkillComponent.class,
+            StaminaSkillComponent::new
+        )
             .append(
                 new KeyedCodec<>("StaminaLevel", Codec.INTEGER),
                 (data, value) -> data.level = value,
@@ -76,7 +82,10 @@ public class StaminaSkillComponent implements Component<EntityStore> {
         COMPONENT_TYPE = componentType;
     }
 
-    public static ComponentType<EntityStore, StaminaSkillComponent> getComponentType() {
+    public static ComponentType<
+        EntityStore,
+        StaminaSkillComponent
+    > getComponentType() {
         return COMPONENT_TYPE;
     }
 
@@ -129,7 +138,7 @@ public class StaminaSkillComponent implements Component<EntityStore> {
     // ============================================
 
     /**
-     * Vérifie si la stamina est illimitée (niveau X).
+     * Checks if stamina is unlimited (level X).
      */
     public boolean isUnlimitedStamina() {
         return staminaMultiplier < 0;
@@ -148,7 +157,7 @@ public class StaminaSkillComponent implements Component<EntityStore> {
     }
 
     // ============================================
-    // Getters et Setters
+    // Getters and Setters
     // ============================================
 
     public int getLevel() {

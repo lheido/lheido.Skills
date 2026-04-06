@@ -15,10 +15,10 @@ import javax.annotation.Nonnull;
 import lheido.skills.components.WaterBreathingSkillComponent;
 
 /**
- * Interaction pour débloquer le skill WaterBreathing.
- * Quand l'item est utilisé :
- * - Ajoute le WaterBreathingSkillComponent au joueur
- * Le WaterBreathingSystem gère ensuite la logique d'oxygène.
+ * Interaction to unlock the WaterBreathing skill.
+ * When the item is used:
+ * - Adds the WaterBreathingSkillComponent to the player
+ * The WaterBreathingSystem then handles the oxygen logic.
  */
 public class SkillWaterBreathingInteraction extends SimpleInstantInteraction {
 
@@ -52,10 +52,11 @@ public class SkillWaterBreathingInteraction extends SimpleInstantInteraction {
             return;
         }
 
-        // Créer le component avec les paramètres du niveau A
-        WaterBreathingSkillComponent component = WaterBreathingSkillComponent.createLevelA();
+        // Create the component with level A parameters
+        WaterBreathingSkillComponent component =
+            WaterBreathingSkillComponent.createLevelA();
 
-        // Ajouter le component au joueur
+        // Add the component to the player
         commandBuffer.addComponent(
             ref,
             WaterBreathingSkillComponent.getComponentType(),
@@ -63,7 +64,9 @@ public class SkillWaterBreathingInteraction extends SimpleInstantInteraction {
         );
 
         player.sendMessage(
-            Message.raw("Water Breathing skill unlocked! +50% oxygen duration underwater.")
+            Message.raw(
+                "Water Breathing skill unlocked! +50% oxygen duration underwater."
+            )
         );
     }
 }

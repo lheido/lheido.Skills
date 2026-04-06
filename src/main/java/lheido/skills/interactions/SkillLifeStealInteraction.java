@@ -15,9 +15,9 @@ import javax.annotation.Nonnull;
 import lheido.skills.components.LifeStealSkillComponent;
 
 /**
- * Interaction pour débloquer le skill LifeSteal (niveau A).
- * Quand l'item est utilisé :
- * - Ajoute le LifeStealSkillComponent au joueur
+ * Interaction to unlock the LifeSteal skill (level A).
+ * When the item is used:
+ * - Adds the LifeStealSkillComponent to the player
  */
 public class SkillLifeStealInteraction extends SimpleInstantInteraction {
 
@@ -51,10 +51,11 @@ public class SkillLifeStealInteraction extends SimpleInstantInteraction {
             return;
         }
 
-        // Créer le component avec les paramètres du niveau A
-        LifeStealSkillComponent component = LifeStealSkillComponent.createLevelA();
+        // Create the component with level A parameters
+        LifeStealSkillComponent component =
+            LifeStealSkillComponent.createLevelA();
 
-        // Ajouter le component au joueur
+        // Add the component to the player
         commandBuffer.addComponent(
             ref,
             LifeStealSkillComponent.getComponentType(),
@@ -62,7 +63,9 @@ public class SkillLifeStealInteraction extends SimpleInstantInteraction {
         );
 
         player.sendMessage(
-            Message.raw("Life Steal skill unlocked! You recover 5% of damage dealt as health.")
+            Message.raw(
+                "Life Steal skill unlocked! You recover 5% of damage dealt as health."
+            )
         );
     }
 }

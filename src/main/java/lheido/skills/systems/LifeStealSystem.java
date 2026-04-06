@@ -23,19 +23,19 @@ import lheido.skills.components.LifeStealSkillComponent;
 import lheido.skills.utils.SkillIds;
 
 /**
- * Système ECS qui gère le vol de vie (Life Steal / Vampirisme).
- * 
- * Ce système écoute les événements de dégâts et soigne l'attaquant
- * d'un pourcentage des dégâts infligés si celui-ci possède le skill
- * LifeSteal actif.
- * 
- * Fonctionnement:
- * - Intercepte les dégâts sur n'importe quelle entité
- * - Vérifie si la source des dégâts est un joueur avec le skill LifeSteal
- * - Soigne le joueur attaquant selon le pourcentage de son niveau de skill
- * 
- * Note: Ce système s'exécute dans le FilterDamageGroup pour intercepter
- * les dégâts avant qu'ils ne soient appliqués.
+ * ECS system that handles life steal (Life Steal / Vampirism).
+ *
+ * This system listens to damage events and heals the attacker
+ * by a percentage of the damage dealt if they have the
+ * LifeSteal skill active.
+ *
+ * How it works:
+ * - Intercepts damage on any entity
+ * - Checks if the damage source is a player with the LifeSteal skill
+ * - Heals the attacking player based on their skill level percentage
+ *
+ * Note: This system runs in the FilterDamageGroup to intercept
+ * damage before it is applied.
  */
 public class LifeStealSystem extends EntityEventSystem<EntityStore, Damage> {
 
@@ -53,7 +53,7 @@ public class LifeStealSystem extends EntityEventSystem<EntityStore, Damage> {
         @Nonnull CommandBuffer<EntityStore> commandBuffer,
         @Nonnull Damage damageEvent
     ) {
-        // Ne pas traiter les dégâts annulés
+        // Do not process cancelled damage
         if (damageEvent.isCancelled()) {
             return;
         }
@@ -63,32 +63,35 @@ public class LifeStealSystem extends EntityEventSystem<EntityStore, Damage> {
             return;
         }
 
-        // Récupérer la source des dégâts (l'attaquant)
+        // Get the damage source (the attacker)
         Damage.Source source = damageEvent.getSource();
         if (source == null) {
             return;
         }
 
-        // Récupérer la référence de l'entité source
-        // Damage.Source est une interface. Pour les dégâts infligés par une entité,
-        // la source est de type Damage.EntitySource qui expose getRef().
+        // Get the source entity reference
+        // Damage.Source is an interface. For damage dealt by an entity,
+        // the source is of type Damage.EntitySource which exposes getRef().
         if (!(source instanceof Damage.EntitySource entitySource)) {
-            // Si ce n'est pas une EntitySource (ex: dégâts d'environnement), ignorer
+            // If it's not an EntitySource (e.g. environmental damage), ignore
             return;
         }
-        
+
         Ref<EntityStore> attackerRef = entitySource.getRef();
         if (attackerRef == null) {
             return;
         }
 
-        // Vérifier si l'attaquant est un joueur
-        Player attackerPlayer = store.getComponent(attackerRef, Player.getComponentType());
+        // Check if the attacker is a player
+        Player attackerPlayer = store.getComponent(
+            attackerRef,
+            Player.getComponentType()
+        );
         if (attackerPlayer == null) {
             return;
         }
 
-        // Vérifier si l'attaquant a le skill LifeSteal
+        // Check if the attacker has the LifeSteal skill
         LifeStealSkillComponent lifeStealComponent = store.getComponent(
             attackerRef,
             LifeStealSkillComponent.getComponentType()
@@ -97,7 +100,7 @@ public class LifeStealSystem extends EntityEventSystem<EntityStore, Damage> {
             return;
         }
 
-        // Vérifier si le skill est actif
+        // Check if the skill is active
         ActiveSkillsComponent activeSkills = store.getComponent(
             attackerRef,
             ActiveSkillsComponent.getComponentType()
@@ -106,29 +109,32 @@ public class LifeStealSystem extends EntityEventSystem<EntityStore, Damage> {
             return;
         }
 
-        // Calculer le montant de soin
+        // Calculate the heal amount
         float healAmount = lifeStealComponent.calculateHealAmount(damageAmount);
         if (healAmount <= 0) {
             return;
         }
 
-        // Soigner l'attaquant
+        // Heal the attacker
         healPlayer(attackerRef, healAmount, store);
 
         LOGGER.atFine().log(
-            "LifeStealSystem: Healed player for " + healAmount + 
-            " HP (dealt " + damageAmount + " damage)"
+            "LifeStealSystem: Healed player for " +
+                healAmount +
+                " HP (dealt " +
+                damageAmount +
+                " damage)"
         );
     }
 
     /**
-     * Vérifie si le skill LifeSteal est actif pour le joueur.
+     * Checks if the LifeSteal skill is active for the player.
      */
     private boolean isSkillActiveForPlayer(ActiveSkillsComponent activeSkills) {
         if (activeSkills == null) {
             return false;
         }
-        
+
         for (String activeSkill : activeSkills.getActiveSkills()) {
             if (SkillIds.isLifeStealSkill(activeSkill)) {
                 return true;
@@ -138,40 +144,42 @@ public class LifeStealSystem extends EntityEventSystem<EntityStore, Damage> {
     }
 
     /**
-     * Soigne un joueur du montant spécifié.
-     * 
-     * Utilise addStatValue pour ajouter des points de vie.
-     * 
-     * @param playerRef Référence vers l'entité joueur
-     * @param healAmount Montant de vie à restaurer
-     * @param store Le store ECS
+     * Heals a player by the specified amount.
+     *
+     * Uses addStatValue to add health points.
+     *
+     * @param playerRef Reference to the player entity
+     * @param healAmount Amount of health to restore
+     * @param store The ECS store
      */
     private void healPlayer(
         Ref<EntityStore> playerRef,
         float healAmount,
         Store<EntityStore> store
     ) {
-        // Récupérer l'EntityStatMap du joueur
+        // Get the player's EntityStatMap
         ComponentType<EntityStore, EntityStatMap> statMapType =
             EntityStatsModule.get().getEntityStatMapComponentType();
-        
+
         EntityStatMap statMap = store.getComponent(playerRef, statMapType);
         if (statMap == null) {
-            LOGGER.atWarning().log("LifeStealSystem: EntityStatMap is null for player");
+            LOGGER.atWarning().log(
+                "LifeStealSystem: EntityStatMap is null for player"
+            );
             return;
         }
 
-        // Récupérer l'index de la stat Health
+        // Get the Health stat index
         int healthIndex = DefaultEntityStatTypes.getHealth();
 
-        // Ajouter de la vie au joueur
-        // addStatValue ajoute la valeur spécifiée à la santé actuelle
-        // sans dépasser le maximum
+        // Add health to the player
+        // addStatValue adds the specified value to the current health
+        // without exceeding the maximum
         statMap.addStatValue(healthIndex, healAmount);
     }
 
     /**
-     * Place ce système dans le FilterDamageGroup pour intercepter les dégâts.
+     * Places this system in the FilterDamageGroup to intercept damage.
      */
     @Nullable
     @Override
@@ -180,13 +188,13 @@ public class LifeStealSystem extends EntityEventSystem<EntityStore, Damage> {
     }
 
     /**
-     * Query pour toutes les entités ayant des stats (santé, etc.).
-     * 
-     * Ce système s'exécute sur TOUTES les entités qui peuvent recevoir des dégâts,
-     * puis nous vérifions si la SOURCE des dégâts (l'attaquant) a le skill LifeSteal.
-     * 
-     * En utilisant EntityStatMapComponentType, on cible toutes les entités
-     * avec un système de stats, donc toutes celles qui peuvent être endommagées.
+     * Query for all entities that have stats (health, etc.).
+     *
+     * This system runs on ALL entities that can receive damage,
+     * then we check if the SOURCE of the damage (the attacker) has the LifeSteal skill.
+     *
+     * By using EntityStatMapComponentType, we target all entities
+     * with a stats system, i.e. all those that can be damaged.
      */
     @Nonnull
     @Override

@@ -15,9 +15,9 @@ import javax.annotation.Nonnull;
 import lheido.skills.components.PoisonResistanceSkillComponent;
 
 /**
- * Interaction pour débloquer le skill PoisonResistance.
- * Quand l'item est utilisé :
- * - Ajoute le PoisonResistanceSkillComponent au joueur
+ * Interaction to unlock the PoisonResistance skill (level A).
+ * When the item is used:
+ * - Adds the PoisonResistanceSkillComponent to the player
  */
 public class SkillPoisonResistanceInteraction extends SimpleInstantInteraction {
 
@@ -51,10 +51,11 @@ public class SkillPoisonResistanceInteraction extends SimpleInstantInteraction {
             return;
         }
 
-        // Créer le component avec les paramètres du niveau A
-        PoisonResistanceSkillComponent component = PoisonResistanceSkillComponent.createLevelA();
+        // Create the component with level A parameters
+        PoisonResistanceSkillComponent component =
+            PoisonResistanceSkillComponent.createLevelA();
 
-        // Ajouter le component au joueur
+        // Add the component to the player
         commandBuffer.addComponent(
             ref,
             PoisonResistanceSkillComponent.getComponentType(),
@@ -62,7 +63,9 @@ public class SkillPoisonResistanceInteraction extends SimpleInstantInteraction {
         );
 
         player.sendMessage(
-            Message.raw("Poison Resistance skill unlocked! 25% poison damage reduction.")
+            Message.raw(
+                "Poison Resistance skill unlocked! 25% poison damage reduction."
+            )
         );
     }
 }

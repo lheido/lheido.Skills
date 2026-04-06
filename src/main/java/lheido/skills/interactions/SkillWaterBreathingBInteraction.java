@@ -15,9 +15,9 @@ import javax.annotation.Nonnull;
 import lheido.skills.components.WaterBreathingSkillComponent;
 
 /**
- * Interaction pour upgrader le skill WaterBreathing vers le niveau B.
- * Requiert que le joueur possède déjà le skill WaterBreathing niveau A.
- * Améliore le multiplicateur d'oxygène (+100% au lieu de +50%).
+ * Interaction to upgrade the WaterBreathing skill to level B.
+ * Requires the player to already have the WaterBreathing skill at level A.
+ * Improves the oxygen multiplier (+100% instead of +50%).
  */
 public class SkillWaterBreathingBInteraction extends SimpleInstantInteraction {
 
@@ -51,19 +51,24 @@ public class SkillWaterBreathingBInteraction extends SimpleInstantInteraction {
             return;
         }
 
-        // Les prérequis sont vérifiés par CheckWaterBreathingUpgradeInteraction
-        // Récupérer le component existant (garanti par le check)
-        WaterBreathingSkillComponent existingComponent = commandBuffer.getComponent(
-            ref,
-            WaterBreathingSkillComponent.getComponentType()
-        );
+        // Prerequisites are verified by CheckWaterBreathingUpgradeInteraction
+        // Get the existing component (guaranteed by the check)
+        WaterBreathingSkillComponent existingComponent =
+            commandBuffer.getComponent(
+                ref,
+                WaterBreathingSkillComponent.getComponentType()
+            );
 
-        // Upgrade vers le niveau B
-        WaterBreathingSkillComponent upgradedComponent = WaterBreathingSkillComponent.createLevelB();
+        // Upgrade to level B
+        WaterBreathingSkillComponent upgradedComponent =
+            WaterBreathingSkillComponent.createLevelB();
 
-        // Supprimer l'ancien et ajouter le nouveau
+        // Remove the old one and add the new one
         if (existingComponent != null) {
-            commandBuffer.removeComponent(ref, WaterBreathingSkillComponent.getComponentType());
+            commandBuffer.removeComponent(
+                ref,
+                WaterBreathingSkillComponent.getComponentType()
+            );
         }
 
         commandBuffer.addComponent(
@@ -73,7 +78,9 @@ public class SkillWaterBreathingBInteraction extends SimpleInstantInteraction {
         );
 
         player.sendMessage(
-            Message.raw("Water Breathing skill upgraded to level 2! +100% oxygen duration.")
+            Message.raw(
+                "Water Breathing skill upgraded to level 2! +100% oxygen duration."
+            )
         );
     }
 }

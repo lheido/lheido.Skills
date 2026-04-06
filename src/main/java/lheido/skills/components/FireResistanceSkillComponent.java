@@ -8,38 +8,44 @@ import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 /**
- * Component pour le skill FireResistance.
- * Attaché au player pour gérer la résistance au feu.
+ * Component for the FireResistance skill.
+ * Attached to the player to manage fire resistance.
  *
- * Niveaux:
- * - A (1): 25% de réduction des dégâts de feu
- * - B (2): 50% de réduction des dégâts de feu
- * - C (3): 75% de réduction des dégâts de feu
- * - X (4): Immunité totale au feu
+ * Levels:
+ * - A (1): 25% fire damage reduction
+ * - B (2): 50% fire damage reduction
+ * - C (3): 75% fire damage reduction
+ * - X (4): Total fire immunity
  */
 public class FireResistanceSkillComponent implements Component<EntityStore> {
 
     // ============================================
-    // Constantes par niveau - Multiplicateur de résistance
+    // Per-level constants - Resistance multiplier
     // ============================================
 
     public static final float LEVEL_A_RESISTANCE = 0.25f;
     public static final float LEVEL_B_RESISTANCE = 0.50f;
     public static final float LEVEL_C_RESISTANCE = 0.75f;
-    public static final float LEVEL_X_RESISTANCE = 1.0f; // 1.0 = immunité totale
+    public static final float LEVEL_X_RESISTANCE = 1.0f; // 1.0 = total immunity
 
     public static final int LEVEL_X = 4;
 
     /**
-     * ComponentType pour accéder à ce component dans l'ECS.
+     * ComponentType to access this component in the ECS.
      */
-    private static volatile ComponentType<EntityStore, FireResistanceSkillComponent> COMPONENT_TYPE;
+    private static volatile ComponentType<
+        EntityStore,
+        FireResistanceSkillComponent
+    > COMPONENT_TYPE;
 
     /**
-     * Codec pour la sérialisation/désérialisation du component.
+     * Codec for component serialization/deserialization.
      */
     public static final BuilderCodec<FireResistanceSkillComponent> CODEC =
-        BuilderCodec.builder(FireResistanceSkillComponent.class, FireResistanceSkillComponent::new)
+        BuilderCodec.builder(
+            FireResistanceSkillComponent.class,
+            FireResistanceSkillComponent::new
+        )
             .append(
                 new KeyedCodec<>("FireResistanceLevel", Codec.INTEGER),
                 (data, value) -> data.level = value,
@@ -76,7 +82,10 @@ public class FireResistanceSkillComponent implements Component<EntityStore> {
         COMPONENT_TYPE = componentType;
     }
 
-    public static ComponentType<EntityStore, FireResistanceSkillComponent> getComponentType() {
+    public static ComponentType<
+        EntityStore,
+        FireResistanceSkillComponent
+    > getComponentType() {
         return COMPONENT_TYPE;
     }
 
@@ -85,28 +94,32 @@ public class FireResistanceSkillComponent implements Component<EntityStore> {
     // ============================================
 
     public static FireResistanceSkillComponent createLevelA() {
-        FireResistanceSkillComponent component = new FireResistanceSkillComponent();
+        FireResistanceSkillComponent component =
+            new FireResistanceSkillComponent();
         component.setLevel(1);
         component.setResistanceMultiplier(LEVEL_A_RESISTANCE);
         return component;
     }
 
     public static FireResistanceSkillComponent createLevelB() {
-        FireResistanceSkillComponent component = new FireResistanceSkillComponent();
+        FireResistanceSkillComponent component =
+            new FireResistanceSkillComponent();
         component.setLevel(2);
         component.setResistanceMultiplier(LEVEL_B_RESISTANCE);
         return component;
     }
 
     public static FireResistanceSkillComponent createLevelC() {
-        FireResistanceSkillComponent component = new FireResistanceSkillComponent();
+        FireResistanceSkillComponent component =
+            new FireResistanceSkillComponent();
         component.setLevel(3);
         component.setResistanceMultiplier(LEVEL_C_RESISTANCE);
         return component;
     }
 
     public static FireResistanceSkillComponent createLevelX() {
-        FireResistanceSkillComponent component = new FireResistanceSkillComponent();
+        FireResistanceSkillComponent component =
+            new FireResistanceSkillComponent();
         component.setLevel(LEVEL_X);
         component.setResistanceMultiplier(LEVEL_X_RESISTANCE);
         return component;
@@ -129,16 +142,16 @@ public class FireResistanceSkillComponent implements Component<EntityStore> {
     // ============================================
 
     /**
-     * Vérifie si le joueur est immunisé au feu (niveau X).
+     * Checks if the player is immune to fire (level X).
      */
     public boolean isImmuneToFire() {
         return resistanceMultiplier >= 1.0f;
     }
 
     /**
-     * Calcule les dégâts de feu après réduction.
-     * @param originalDamage Les dégâts de feu originaux
-     * @return Les dégâts après application de la résistance
+     * Calculates fire damage after reduction.
+     * @param originalDamage The original fire damage
+     * @return The damage after applying resistance
      */
     public float calculateReducedFireDamage(float originalDamage) {
         if (isImmuneToFire()) {
@@ -160,7 +173,7 @@ public class FireResistanceSkillComponent implements Component<EntityStore> {
     }
 
     // ============================================
-    // Getters et Setters
+    // Getters and Setters
     // ============================================
 
     public int getLevel() {

@@ -10,16 +10,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Component pour stocker les 3 skills actifs d'un joueur.
+ * Component to store a player's 3 active skills.
  *
- * Ce component est attache au Player et persiste les IDs des skills
- * que le joueur a choisi comme actifs. Un joueur peut avoir un maximum
- * de 3 skills actifs simultanement.
+ * This component is attached to the Player and persists the IDs of the skills
+ * that the player has chosen as active. A player can have a maximum
+ * of 3 active skills simultaneously.
  */
 public class ActiveSkillsComponent implements Component<EntityStore> {
 
     // ============================================
-    // Constantes
+    // Constants
     // ============================================
 
     public static final int MAX_ACTIVE_SKILLS = 3;
@@ -34,8 +34,8 @@ public class ActiveSkillsComponent implements Component<EntityStore> {
     > COMPONENT_TYPE;
 
     /**
-     * Codec pour la serialisation/deserialisation du component.
-     * Les skills sont stockes comme une liste de strings.
+     * Codec for serialization/deserialization of the component.
+     * Skills are stored as a list of strings.
      */
     public static final BuilderCodec<ActiveSkillsComponent> CODEC =
         BuilderCodec.builder(
@@ -63,14 +63,14 @@ public class ActiveSkillsComponent implements Component<EntityStore> {
             .build();
 
     // ============================================
-    // Donnees
+    // Data
     // ============================================
 
-    /** Les 3 slots de skills actifs (peut contenir des null ou des chaines vides) */
+    /** The 3 active skill slots (may contain nulls or empty strings) */
     private final String[] activeSkills;
 
     // ============================================
-    // Constructeur
+    // Constructor
     // ============================================
 
     public ActiveSkillsComponent() {
@@ -95,28 +95,28 @@ public class ActiveSkillsComponent implements Component<EntityStore> {
     }
 
     // ============================================
-    // Getters et Setters
+    // Getters and Setters
     // ============================================
 
     /**
-     * Retourne une copie des skills actifs.
+     * Returns a copy of the active skills.
      */
     public String[] getActiveSkills() {
         return activeSkills.clone();
     }
 
     /**
-     * Definit les skills actifs.
+     * Sets the active skills.
      *
-     * @param skills Tableau de skills (sera copie, peut etre null)
+     * @param skills Array of skills (will be copied, can be null)
      */
     public void setActiveSkills(String[] skills) {
-        // Reinitialiser tous les slots
+        // Reset all slots
         for (int i = 0; i < MAX_ACTIVE_SKILLS; i++) {
             this.activeSkills[i] = null;
         }
 
-        // Copier les skills fournis
+        // Copy the provided skills
         if (skills != null) {
             for (int i = 0; i < MAX_ACTIVE_SKILLS && i < skills.length; i++) {
                 this.activeSkills[i] = skills[i];
@@ -125,10 +125,10 @@ public class ActiveSkillsComponent implements Component<EntityStore> {
     }
 
     /**
-     * Retourne le skill actif a l'index donne.
+     * Returns the active skill at the given index.
      *
-     * @param index Index du slot (0-2)
-     * @return L'ID du skill ou null si le slot est vide
+     * @param index Slot index (0-2)
+     * @return The skill ID or null if the slot is empty
      */
     public String getActiveSkill(int index) {
         if (index >= 0 && index < MAX_ACTIVE_SKILLS) {
@@ -138,10 +138,10 @@ public class ActiveSkillsComponent implements Component<EntityStore> {
     }
 
     /**
-     * Definit le skill actif a l'index donne.
+     * Sets the active skill at the given index.
      *
-     * @param index Index du slot (0-2)
-     * @param skillId ID du skill (peut etre null pour vider le slot)
+     * @param index Slot index (0-2)
+     * @param skillId Skill ID (can be null to clear the slot)
      */
     public void setActiveSkill(int index, String skillId) {
         if (index >= 0 && index < MAX_ACTIVE_SKILLS) {
@@ -150,11 +150,11 @@ public class ActiveSkillsComponent implements Component<EntityStore> {
     }
 
     /**
-     * Verifie si un skill est actuellement actif.
-     * Supporte les IDs complets ET les prefixes.
+     * Checks if a skill is currently active.
+     * Supports full IDs AND prefixes.
      *
-     * @param skillIdOrPrefix L'ID du skill ou le prefix a verifier
-     * @return true si le skill est dans un des slots actifs
+     * @param skillIdOrPrefix The skill ID or the prefix to check
+     * @return true if the skill is in one of the active slots
      */
     public boolean isSkillActive(String skillIdOrPrefix) {
         if (skillIdOrPrefix == null || skillIdOrPrefix.isEmpty()) {
@@ -164,11 +164,11 @@ public class ActiveSkillsComponent implements Component<EntityStore> {
             if (active == null || active.isEmpty()) {
                 continue;
             }
-            // Comparaison exacte (pour les prefixes stockes)
+            // Exact comparison (for stored prefixes)
             if (skillIdOrPrefix.equals(active)) {
                 return true;
             }
-            // Comparaison par prefix (pour retrocompatibilite avec anciens IDs complets)
+            // Prefix comparison (for backward compatibility with old full IDs)
             if (
                 active.startsWith(skillIdOrPrefix) ||
                 skillIdOrPrefix.startsWith(active)
@@ -180,10 +180,10 @@ public class ActiveSkillsComponent implements Component<EntityStore> {
     }
 
     /**
-     * Verifie si un skill avec le prefix donne est actif.
+     * Checks if a skill with the given prefix is active.
      *
-     * @param prefix Le prefix du skill (ex: "Skill_Flying_")
-     * @return true si un skill avec ce prefix est actif
+     * @param prefix The skill prefix (e.g. "Skill_Flying_")
+     * @return true if a skill with this prefix is active
      */
     public boolean isSkillPrefixActive(String prefix) {
         if (prefix == null || prefix.isEmpty()) {
@@ -198,7 +198,7 @@ public class ActiveSkillsComponent implements Component<EntityStore> {
     }
 
     /**
-     * Retourne la liste des skills actifs non-null.
+     * Returns the list of non-null active skills.
      */
     public List<String> getActiveSkillsList() {
         List<String> result = new ArrayList<>();
@@ -211,7 +211,7 @@ public class ActiveSkillsComponent implements Component<EntityStore> {
     }
 
     /**
-     * Retourne le nombre de slots occupes.
+     * Returns the number of occupied slots.
      */
     public int getActiveSkillCount() {
         int count = 0;
@@ -224,29 +224,29 @@ public class ActiveSkillsComponent implements Component<EntityStore> {
     }
 
     /**
-     * Verifie s'il reste des slots disponibles.
+     * Checks if there are available slots remaining.
      */
     public boolean hasAvailableSlot() {
         return getActiveSkillCount() < MAX_ACTIVE_SKILLS;
     }
 
     /**
-     * Ajoute un skill au premier slot disponible.
+     * Adds a skill to the first available slot.
      *
-     * @param skillId L'ID du skill a ajouter
-     * @return true si le skill a ete ajoute, false si tous les slots sont pleins ou le skill est deja actif
+     * @param skillId The skill ID to add
+     * @return true if the skill was added, false if all slots are full or the skill is already active
      */
     public boolean addSkill(String skillId) {
         if (skillId == null || skillId.isEmpty()) {
             return false;
         }
 
-        // Verifier si deja actif
+        // Check if already active
         if (isSkillActive(skillId)) {
             return false;
         }
 
-        // Trouver un slot vide
+        // Find an empty slot
         for (int i = 0; i < MAX_ACTIVE_SKILLS; i++) {
             if (activeSkills[i] == null || activeSkills[i].isEmpty()) {
                 activeSkills[i] = skillId;
@@ -254,14 +254,14 @@ public class ActiveSkillsComponent implements Component<EntityStore> {
             }
         }
 
-        return false; // Tous les slots sont pleins
+        return false; // All slots are full
     }
 
     /**
-     * Retire un skill des slots actifs.
+     * Removes a skill from the active slots.
      *
-     * @param skillId L'ID du skill a retirer
-     * @return true si le skill a ete retire
+     * @param skillId The skill ID to remove
+     * @return true if the skill was removed
      */
     public boolean removeSkill(String skillId) {
         if (skillId == null || skillId.isEmpty()) {

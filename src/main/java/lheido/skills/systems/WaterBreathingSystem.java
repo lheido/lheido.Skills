@@ -20,30 +20,30 @@ import lheido.skills.components.WaterBreathingSkillComponent;
 import lheido.skills.utils.SkillIds;
 
 /**
- * Système ECS qui gère la logique du skill WaterBreathing.
+ * ECS system that manages the WaterBreathing skill logic.
  *
- * Ce système ajoute un modificateur multiplicatif sur la stat Oxygen du joueur
- * en fonction du niveau du skill:
- * - Niveau A (1): +50% oxygen (multiplier 1.5x)
- * - Niveau B (2): +100% oxygen (multiplier 2.0x)
- * - Niveau C (3): +200% oxygen (multiplier 3.0x)
- * - Niveau X (4): Oxygen max très élevé (simule l'illimité)
+ * This system adds a multiplicative modifier on the player's Oxygen stat
+ * based on the skill level:
+ * - Level A (1): +50% oxygen (multiplier 1.5x)
+ * - Level B (2): +100% oxygen (multiplier 2.0x)
+ * - Level C (3): +200% oxygen (multiplier 3.0x)
+ * - Level X (4): Very high max oxygen (simulates unlimited)
  *
- * Le modificateur est appliqué une seule fois lors de l'initialisation
- * et mis à jour si le niveau change.
+ * The modifier is applied once during initialization
+ * and updated if the level changes.
  */
 public class WaterBreathingSystem extends EntityTickingSystem<EntityStore> {
 
     public static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
     /**
-     * Identifiant unique du modifier pour ce skill.
-     * Permet de le retrouver et le mettre à jour/supprimer.
+     * Unique identifier for this skill's modifier.
+     * Allows finding and updating/removing it.
      */
     private static final String MODIFIER_ID = "lheido_water_breathing";
 
     /**
-     * Valeur multiplicative très haute pour simuler l'oxygène illimité (niveau X).
+     * Very high multiplicative value to simulate unlimited oxygen (level X).
      */
     private static final float UNLIMITED_MULTIPLIER = 1000.0f;
 
@@ -83,7 +83,7 @@ public class WaterBreathingSystem extends EntityTickingSystem<EntityStore> {
             return;
         }
 
-        // Récupérer le ComponentType pour EntityStatMap depuis le module
+        // Get the ComponentType for EntityStatMap from the module
         ComponentType<EntityStore, EntityStatMap> statMapType =
             EntityStatsModule.get().getEntityStatMapComponentType();
 
@@ -98,7 +98,7 @@ public class WaterBreathingSystem extends EntityTickingSystem<EntityStore> {
             return;
         }
 
-        // Récupérer l'index de la stat Oxygen
+        // Get the Oxygen stat index
         int oxygenStatIndex = DefaultEntityStatTypes.getOxygen();
         if (oxygenStatIndex < 0) {
             LOGGER.atWarning().log(
@@ -107,7 +107,7 @@ public class WaterBreathingSystem extends EntityTickingSystem<EntityStore> {
             return;
         }
 
-        // Vérifier si le skill est actif dans ActiveSkillsComponent
+        // Check if the skill is active in ActiveSkillsComponent
         ActiveSkillsComponent activeSkills = commandBuffer.getComponent(
             entityRef,
             ActiveSkillsComponent.getComponentType()
@@ -115,32 +115,32 @@ public class WaterBreathingSystem extends EntityTickingSystem<EntityStore> {
         boolean isSkillActive = isSkillActiveForPlayer(activeSkills);
 
         if (!isSkillActive) {
-            // Skill non actif: supprimer le modifier
+            // Skill not active: remove the modifier
             removeOxygenModifier(statMap, oxygenStatIndex);
             return;
         }
 
-        // Calculer le multiplicateur effectif
+        // Calculate the effective multiplier
         float effectiveMultiplier = waterBreathingComponent.isUnlimitedOxygen()
             ? UNLIMITED_MULTIPLIER
             : waterBreathingComponent.getOxygenMultiplier();
 
-        // Vérifier si le modifier existe déjà et s'il a la bonne valeur
-        // On utilise putModifier qui remplace le modifier existant s'il existe
+        // Check if the modifier already exists and has the correct value
+        // We use putModifier which replaces the existing modifier if it exists
         applyOxygenModifier(statMap, oxygenStatIndex, effectiveMultiplier);
     }
 
     /**
-     * Vérifie si le skill WaterBreathing est actif pour le joueur.
-     * 
-     * Un skill est considéré actif si un des skills actifs est un skill
-     * WaterBreathing (commence par "Skill_WaterBreathing_")
+     * Checks if the WaterBreathing skill is active for the player.
+     *
+     * A skill is considered active if one of the active skills is a
+     * WaterBreathing skill (starts with "Skill_WaterBreathing_")
      */
     private boolean isSkillActiveForPlayer(ActiveSkillsComponent activeSkills) {
         if (activeSkills == null) {
             return false;
         }
-        
+
         for (String activeSkill : activeSkills.getActiveSkills()) {
             if (SkillIds.isWaterBreathingSkill(activeSkill)) {
                 return true;
@@ -150,10 +150,13 @@ public class WaterBreathingSystem extends EntityTickingSystem<EntityStore> {
     }
 
     /**
-     * Supprime le modificateur d'oxygène du joueur.
-     * Appelé quand le skill n'est pas actif.
+     * Removes the oxygen modifier from the player.
+     * Called when the skill is not active.
      */
-    private void removeOxygenModifier(EntityStatMap statMap, int oxygenStatIndex) {
+    private void removeOxygenModifier(
+        EntityStatMap statMap,
+        int oxygenStatIndex
+    ) {
         statMap.removeModifier(
             EntityStatMap.Predictable.NONE,
             oxygenStatIndex,
@@ -162,32 +165,32 @@ public class WaterBreathingSystem extends EntityTickingSystem<EntityStore> {
     }
 
     /**
-     * Applique ou met à jour le modificateur d'oxygène sur le joueur.
+     * Applies or updates the oxygen modifier on the player.
      *
-     * @param statMap L'EntityStatMap du joueur
-     * @param oxygenStatIndex L'index de la stat Oxygen
-     * @param multiplier Le multiplicateur à appliquer
+     * @param statMap The player's EntityStatMap
+     * @param oxygenStatIndex The Oxygen stat index
+     * @param multiplier The multiplier to apply
      */
     private void applyOxygenModifier(
         EntityStatMap statMap,
         int oxygenStatIndex,
         float multiplier
     ) {
-        // Créer un modifier multiplicatif sur l'oxygène max
-        // StaticModifier avec CalculationType.MULTIPLICATIVE multiplie la valeur max
+        // Create a multiplicative modifier on max oxygen
+        // StaticModifier with CalculationType.MULTIPLICATIVE multiplies the max value
         StaticModifier oxygenModifier = new StaticModifier(
             Modifier.ModifierTarget.MAX,
             StaticModifier.CalculationType.MULTIPLICATIVE,
             multiplier
         );
 
-        // putModifier remplace automatiquement si un modifier avec le même ID existe
+        // putModifier automatically replaces if a modifier with the same ID exists
         statMap.putModifier(
             EntityStatMap.Predictable.NONE,
             oxygenStatIndex,
             MODIFIER_ID,
             oxygenModifier
         );
-        // Si previousModifier != null, le modifier existait déjà et a été remplacé
+        // If previousModifier != null, the modifier already existed and was replaced
     }
 }

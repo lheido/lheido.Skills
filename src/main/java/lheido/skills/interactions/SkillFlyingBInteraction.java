@@ -16,9 +16,9 @@ import javax.annotation.Nonnull;
 import lheido.skills.components.FlyingSkillComponent;
 
 /**
- * Interaction pour upgrader le skill Flying vers le niveau B.
- * Requiert que le joueur possède déjà le skill Flying niveau A.
- * Améliore la durée de vol (15s au lieu de 10s) et réduit le cooldown (18s au lieu de 20s).
+ * Interaction to upgrade the Flying skill to level B.
+ * Requires that the player already has the Flying skill at level A.
+ * Improves flight duration (15s instead of 10s) and reduces cooldown (18s instead of 20s).
  */
 public class SkillFlyingBInteraction extends SimpleInstantInteraction {
 
@@ -58,20 +58,24 @@ public class SkillFlyingBInteraction extends SimpleInstantInteraction {
             return;
         }
 
-        // Les prérequis sont vérifiés par CheckFlyingUpgradeInteraction
-        // Récupérer le component existant (garanti par le check)
+        // Prerequisites are verified by CheckFlyingUpgradeInteraction
+        // Get the existing component (guaranteed by the check)
         FlyingSkillComponent existingComponent = commandBuffer.getComponent(
             ref,
             FlyingSkillComponent.getComponentType()
         );
 
-        // Upgrade vers le niveau B
-        FlyingSkillComponent upgradedComponent = FlyingSkillComponent.createLevelB();
-        
-        // Supprimer l'ancien component s'il existe
-        // Note: On ne conserve pas l'état car l'upgrade donne de nouveaux paramètres
+        // Upgrade to level B
+        FlyingSkillComponent upgradedComponent =
+            FlyingSkillComponent.createLevelB();
+
+        // Remove the old component if it exists
+        // Note: We don't preserve state because the upgrade provides new parameters
         if (existingComponent != null) {
-            commandBuffer.removeComponent(ref, FlyingSkillComponent.getComponentType());
+            commandBuffer.removeComponent(
+                ref,
+                FlyingSkillComponent.getComponentType()
+            );
         }
 
         commandBuffer.addComponent(
@@ -81,7 +85,9 @@ public class SkillFlyingBInteraction extends SimpleInstantInteraction {
         );
 
         player.sendMessage(
-            Message.raw("Flying skill upgraded to level 2! Fly duration: 15s, Cooldown: 18s")
+            Message.raw(
+                "Flying skill upgraded to level 2! Fly duration: 15s, Cooldown: 18s"
+            )
         );
     }
 }

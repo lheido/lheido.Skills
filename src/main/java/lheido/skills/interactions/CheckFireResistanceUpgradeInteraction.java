@@ -17,15 +17,15 @@ import javax.annotation.Nonnull;
 import lheido.skills.components.FireResistanceSkillComponent;
 
 /**
- * Interaction pour vérifier les prérequis d'upgrade du skill FireResistance.
- * Paramétrable via JSON avec RequiredLevel et TargetLevel.
+ * Interaction to check the upgrade prerequisites for the FireResistance skill.
+ * Configurable via JSON with RequiredLevel and TargetLevel.
  *
- * - RequiredLevel: Le niveau minimum requis (0 = aucun prérequis, pour FireResistance A)
- * - TargetLevel: Le niveau vers lequel on upgrade
+ * - RequiredLevel: The minimum required level (0 = no prerequisite, for FireResistance A)
+ * - TargetLevel: The level to upgrade to
  *
- * Échoue si:
- * - Le joueur n'a pas le niveau requis
- * - Le joueur a déjà le niveau cible ou supérieur
+ * Fails if:
+ * - The player does not have the required level
+ * - The player already has the target level or higher
  */
 public class CheckFireResistanceUpgradeInteraction
     extends SimpleInstantInteraction
@@ -78,7 +78,7 @@ public class CheckFireResistanceUpgradeInteraction
             return;
         }
 
-        // Récupérer le component FireResistance existant (peut être null)
+        // Get the existing FireResistance component (may be null)
         FireResistanceSkillComponent existingComponent =
             commandBuffer.getComponent(
                 ref,
@@ -88,7 +88,7 @@ public class CheckFireResistanceUpgradeInteraction
         int currentLevel =
             existingComponent != null ? existingComponent.getLevel() : 0;
 
-        // Vérifier si le joueur a le niveau requis
+        // Check if the player has the required level
         if (currentLevel < requiredLevel) {
             String message =
                 requiredLevel == 0
@@ -101,7 +101,7 @@ public class CheckFireResistanceUpgradeInteraction
             return;
         }
 
-        // Vérifier si le joueur a déjà le niveau cible ou supérieur
+        // Check if the player already has the target level or higher
         if (currentLevel >= targetLevel) {
             String message =
                 targetLevel == 4
@@ -114,6 +114,6 @@ public class CheckFireResistanceUpgradeInteraction
             return;
         }
 
-        // Prérequis validés, l'interaction suivante peut s'exécuter
+        // Prerequisites validated, the next interaction can execute
     }
 }

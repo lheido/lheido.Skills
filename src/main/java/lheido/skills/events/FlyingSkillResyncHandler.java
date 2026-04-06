@@ -15,28 +15,28 @@ import lheido.skills.utils.MovementUtils;
 import lheido.skills.utils.SkillIds;
 
 /**
- * Handler d'evenement pour resynchroniser l'etat du skill Flying
- * apres certains evenements du jeu (connexion, etc.).
+ * Event handler to resynchronize the Flying skill state
+ * after certain game events (connection, etc.).
  *
- * Le probleme: Quand un joueur dort et se reveille, le jeu reinitialise
- * les MovementSettings (canFly = false). Notre FlyingSystem detecte cela
- * a chaque tick, mais il peut y avoir un delai.
+ * The problem: When a player sleeps and wakes up, the game resets
+ * the MovementSettings (canFly = false). Our FlyingSystem detects this
+ * every tick, but there can be a delay.
  *
- * La solution: Ecouter l'evenement PlayerReadyEvent qui est declenche
- * quand un joueur est pret pour le gameplay. On force alors
- * immediatement la resynchronisation de canFly.
+ * The solution: Listen to the PlayerReadyEvent which is triggered
+ * when a player is ready for gameplay. We then immediately force
+ * the resynchronization of canFly.
  *
- * Note: Cet event handler est complementaire a la verification dans
- * FlyingSystem.syncCanFlyState() qui detecte les desync a chaque tick.
+ * Note: This event handler is complementary to the check in
+ * FlyingSystem.syncCanFlyState() which detects desyncs every tick.
  */
 public class FlyingSkillResyncHandler {
 
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
     /**
-     * Handler appele quand un joueur est pret pour le gameplay.
+     * Handler called when a player is ready for gameplay.
      *
-     * @param event L'evenement PlayerReadyEvent
+     * @param event The PlayerReadyEvent
      */
     public static void onPlayerReady(PlayerReadyEvent event) {
         Player player = event.getPlayer();
@@ -49,7 +49,7 @@ public class FlyingSkillResyncHandler {
             return;
         }
 
-        // Recuperer le World pour acceder au Store
+        // Retrieve the World to access the Store
         World world = player.getWorld();
         if (world == null) {
             return;
@@ -65,7 +65,7 @@ public class FlyingSkillResyncHandler {
             return;
         }
 
-        // Verifier si le joueur a le FlyingSkillComponent
+        // Check if the player has the FlyingSkillComponent
         FlyingSkillComponent flyingComponent = store.getComponent(
             entityRef,
             FlyingSkillComponent.getComponentType()
@@ -74,7 +74,7 @@ public class FlyingSkillResyncHandler {
             return;
         }
 
-        // Verifier si le skill Flying est actif
+        // Check if the Flying skill is active
         ActiveSkillsComponent activeSkills = store.getComponent(
             entityRef,
             ActiveSkillsComponent.getComponentType()
@@ -84,7 +84,7 @@ public class FlyingSkillResyncHandler {
             return;
         }
 
-        // Recuperer le PlayerRef pour le PacketHandler
+        // Retrieve the PlayerRef for the PacketHandler
         PlayerRef playerRef = store.getComponent(
             entityRef,
             PlayerRef.getComponentType()
@@ -93,7 +93,7 @@ public class FlyingSkillResyncHandler {
             return;
         }
 
-        // Recuperer le MovementManager pour mettre a jour canFly
+        // Retrieve the MovementManager to update canFly
         MovementManager movementManager = store.getComponent(
             entityRef,
             MovementManager.getComponentType()
@@ -102,9 +102,9 @@ public class FlyingSkillResyncHandler {
             return;
         }
 
-        // Forcer la resynchronisation de canFly
-        // On utilise forceSetCanFly car le client peut avoir été réinitialisé
-        // même si le serveur a déjà la bonne valeur
+        // Force the resynchronization of canFly
+        // We use forceSetCanFly because the client may have been reset
+        // even if the server already has the correct value
         boolean shouldCanFly = flyingComponent.shouldCanFly();
         MovementUtils.forceSetCanFly(
             movementManager,
@@ -120,7 +120,7 @@ public class FlyingSkillResyncHandler {
     }
 
     /**
-     * Verifie si le skill Flying est actif pour le joueur.
+     * Checks if the Flying skill is active for the player.
      */
     private static boolean isSkillActiveForPlayer(
         ActiveSkillsComponent activeSkills

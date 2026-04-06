@@ -1,21 +1,21 @@
 package lheido.skills.components;
 
 /**
- * États possibles du skill Flying.
+ * Possible states of the Flying skill.
  */
 public enum FlyingState {
     /**
-     * Le joueur peut voler (double-espace disponible).
+     * The player can fly (double-space available).
      */
     READY,
 
     /**
-     * Le joueur est en train de voler (timer actif).
+     * The player is currently flying (timer active).
      */
     FLYING,
 
     /**
-     * Le skill est en cooldown (vol désactivé temporairement).
+     * The skill is on cooldown (flight temporarily disabled).
      */
-    COOLDOWN
+    COOLDOWN,
 }

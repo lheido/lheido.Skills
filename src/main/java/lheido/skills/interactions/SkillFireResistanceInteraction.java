@@ -15,9 +15,9 @@ import javax.annotation.Nonnull;
 import lheido.skills.components.FireResistanceSkillComponent;
 
 /**
- * Interaction pour débloquer le skill FireResistance.
- * Quand l'item est utilisé :
- * - Ajoute le FireResistanceSkillComponent au joueur
+ * Interaction to unlock the FireResistance skill.
+ * When the item is used:
+ * - Adds the FireResistanceSkillComponent to the player
  */
 public class SkillFireResistanceInteraction extends SimpleInstantInteraction {
 
@@ -51,10 +51,11 @@ public class SkillFireResistanceInteraction extends SimpleInstantInteraction {
             return;
         }
 
-        // Créer le component avec les paramètres du niveau A
-        FireResistanceSkillComponent component = FireResistanceSkillComponent.createLevelA();
+        // Create the component with level A parameters
+        FireResistanceSkillComponent component =
+            FireResistanceSkillComponent.createLevelA();
 
-        // Ajouter le component au joueur
+        // Add the component to the player
         commandBuffer.addComponent(
             ref,
             FireResistanceSkillComponent.getComponentType(),
@@ -62,7 +63,9 @@ public class SkillFireResistanceInteraction extends SimpleInstantInteraction {
         );
 
         player.sendMessage(
-            Message.raw("Fire Resistance skill unlocked! 25% fire damage reduction.")
+            Message.raw(
+                "Fire Resistance skill unlocked! 25% fire damage reduction."
+            )
         );
     }
 }

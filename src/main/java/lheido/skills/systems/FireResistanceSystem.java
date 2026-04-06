@@ -20,19 +20,21 @@ import lheido.skills.components.FireResistanceSkillComponent;
 import lheido.skills.utils.SkillIds;
 
 /**
- * Système ECS qui gère la résistance au feu.
- * 
- * Ce système intercepte les événements de dégâts (Damage) et :
- * - Réduit les dégâts de feu selon le niveau du skill (niveaux A-C)
- * - Annule complètement les dégâts de feu pour le niveau X (immunité)
- * 
- * Le système s'exécute dans le FilterDamageGroup pour intercepter les dégâts
- * avant qu'ils ne soient appliqués à la santé.
- * 
- * Types de dégâts considérés comme feu :
- * - DamageCause dont l'ID contient "fire", "burn", "flame", ou "lava"
+ * ECS system that handles fire resistance.
+ *
+ * This system intercepts damage events (Damage) and:
+ * - Reduces fire damage based on the skill level (levels A-C)
+ * - Completely cancels fire damage for level X (immunity)
+ *
+ * The system runs in the FilterDamageGroup to intercept damage
+ * before it is applied to health.
+ *
+ * Damage types considered as fire:
+ * - DamageCause whose ID contains "fire", "burn", "flame", or "lava"
  */
-public class FireResistanceSystem extends EntityEventSystem<EntityStore, Damage> {
+public class FireResistanceSystem
+    extends EntityEventSystem<EntityStore, Damage>
+{
 
     public static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
@@ -50,7 +52,7 @@ public class FireResistanceSystem extends EntityEventSystem<EntityStore, Damage>
     ) {
         Ref<EntityStore> entityRef = archetypeChunk.getReferenceTo(index);
 
-        // Vérifier si l'entité a le skill de résistance au feu
+        // Check if the entity has the fire resistance skill
         FireResistanceSkillComponent resistanceComponent = store.getComponent(
             entityRef,
             FireResistanceSkillComponent.getComponentType()
@@ -59,7 +61,7 @@ public class FireResistanceSystem extends EntityEventSystem<EntityStore, Damage>
             return;
         }
 
-        // Vérifier si le skill est actif
+        // Check if the skill is active
         ActiveSkillsComponent activeSkills = store.getComponent(
             entityRef,
             ActiveSkillsComponent.getComponentType()
@@ -68,47 +70,53 @@ public class FireResistanceSystem extends EntityEventSystem<EntityStore, Damage>
             return;
         }
 
-        // Vérifier si c'est un dégât de feu
+        // Check if this is fire damage
         DamageCause cause = damageEvent.getCause();
         if (!isFireDamage(cause)) {
             return;
         }
 
-        // Appliquer la résistance
+        // Apply resistance
         if (resistanceComponent.isImmuneToFire()) {
-            // Niveau X : Immunité totale - annuler les dégâts
+            // Level X: Total immunity - cancel damage
             damageEvent.setCancelled(true);
-            
-            // Log pour debug (optionnel)
-            Player player = store.getComponent(entityRef, Player.getComponentType());
+
+            // Log for debug (optional)
+            Player player = store.getComponent(
+                entityRef,
+                Player.getComponentType()
+            );
             if (player != null) {
                 LOGGER.atFine().log(
                     "FireResistanceSystem: Fire damage cancelled for player (immunity)"
                 );
             }
         } else {
-            // Niveaux A-C : Réduire les dégâts
+            // Levels A-C: Reduce damage
             float originalAmount = damageEvent.getAmount();
-            float reducedAmount = resistanceComponent.calculateReducedFireDamage(originalAmount);
-            
-            // Utiliser setAmount si disponible, sinon annuler si dégâts <= 0
+            float reducedAmount =
+                resistanceComponent.calculateReducedFireDamage(originalAmount);
+
+            // Use setAmount if available, otherwise cancel if damage <= 0
             if (reducedAmount <= 0) {
                 damageEvent.setCancelled(true);
             } else {
-                // Tenter de modifier le montant des dégâts
-                // Note: Si setAmount n'existe pas, on ne peut que cancel
+                // Attempt to modify the damage amount
+                // Note: If setAmount doesn't exist, we can only cancel
                 try {
                     damageEvent.setAmount(reducedAmount);
-                    
+
                     LOGGER.atFine().log(
-                        "FireResistanceSystem: Fire damage reduced from " + 
-                        originalAmount + " to " + reducedAmount
+                        "FireResistanceSystem: Fire damage reduced from " +
+                            originalAmount +
+                            " to " +
+                            reducedAmount
                     );
                 } catch (Exception e) {
-                    // Si setAmount n'est pas disponible, on log l'erreur
+                    // If setAmount is not available, log the error
                     LOGGER.atWarning().log(
-                        "FireResistanceSystem: Could not set damage amount - " + 
-                        e.getMessage()
+                        "FireResistanceSystem: Could not set damage amount - " +
+                            e.getMessage()
                     );
                 }
             }
@@ -116,13 +124,13 @@ public class FireResistanceSystem extends EntityEventSystem<EntityStore, Damage>
     }
 
     /**
-     * Vérifie si le skill FireResistance est actif pour le joueur.
+     * Checks if the FireResistance skill is active for the player.
      */
     private boolean isSkillActiveForPlayer(ActiveSkillsComponent activeSkills) {
         if (activeSkills == null) {
             return false;
         }
-        
+
         for (String activeSkill : activeSkills.getActiveSkills()) {
             if (SkillIds.isFireResistanceSkill(activeSkill)) {
                 return true;
@@ -132,35 +140,37 @@ public class FireResistanceSystem extends EntityEventSystem<EntityStore, Damage>
     }
 
     /**
-     * Vérifie si la cause de dégât est du feu.
-     * 
-     * Les types considérés comme feu :
-     * - Toute DamageCause dont l'ID contient "fire", "burn", "flame", ou "lava"
-     * 
-     * Note: Cette liste peut être étendue selon les besoins du jeu.
-     * DamageCause est un asset, donc on utilise getId() pour récupérer l'identifiant.
+     * Checks if the damage cause is fire.
+     *
+     * Types considered as fire:
+     * - Any DamageCause whose ID contains "fire", "burn", "flame", or "lava"
+     *
+     * Note: This list can be extended based on the game's needs.
+     * DamageCause is an asset, so we use getId() to retrieve the identifier.
      */
     private boolean isFireDamage(DamageCause cause) {
         if (cause == null) {
             return false;
         }
-        
+
         String causeId = cause.getId();
         if (causeId == null) {
             return false;
         }
-        
-        // Vérifier les différentes causes possibles de feu
+
+        // Check the different possible fire causes
         String lowerCauseId = causeId.toLowerCase();
-        return lowerCauseId.contains("fire") || 
-               lowerCauseId.contains("burn") ||
-               lowerCauseId.contains("flame") ||
-               lowerCauseId.contains("lava");
+        return (
+            lowerCauseId.contains("fire") ||
+            lowerCauseId.contains("burn") ||
+            lowerCauseId.contains("flame") ||
+            lowerCauseId.contains("lava")
+        );
     }
 
     /**
-     * Place ce système dans le FilterDamageGroup pour intercepter les dégâts
-     * avant qu'ils ne soient appliqués à la santé.
+     * Places this system in the FilterDamageGroup to intercept damage
+     * before it is applied to health.
      */
     @Nullable
     @Override
@@ -169,7 +179,7 @@ public class FireResistanceSystem extends EntityEventSystem<EntityStore, Damage>
     }
 
     /**
-     * Query pour les entités qui ont le component FireResistanceSkillComponent.
+     * Query for entities that have the FireResistanceSkillComponent.
      */
     @Nonnull
     @Override

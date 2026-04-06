@@ -10,7 +10,6 @@ import com.hypixel.hytale.component.system.tick.EntityTickingSystem;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.protocol.MovementSettings;
 import com.hypixel.hytale.server.core.entity.entities.Player;
-
 import com.hypixel.hytale.server.core.entity.entities.player.movement.MovementManager;
 import com.hypixel.hytale.server.core.entity.movement.MovementStatesComponent;
 import com.hypixel.hytale.server.core.io.PacketHandler;
@@ -22,22 +21,22 @@ import lheido.skills.utils.MovementUtils;
 import lheido.skills.utils.SkillIds;
 
 /**
- * Système ECS qui gère la logique du skill Flying via une state machine.
+ * ECS system that manages the Flying skill logic via a state machine.
  *
- * États:
- * - READY: Le joueur peut voler (double-espace disponible)
- * - FLYING: Timer de vol actif (décrémenté chaque tick, joueur peut voler/atterrir)
- * - COOLDOWN: Le skill est en cooldown (timer décrémenté chaque tick)
+ * States:
+ * - READY: The player can fly (double-space available)
+ * - FLYING: Flight timer active (decremented each tick, player can fly/land)
+ * - COOLDOWN: The skill is on cooldown (timer decremented each tick)
  *
  * Transitions:
- * - READY → FLYING: Joueur fait double-espace (timer démarre)
- * - FLYING → COOLDOWN: Timer de vol expiré (= 0)
- * - COOLDOWN → READY: Cooldown expiré
+ * - READY → FLYING: Player double-presses space (timer starts)
+ * - FLYING → COOLDOWN: Flight timer expired (= 0)
+ * - COOLDOWN → READY: Cooldown expired
  *
- * Le joueur peut atterrir et revoler librement tant que le timer de vol n'est pas à 0.
+ * The player can land and fly again freely as long as the flight timer has not reached 0.
  *
- * Ce système vérifie aussi périodiquement que canFly est synchronisé
- * avec l'état du skill (protection contre les désync après sommeil, etc.)
+ * This system also periodically checks that canFly is synchronized
+ * with the skill state (protection against desync after sleeping, etc.)
  */
 public class FlyingSystem extends EntityTickingSystem<EntityStore> {
 
@@ -103,7 +102,7 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
             return;
         }
 
-        // Vérifier si le skill est actif dans ActiveSkillsComponent
+        // Check if the skill is active in ActiveSkillsComponent
         ActiveSkillsComponent activeSkills = commandBuffer.getComponent(
             entityRef,
             ActiveSkillsComponent.getComponentType()
@@ -114,7 +113,7 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
         );
 
         if (!isSkillActive) {
-            // Skill non actif: désactiver les effets et cacher le HUD
+            // Skill not active: disable effects and hide the HUD
             handleInactiveSkill(
                 flyingComponent,
                 movementManager,
@@ -126,13 +125,13 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
             return;
         }
 
-        // Décrémenter le timer approprié à chaque tick
+        // Decrement the appropriate timer each tick
         flyingComponent.decrementTimer(deltaTime);
 
-        // Vérification périodique de la synchronisation canFly
-        // Protection contre les désync (sommeil, téléportation, etc.)
-        // On utilise un resync forcé périodique pour garantir que le client
-        // a toujours la bonne valeur même après des événements de désync
+        // Periodic canFly synchronization check
+        // Protection against desync (sleeping, teleportation, etc.)
+        // We use a periodic forced resync to ensure the client
+        // always has the correct value even after desync events
         boolean forceResync = flyingComponent.accumulateResyncTime(deltaTime);
         syncCanFlyState(
             flyingComponent,
@@ -141,7 +140,7 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
             forceResync
         );
 
-        // Traiter l'état actuel
+        // Process the current state
         switch (flyingComponent.getState()) {
             case READY -> handleReadyState(
                 flyingComponent,
@@ -166,11 +165,11 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
     }
 
     /**
-     * Vérifie si le skill Flying est actif pour le joueur.
+     * Checks if the Flying skill is active for the player.
      *
-     * Un skill est considéré actif si:
-     * - Le joueur a un ActiveSkillsComponent
-     * - Un des skills actifs est un skill Flying (commence par "Skill_Flying_")
+     * A skill is considered active if:
+     * - The player has an ActiveSkillsComponent
+     * - One of the active skills is a Flying skill (starts with "Skill_Flying_")
      */
     private boolean isSkillActiveForPlayer(
         ActiveSkillsComponent activeSkills,
@@ -180,7 +179,7 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
             return false;
         }
 
-        // Vérifier si un skill Flying est dans les slots actifs
+        // Check if a Flying skill is in the active slots
         for (String activeSkill : activeSkills.getActiveSkills()) {
             if (SkillIds.isFlyingSkill(activeSkill)) {
                 return true;
@@ -190,12 +189,12 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
     }
 
     /**
-     * Gère le cas où le skill n'est pas actif.
+     * Handles the case where the skill is not active.
      *
-     * - Désactive le vol si le joueur volait
-     * - Réinitialise l'état du skill
-     * 
-     * Note: L'affichage HUD est géré par SkillBarSystem.
+     * - Disables flight if the player was flying
+     * - Resets the skill state
+     *
+     * Note: HUD display is managed by SkillBarSystem.
      */
     private void handleInactiveSkill(
         FlyingSkillComponent component,
@@ -205,7 +204,7 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
         Player player,
         PlayerRef playerRef
     ) {
-        // Forcer l'arrêt du vol si le joueur est en l'air
+        // Force stop flying if the player is in the air
         boolean isActuallyFlying = MovementUtils.isCurrentlyFlying(
             statesComponent
         );
@@ -213,25 +212,25 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
             MovementUtils.forceStopFlying(statesComponent, packetHandler);
         }
 
-        // Désactiver canFly
+        // Disable canFly
         MovementSettings settings = movementManager.getSettings();
         if (settings != null && settings.canFly) {
             MovementUtils.setCanFly(movementManager, packetHandler, false);
         }
 
-        // Réinitialiser l'état du skill pour être prêt si réactivé
+        // Reset the skill state to be ready if reactivated
         component.transitionToReady();
     }
 
     /**
-     * Vérifie et corrige la synchronisation de canFly avec l'état du skill.
-     * Appelé à chaque tick pour détecter les désynchronisations.
+     * Checks and corrects the canFly synchronization with the skill state.
+     * Called each tick to detect desynchronizations.
      *
-     * @param component        Le FlyingSkillComponent du joueur
-     * @param movementManager  Le MovementManager du joueur
-     * @param packetHandler    Le PacketHandler pour envoyer les packets
-     * @param forceResync      Si true, force l'envoi du packet même si la valeur
-     *                         serveur est déjà correcte (utile après réveil du lit, etc.)
+     * @param component        The player's FlyingSkillComponent
+     * @param movementManager  The player's MovementManager
+     * @param packetHandler    The PacketHandler to send packets
+     * @param forceResync      If true, forces sending the packet even if the server
+     *                         value is already correct (useful after waking from bed, etc.)
      */
     private void syncCanFlyState(
         FlyingSkillComponent component,
@@ -247,14 +246,14 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
         boolean shouldCanFly = component.shouldCanFly();
 
         if (forceResync) {
-            // Forcer l'envoi du packet pour resync le client
+            // Force send the packet to resync the client
             MovementUtils.forceSetCanFly(
                 movementManager,
                 packetHandler,
                 shouldCanFly
             );
         } else if (settings.canFly != shouldCanFly) {
-            // Correction normale si désync détectée côté serveur
+            // Normal correction if desync detected on server side
             MovementUtils.setCanFly(
                 movementManager,
                 packetHandler,
@@ -264,10 +263,10 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
     }
 
     /**
-     * État READY: Le joueur peut voler.
-     * Transition vers FLYING si le joueur fait double-espace.
-     * 
-     * Note: L'affichage HUD est géré par SkillBarSystem.
+     * READY state: The player can fly.
+     * Transitions to FLYING if the player double-presses space.
+     *
+     * Note: HUD display is managed by SkillBarSystem.
      */
     private void handleReadyState(
         FlyingSkillComponent component,
@@ -275,7 +274,7 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
         Player player,
         PlayerRef playerRef
     ) {
-        // Vérifier si le joueur commence à voler (double-espace)
+        // Check if the player starts flying (double-space)
         boolean isPlayerFlying = MovementUtils.isCurrentlyFlying(
             statesComponent
         );
@@ -285,11 +284,11 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
     }
 
     /**
-     * État FLYING: Le timer de vol est actif.
-     * Le joueur peut voler/atterrir librement.
-     * Transition vers COOLDOWN uniquement quand le timer expire.
-     * 
-     * Note: L'affichage HUD est géré par SkillBarSystem.
+     * FLYING state: The flight timer is active.
+     * The player can fly/land freely.
+     * Transitions to COOLDOWN only when the timer expires.
+     *
+     * Note: HUD display is managed by SkillBarSystem.
      */
     private void handleFlyingState(
         FlyingSkillComponent component,
@@ -299,11 +298,11 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
         Player player,
         PlayerRef playerRef
     ) {
-        // Timer de vol expiré → cooldown
+        // Flight timer expired → cooldown
         if (component.isFlyTimeExpired()) {
             component.transitionToCooldown();
 
-            // Forcer l'arrêt du vol si le joueur est en l'air
+            // Force stop flying if the player is in the air
             boolean isActuallyFlying = MovementUtils.isCurrentlyFlying(
                 statesComponent
             );
@@ -314,10 +313,10 @@ public class FlyingSystem extends EntityTickingSystem<EntityStore> {
     }
 
     /**
-     * État COOLDOWN: Le skill est en cooldown.
-     * Transition vers READY quand le cooldown expire.
-     * 
-     * Note: L'affichage HUD est géré par SkillBarSystem.
+     * COOLDOWN state: The skill is on cooldown.
+     * Transitions to READY when the cooldown expires.
+     *
+     * Note: HUD display is managed by SkillBarSystem.
      */
     private void handleCooldownState(
         FlyingSkillComponent component,

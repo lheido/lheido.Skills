@@ -15,11 +15,13 @@ import javax.annotation.Nonnull;
 import lheido.skills.components.PoisonResistanceSkillComponent;
 
 /**
- * Interaction pour upgrader le skill PoisonResistance vers le niveau C.
- * Requiert que le joueur possède déjà le skill PoisonResistance niveau B.
- * Améliore la résistance au poison (75% au lieu de 50%).
+ * Interaction to upgrade the PoisonResistance skill to level C.
+ * Requires the player to already have the PoisonResistance skill at level B.
+ * Improves poison resistance (75% instead of 50%).
  */
-public class SkillPoisonResistanceCInteraction extends SimpleInstantInteraction {
+public class SkillPoisonResistanceCInteraction
+    extends SimpleInstantInteraction
+{
 
     public static final BuilderCodec<SkillPoisonResistanceCInteraction> CODEC =
         BuilderCodec.builder(
@@ -51,19 +53,24 @@ public class SkillPoisonResistanceCInteraction extends SimpleInstantInteraction 
             return;
         }
 
-        // Les prérequis sont vérifiés par CheckPoisonResistanceUpgradeInteraction
-        // Récupérer le component existant (garanti par le check)
-        PoisonResistanceSkillComponent existingComponent = commandBuffer.getComponent(
-            ref,
-            PoisonResistanceSkillComponent.getComponentType()
-        );
+        // Prerequisites are verified by CheckPoisonResistanceUpgradeInteraction
+        // Get the existing component (guaranteed by the check)
+        PoisonResistanceSkillComponent existingComponent =
+            commandBuffer.getComponent(
+                ref,
+                PoisonResistanceSkillComponent.getComponentType()
+            );
 
-        // Upgrade vers le niveau C
-        PoisonResistanceSkillComponent upgradedComponent = PoisonResistanceSkillComponent.createLevelC();
+        // Upgrade to level C
+        PoisonResistanceSkillComponent upgradedComponent =
+            PoisonResistanceSkillComponent.createLevelC();
 
-        // Supprimer l'ancien et ajouter le nouveau
+        // Remove the old one and add the new one
         if (existingComponent != null) {
-            commandBuffer.removeComponent(ref, PoisonResistanceSkillComponent.getComponentType());
+            commandBuffer.removeComponent(
+                ref,
+                PoisonResistanceSkillComponent.getComponentType()
+            );
         }
 
         commandBuffer.addComponent(
@@ -73,7 +80,9 @@ public class SkillPoisonResistanceCInteraction extends SimpleInstantInteraction 
         );
 
         player.sendMessage(
-            Message.raw("Poison Resistance skill upgraded to level 3! 75% poison damage reduction.")
+            Message.raw(
+                "Poison Resistance skill upgraded to level 3! 75% poison damage reduction."
+            )
         );
     }
 }

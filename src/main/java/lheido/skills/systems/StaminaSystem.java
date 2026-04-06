@@ -84,7 +84,7 @@ public class StaminaSystem extends EntityTickingSystem<EntityStore> {
             return;
         }
 
-        // Vérifier si le skill est actif dans ActiveSkillsComponent
+        // Check if the skill is active in ActiveSkillsComponent
         ActiveSkillsComponent activeSkills = commandBuffer.getComponent(
             entityRef,
             ActiveSkillsComponent.getComponentType()
@@ -92,7 +92,7 @@ public class StaminaSystem extends EntityTickingSystem<EntityStore> {
         boolean isSkillActive = isSkillActiveForPlayer(activeSkills);
 
         if (!isSkillActive) {
-            // Skill non actif: supprimer le modifier
+            // Skill not active: remove the modifier
             removeStaminaModifier(statMap, staminaStatIndex);
             return;
         }
@@ -112,13 +112,13 @@ public class StaminaSystem extends EntityTickingSystem<EntityStore> {
     }
 
     /**
-     * Vérifie si le skill Stamina est actif pour le joueur.
+     * Checks if the Stamina skill is active for the player.
      */
     private boolean isSkillActiveForPlayer(ActiveSkillsComponent activeSkills) {
         if (activeSkills == null) {
             return false;
         }
-        
+
         for (String activeSkill : activeSkills.getActiveSkills()) {
             if (SkillIds.isStaminaSkill(activeSkill)) {
                 return true;
@@ -128,9 +128,12 @@ public class StaminaSystem extends EntityTickingSystem<EntityStore> {
     }
 
     /**
-     * Supprime le modificateur de stamina du joueur.
+     * Removes the stamina modifier from the player.
      */
-    private void removeStaminaModifier(EntityStatMap statMap, int staminaStatIndex) {
+    private void removeStaminaModifier(
+        EntityStatMap statMap,
+        int staminaStatIndex
+    ) {
         statMap.removeModifier(
             EntityStatMap.Predictable.NONE,
             staminaStatIndex,

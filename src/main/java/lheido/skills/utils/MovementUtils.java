@@ -10,22 +10,22 @@ import com.hypixel.hytale.server.core.io.PacketHandler;
 import javax.annotation.Nonnull;
 
 /**
- * Utilitaires pour la gestion des mouvements des joueurs.
- * Utilisable par plusieurs skills liés au mouvement (Flying, Swimming, etc.).
+ * Utilities for managing player movements.
+ * Usable by multiple movement-related skills (Flying, Swimming, etc.).
  */
 public final class MovementUtils {
 
     private MovementUtils() {
-        // Utility class - pas d'instanciation
+        // Utility class - no instantiation
     }
 
     /**
-     * Active ou désactive la capacité de voler pour un joueur.
-     * Ne fait rien si l'état est déjà celui demandé.
+     * Enables or disables the ability to fly for a player.
+     * Does nothing if the state is already the requested one.
      *
-     * @param movement      Le MovementManager du joueur
-     * @param packetHandler Le PacketHandler pour envoyer les updates au client
-     * @param canFly        true pour permettre le vol, false sinon
+     * @param movement      The player's MovementManager
+     * @param packetHandler The PacketHandler to send updates to the client
+     * @param canFly        true to allow flying, false otherwise
      */
     public static void setCanFly(
         @Nonnull MovementManager movement,
@@ -41,16 +41,16 @@ public final class MovementUtils {
     }
 
     /**
-     * Force l'envoi du packet UpdateMovementSettings au client,
-     * même si la valeur côté serveur est déjà correcte.
+     * Forces sending the UpdateMovementSettings packet to the client,
+     * even if the server-side value is already correct.
      *
-     * Utile après des événements qui peuvent désynchroniser le client
-     * (réveil du lit, téléportation, etc.) où le serveur a la bonne
-     * valeur mais le client a été réinitialisé.
+     * Useful after events that can desynchronize the client
+     * (waking from bed, teleportation, etc.) where the server has the correct
+     * value but the client has been reset.
      *
-     * @param movement      Le MovementManager du joueur
-     * @param packetHandler Le PacketHandler pour envoyer les updates au client
-     * @param canFly        true pour permettre le vol, false sinon
+     * @param movement      The player's MovementManager
+     * @param packetHandler The PacketHandler to send updates to the client
+     * @param canFly        true to allow flying, false otherwise
      */
     public static void forceSetCanFly(
         @Nonnull MovementManager movement,
@@ -59,16 +59,16 @@ public final class MovementUtils {
     ) {
         MovementSettings settings = movement.getSettings();
         settings.canFly = canFly;
-        // Toujours envoyer le packet, même si la valeur n'a pas changé
+        // Always send the packet, even if the value hasn't changed
         movement.update(packetHandler);
     }
 
     /**
-     * Force l'arrêt du vol pour un joueur.
-     * Utile quand le temps de vol expire ou que le skill est désactivé.
+     * Forces a player to stop flying.
+     * Useful when flight time expires or the skill is deactivated.
      *
-     * @param statesComponent Le MovementStatesComponent du joueur
-     * @param packetHandler   Le PacketHandler pour envoyer les updates au client
+     * @param statesComponent The player's MovementStatesComponent
+     * @param packetHandler   The PacketHandler to send updates to the client
      */
     public static void forceStopFlying(
         @Nonnull MovementStatesComponent statesComponent,
@@ -86,10 +86,10 @@ public final class MovementUtils {
     }
 
     /**
-     * Vérifie si un joueur est actuellement en train de voler.
+     * Checks if a player is currently flying.
      *
-     * @param statesComponent Le MovementStatesComponent du joueur
-     * @return true si le joueur vole, false sinon
+     * @param statesComponent The player's MovementStatesComponent
+     * @return true if the player is flying, false otherwise
      */
     public static boolean isCurrentlyFlying(
         @Nonnull MovementStatesComponent statesComponent
@@ -99,42 +99,42 @@ public final class MovementUtils {
     }
 
     /**
-     * Active le vol pour un joueur et met à jour le client.
+     * Enables flying for a player and updates the client.
      *
-     * @param movement        Le MovementManager du joueur
-     * @param statesComponent Le MovementStatesComponent du joueur
-     * @param packetHandler   Le PacketHandler pour envoyer les updates au client
+     * @param movement        The player's MovementManager
+     * @param statesComponent The player's MovementStatesComponent
+     * @param packetHandler   The PacketHandler to send updates to the client
      */
     public static void enableFlying(
         @Nonnull MovementManager movement,
         @Nonnull MovementStatesComponent statesComponent,
         @Nonnull PacketHandler packetHandler
     ) {
-        // Permettre le vol
+        // Allow flying
         setCanFly(movement, packetHandler, true);
     }
 
     /**
-     * Force le démarrage du vol pour un joueur.
-     * Utilisé pour restaurer l'état de vol après reconnexion.
+     * Forces flight to start for a player.
+     * Used to restore the flight state after reconnection.
      *
-     * @param movement        Le MovementManager du joueur
-     * @param statesComponent Le MovementStatesComponent du joueur
-     * @param packetHandler   Le PacketHandler pour envoyer les updates au client
+     * @param movement        The player's MovementManager
+     * @param statesComponent The player's MovementStatesComponent
+     * @param packetHandler   The PacketHandler to send updates to the client
      */
     public static void forceStartFlying(
         @Nonnull MovementManager movement,
         @Nonnull MovementStatesComponent statesComponent,
         @Nonnull PacketHandler packetHandler
     ) {
-        // S'assurer que canFly est activé
+        // Ensure canFly is enabled
         MovementSettings settings = movement.getSettings();
         if (settings != null) {
             settings.canFly = true;
             movement.update(packetHandler);
         }
 
-        // Forcer l'état de vol
+        // Force the flight state
         MovementStates movementStates = statesComponent.getMovementStates();
         if (movementStates == null) {
             movementStates = new MovementStates();
@@ -148,21 +148,21 @@ public final class MovementUtils {
     }
 
     /**
-     * Désactive complètement le vol pour un joueur.
-     * Force l'arrêt du vol s'il est en cours, puis retire la capacité de voler.
+     * Completely disables flying for a player.
+     * Forces flight to stop if in progress, then removes the ability to fly.
      *
-     * @param movement        Le MovementManager du joueur
-     * @param statesComponent Le MovementStatesComponent du joueur
-     * @param packetHandler   Le PacketHandler pour envoyer les updates au client
+     * @param movement        The player's MovementManager
+     * @param statesComponent The player's MovementStatesComponent
+     * @param packetHandler   The PacketHandler to send updates to the client
      */
     public static void disableFlying(
         @Nonnull MovementManager movement,
         @Nonnull MovementStatesComponent statesComponent,
         @Nonnull PacketHandler packetHandler
     ) {
-        // Force l'arrêt du vol si en cours
+        // Force stop flying if in progress
         forceStopFlying(statesComponent, packetHandler);
-        // Retire la capacité de voler
+        // Remove the ability to fly
         setCanFly(movement, packetHandler, false);
     }
 }

@@ -7,32 +7,32 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * HUD pour afficher les 3 skills actifs du joueur.
+ * HUD to display the player's 3 active skills.
  * 
- * Chaque slot peut afficher:
- * - L'icone du skill (via ItemSlot)
- * - Un overlay de cooldown avec timer
- * - Un overlay d'activation avec timer (skill en cours d'utilisation)
- * - Un tiret "-" si le slot est vide
+ * Each slot can display:
+ * - The skill icon (via ItemSlot)
+ * - A cooldown overlay with timer
+ * - An activation overlay with timer (skill currently in use)
+ * - A dash "-" if the slot is empty
  */
 public class SkillBarHud extends CustomUIHud {
 
     /**
-     * Etat d'un slot de skill.
+     * State of a skill slot.
      */
     public enum SlotState {
-        /** Slot vide, pas de skill equipe */
+        /** Empty slot, no skill equipped */
         EMPTY,
-        /** Skill equipe et pret a l'utilisation */
+        /** Skill equipped and ready to use */
         READY,
-        /** Skill en cours d'utilisation (avec timer) */
+        /** Skill currently in use (with timer) */
         ACTIVE,
-        /** Skill en cooldown (avec timer) */
+        /** Skill on cooldown (with timer) */
         COOLDOWN
     }
 
     /**
-     * Donnees d'un slot de skill pour le tracking des changements.
+     * Data of a skill slot for change tracking.
      */
     private static class SlotData {
         SlotState state = SlotState.EMPTY;
@@ -69,10 +69,10 @@ public class SkillBarHud extends CustomUIHud {
     }
 
     /**
-     * Met a jour un slot avec un skill pret (pas de timer affiche).
+     * Updates a slot with a ready skill (no timer displayed).
      * 
-     * @param slotIndex Index du slot (0-2)
-     * @param skillId ID complet du skill (ex: "Skill_Flying_A")
+     * @param slotIndex Slot index (0-2)
+     * @param skillId Full skill ID (e.g. "Skill_Flying_A")
      */
     public void setSlotReady(int slotIndex, @Nonnull String skillId) {
         if (slotIndex < 0 || slotIndex >= MAX_SLOTS) {
@@ -91,11 +91,11 @@ public class SkillBarHud extends CustomUIHud {
     }
 
     /**
-     * Met a jour un slot avec un skill actif (en cours d'utilisation).
+     * Updates a slot with an active skill (currently in use).
      * 
-     * @param slotIndex Index du slot (0-2)
-     * @param skillId ID complet du skill
-     * @param remainingSeconds Temps restant en secondes
+     * @param slotIndex Slot index (0-2)
+     * @param skillId Full skill ID
+     * @param remainingSeconds Remaining time in seconds
      */
     public void setSlotActive(int slotIndex, @Nonnull String skillId, int remainingSeconds) {
         if (slotIndex < 0 || slotIndex >= MAX_SLOTS) {
@@ -114,11 +114,11 @@ public class SkillBarHud extends CustomUIHud {
     }
 
     /**
-     * Met a jour un slot avec un skill en cooldown.
+     * Updates a slot with a skill on cooldown.
      * 
-     * @param slotIndex Index du slot (0-2)
-     * @param skillId ID complet du skill
-     * @param remainingSeconds Temps de cooldown restant en secondes
+     * @param slotIndex Slot index (0-2)
+     * @param skillId Full skill ID
+     * @param remainingSeconds Remaining cooldown time in seconds
      */
     public void setSlotCooldown(int slotIndex, @Nonnull String skillId, int remainingSeconds) {
         if (slotIndex < 0 || slotIndex >= MAX_SLOTS) {
@@ -137,9 +137,9 @@ public class SkillBarHud extends CustomUIHud {
     }
 
     /**
-     * Vide un slot (plus de skill equipe).
+     * Empties a slot (no skill equipped).
      * 
-     * @param slotIndex Index du slot (0-2)
+     * @param slotIndex Slot index (0-2)
      */
     public void setSlotEmpty(int slotIndex) {
         if (slotIndex < 0 || slotIndex >= MAX_SLOTS) {
@@ -158,9 +158,9 @@ public class SkillBarHud extends CustomUIHud {
     }
 
     /**
-     * Met a jour tous les slots en une seule commande (optimisation).
+     * Updates all slots in a single command (optimization).
      * 
-     * @param skillStates Tableau de 3 etats de slots (peut contenir des null pour les slots vides)
+     * @param skillStates Array of 3 slot states (can contain null for empty slots)
      */
     public void updateAllSlots(@Nonnull SlotInfo[] skillStates) {
         UICommandBuilder builder = new UICommandBuilder();
@@ -187,11 +187,11 @@ public class SkillBarHud extends CustomUIHud {
     }
 
     /**
-     * Construit les commandes UI pour mettre a jour un slot.
+     * Builds UI commands to update a slot.
      */
     private void updateSlotUI(UICommandBuilder builder, int slotIndex, 
                               SlotState state, @Nullable String skillId, int timerSeconds) {
-        // Selecteurs basés sur la nouvelle structure UI
+        // Selectors based on the new UI structure
         String slotPrefix = "#Slot" + slotIndex + " #SkillContainer" + slotIndex;
         String itemSelector = slotPrefix + " #Item" + slotIndex;
         String cooldownOverlay = slotPrefix + " #CooldownOverlay" + slotIndex;
@@ -199,13 +199,13 @@ public class SkillBarHud extends CustomUIHud {
         
         switch (state) {
             case EMPTY -> {
-                // Masquer l'item et les overlays
+                // Hide the item and overlays
                 builder.set(itemSelector + ".Visible", false);
                 builder.set(cooldownOverlay + ".Visible", false);
                 builder.set(activeOverlay + ".Visible", false);
             }
             case READY -> {
-                // Afficher l'item, masquer les overlays
+                // Show the item, hide overlays
                 builder.set(itemSelector + ".Visible", true);
                 builder.set(itemSelector + ".ItemId", skillId);
                 builder.set(itemSelector + ".Quantity", 1);
@@ -213,7 +213,7 @@ public class SkillBarHud extends CustomUIHud {
                 builder.set(activeOverlay + ".Visible", false);
             }
             case ACTIVE -> {
-                // Afficher l'item avec overlay vert (actif)
+                // Show the item with green overlay (active)
                 builder.set(itemSelector + ".Visible", true);
                 builder.set(itemSelector + ".ItemId", skillId);
                 builder.set(itemSelector + ".Quantity", 1);
@@ -222,7 +222,7 @@ public class SkillBarHud extends CustomUIHud {
                 builder.set(activeOverlay + " #ActiveText" + slotIndex + ".Text", timerSeconds + "s");
             }
             case COOLDOWN -> {
-                // Afficher l'item avec overlay orange (cooldown)
+                // Show the item with orange overlay (cooldown)
                 builder.set(itemSelector + ".Visible", true);
                 builder.set(itemSelector + ".ItemId", skillId);
                 builder.set(itemSelector + ".Quantity", 1);
@@ -234,7 +234,7 @@ public class SkillBarHud extends CustomUIHud {
     }
 
     /**
-     * Retourne l'etat actuel d'un slot.
+     * Returns the current state of a slot.
      */
     public SlotState getSlotState(int slotIndex) {
         if (slotIndex < 0 || slotIndex >= MAX_SLOTS) {
@@ -244,7 +244,7 @@ public class SkillBarHud extends CustomUIHud {
     }
 
     /**
-     * Informations pour mettre a jour un slot.
+     * Information for updating a slot.
      */
     public static class SlotInfo {
         public final SlotState state;

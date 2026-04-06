@@ -8,38 +8,44 @@ import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 /**
- * Component pour le skill LifeSteal (Vampirisme).
- * Attaché au player pour gérer le vol de vie lors des attaques.
+ * Component for the LifeSteal skill (Vampirism).
+ * Attached to the player to manage life steal on attacks.
  *
- * Niveaux:
- * - A (1): 5% des dégâts infligés récupérés en vie
- * - B (2): 10% des dégâts infligés récupérés en vie
- * - C (3): 15% des dégâts infligés récupérés en vie
- * - X (4): 25% des dégâts infligés récupérés en vie
+ * Levels:
+ * - A (1): 5% of damage dealt recovered as health
+ * - B (2): 10% of damage dealt recovered as health
+ * - C (3): 15% of damage dealt recovered as health
+ * - X (4): 25% of damage dealt recovered as health
  */
 public class LifeStealSkillComponent implements Component<EntityStore> {
 
     // ============================================
-    // Constantes par niveau - Pourcentage de vol de vie
+    // Per-level constants - Life steal percentage
     // ============================================
 
-    public static final float LEVEL_A_PERCENTAGE = 0.05f;  // 5%
-    public static final float LEVEL_B_PERCENTAGE = 0.10f;  // 10%
-    public static final float LEVEL_C_PERCENTAGE = 0.15f;  // 15%
-    public static final float LEVEL_X_PERCENTAGE = 0.25f;  // 25%
+    public static final float LEVEL_A_PERCENTAGE = 0.05f; // 5%
+    public static final float LEVEL_B_PERCENTAGE = 0.10f; // 10%
+    public static final float LEVEL_C_PERCENTAGE = 0.15f; // 15%
+    public static final float LEVEL_X_PERCENTAGE = 0.25f; // 25%
 
     public static final int LEVEL_X = 4;
 
     /**
-     * ComponentType pour accéder à ce component dans l'ECS.
+     * ComponentType to access this component in the ECS.
      */
-    private static volatile ComponentType<EntityStore, LifeStealSkillComponent> COMPONENT_TYPE;
+    private static volatile ComponentType<
+        EntityStore,
+        LifeStealSkillComponent
+    > COMPONENT_TYPE;
 
     /**
-     * Codec pour la sérialisation/désérialisation du component.
+     * Codec for serialization/deserialization of the component.
      */
     public static final BuilderCodec<LifeStealSkillComponent> CODEC =
-        BuilderCodec.builder(LifeStealSkillComponent.class, LifeStealSkillComponent::new)
+        BuilderCodec.builder(
+            LifeStealSkillComponent.class,
+            LifeStealSkillComponent::new
+        )
             .append(
                 new KeyedCodec<>("LifeStealLevel", Codec.INTEGER),
                 (data, value) -> data.level = value,
@@ -76,7 +82,10 @@ public class LifeStealSkillComponent implements Component<EntityStore> {
         COMPONENT_TYPE = componentType;
     }
 
-    public static ComponentType<EntityStore, LifeStealSkillComponent> getComponentType() {
+    public static ComponentType<
+        EntityStore,
+        LifeStealSkillComponent
+    > getComponentType() {
         return COMPONENT_TYPE;
     }
 
@@ -125,13 +134,13 @@ public class LifeStealSkillComponent implements Component<EntityStore> {
     }
 
     // ============================================
-    // Calculs
+    // Calculations
     // ============================================
 
     /**
-     * Calcule le montant de vie à récupérer en fonction des dégâts infligés.
-     * @param damageDealt Les dégâts infligés à la cible
-     * @return Le montant de vie à récupérer
+     * Calculates the amount of health to recover based on damage dealt.
+     * @param damageDealt The damage dealt to the target
+     * @return The amount of health to recover
      */
     public float calculateHealAmount(float damageDealt) {
         return damageDealt * lifeStealPercentage;
@@ -150,7 +159,7 @@ public class LifeStealSkillComponent implements Component<EntityStore> {
     }
 
     // ============================================
-    // Getters et Setters
+    // Getters and Setters
     // ============================================
 
     public int getLevel() {

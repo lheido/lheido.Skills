@@ -15,9 +15,9 @@ import javax.annotation.Nonnull;
 import lheido.skills.components.LifeStealSkillComponent;
 
 /**
- * Interaction pour upgrader le skill LifeSteal vers le niveau X (maximum).
- * Requiert que le joueur possède déjà le skill LifeSteal niveau C.
- * Améliore le vol de vie (25% - niveau maximum).
+ * Interaction to upgrade the LifeSteal skill to level X (maximum).
+ * Requires the player to already have the LifeSteal skill at level C.
+ * Improves life steal (25% - maximum level).
  */
 public class SkillLifeStealXInteraction extends SimpleInstantInteraction {
 
@@ -51,19 +51,23 @@ public class SkillLifeStealXInteraction extends SimpleInstantInteraction {
             return;
         }
 
-        // Les prérequis sont vérifiés par CheckLifeStealUpgradeInteraction
-        // Récupérer le component existant (garanti par le check)
+        // Prerequisites are verified by CheckLifeStealUpgradeInteraction
+        // Get the existing component (guaranteed by the check)
         LifeStealSkillComponent existingComponent = commandBuffer.getComponent(
             ref,
             LifeStealSkillComponent.getComponentType()
         );
 
-        // Upgrade vers le niveau X (maximum)
-        LifeStealSkillComponent upgradedComponent = LifeStealSkillComponent.createLevelX();
+        // Upgrade to level X (maximum)
+        LifeStealSkillComponent upgradedComponent =
+            LifeStealSkillComponent.createLevelX();
 
-        // Supprimer l'ancien et ajouter le nouveau
+        // Remove the old one and add the new one
         if (existingComponent != null) {
-            commandBuffer.removeComponent(ref, LifeStealSkillComponent.getComponentType());
+            commandBuffer.removeComponent(
+                ref,
+                LifeStealSkillComponent.getComponentType()
+            );
         }
 
         commandBuffer.addComponent(
@@ -73,7 +77,9 @@ public class SkillLifeStealXInteraction extends SimpleInstantInteraction {
         );
 
         player.sendMessage(
-            Message.raw("Life Steal skill maxed out! You recover 25% of damage dealt as health.")
+            Message.raw(
+                "Life Steal skill maxed out! You recover 25% of damage dealt as health."
+            )
         );
     }
 }

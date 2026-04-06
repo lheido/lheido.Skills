@@ -8,38 +8,44 @@ import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 /**
- * Component pour le skill PoisonResistance.
- * Attaché au player pour gérer la résistance au poison.
+ * Component for the PoisonResistance skill.
+ * Attached to the player to manage poison resistance.
  *
- * Niveaux:
- * - A (1): 25% de réduction des dégâts de poison
- * - B (2): 50% de réduction des dégâts de poison
- * - C (3): 75% de réduction des dégâts de poison
- * - X (4): Immunité totale au poison
+ * Levels:
+ * - A (1): 25% poison damage reduction
+ * - B (2): 50% poison damage reduction
+ * - C (3): 75% poison damage reduction
+ * - X (4): Full immunity to poison
  */
 public class PoisonResistanceSkillComponent implements Component<EntityStore> {
 
     // ============================================
-    // Constantes par niveau - Multiplicateur de résistance
+    // Per-level constants - Resistance multiplier
     // ============================================
 
     public static final float LEVEL_A_RESISTANCE = 0.25f;
     public static final float LEVEL_B_RESISTANCE = 0.50f;
     public static final float LEVEL_C_RESISTANCE = 0.75f;
-    public static final float LEVEL_X_RESISTANCE = 1.0f; // 1.0 = immunité totale
+    public static final float LEVEL_X_RESISTANCE = 1.0f; // 1.0 = full immunity
 
     public static final int LEVEL_X = 4;
 
     /**
-     * ComponentType pour accéder à ce component dans l'ECS.
+     * ComponentType to access this component in the ECS.
      */
-    private static volatile ComponentType<EntityStore, PoisonResistanceSkillComponent> COMPONENT_TYPE;
+    private static volatile ComponentType<
+        EntityStore,
+        PoisonResistanceSkillComponent
+    > COMPONENT_TYPE;
 
     /**
-     * Codec pour la sérialisation/désérialisation du component.
+     * Codec for serialization/deserialization of the component.
      */
     public static final BuilderCodec<PoisonResistanceSkillComponent> CODEC =
-        BuilderCodec.builder(PoisonResistanceSkillComponent.class, PoisonResistanceSkillComponent::new)
+        BuilderCodec.builder(
+            PoisonResistanceSkillComponent.class,
+            PoisonResistanceSkillComponent::new
+        )
             .append(
                 new KeyedCodec<>("PoisonResistanceLevel", Codec.INTEGER),
                 (data, value) -> data.level = value,
@@ -76,7 +82,10 @@ public class PoisonResistanceSkillComponent implements Component<EntityStore> {
         COMPONENT_TYPE = componentType;
     }
 
-    public static ComponentType<EntityStore, PoisonResistanceSkillComponent> getComponentType() {
+    public static ComponentType<
+        EntityStore,
+        PoisonResistanceSkillComponent
+    > getComponentType() {
         return COMPONENT_TYPE;
     }
 
@@ -85,28 +94,32 @@ public class PoisonResistanceSkillComponent implements Component<EntityStore> {
     // ============================================
 
     public static PoisonResistanceSkillComponent createLevelA() {
-        PoisonResistanceSkillComponent component = new PoisonResistanceSkillComponent();
+        PoisonResistanceSkillComponent component =
+            new PoisonResistanceSkillComponent();
         component.setLevel(1);
         component.setResistanceMultiplier(LEVEL_A_RESISTANCE);
         return component;
     }
 
     public static PoisonResistanceSkillComponent createLevelB() {
-        PoisonResistanceSkillComponent component = new PoisonResistanceSkillComponent();
+        PoisonResistanceSkillComponent component =
+            new PoisonResistanceSkillComponent();
         component.setLevel(2);
         component.setResistanceMultiplier(LEVEL_B_RESISTANCE);
         return component;
     }
 
     public static PoisonResistanceSkillComponent createLevelC() {
-        PoisonResistanceSkillComponent component = new PoisonResistanceSkillComponent();
+        PoisonResistanceSkillComponent component =
+            new PoisonResistanceSkillComponent();
         component.setLevel(3);
         component.setResistanceMultiplier(LEVEL_C_RESISTANCE);
         return component;
     }
 
     public static PoisonResistanceSkillComponent createLevelX() {
-        PoisonResistanceSkillComponent component = new PoisonResistanceSkillComponent();
+        PoisonResistanceSkillComponent component =
+            new PoisonResistanceSkillComponent();
         component.setLevel(LEVEL_X);
         component.setResistanceMultiplier(LEVEL_X_RESISTANCE);
         return component;
@@ -129,16 +142,16 @@ public class PoisonResistanceSkillComponent implements Component<EntityStore> {
     // ============================================
 
     /**
-     * Vérifie si le joueur est immunisé au poison (niveau X).
+     * Checks if the player is immune to poison (level X).
      */
     public boolean isImmuneToPosion() {
         return resistanceMultiplier >= 1.0f;
     }
 
     /**
-     * Calcule les dégâts de poison après réduction.
-     * @param originalDamage Les dégâts de poison originaux
-     * @return Les dégâts après application de la résistance
+     * Calculates poison damage after reduction.
+     * @param originalDamage The original poison damage
+     * @return The damage after applying resistance
      */
     public float calculateReducedPoisonDamage(float originalDamage) {
         if (isImmuneToPosion()) {
@@ -153,14 +166,15 @@ public class PoisonResistanceSkillComponent implements Component<EntityStore> {
 
     @Override
     public PoisonResistanceSkillComponent clone() {
-        PoisonResistanceSkillComponent copy = new PoisonResistanceSkillComponent();
+        PoisonResistanceSkillComponent copy =
+            new PoisonResistanceSkillComponent();
         copy.level = this.level;
         copy.resistanceMultiplier = this.resistanceMultiplier;
         return copy;
     }
 
     // ============================================
-    // Getters et Setters
+    // Getters and Setters
     // ============================================
 
     public int getLevel() {

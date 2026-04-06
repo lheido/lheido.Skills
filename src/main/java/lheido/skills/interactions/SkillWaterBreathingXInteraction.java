@@ -15,9 +15,9 @@ import javax.annotation.Nonnull;
 import lheido.skills.components.WaterBreathingSkillComponent;
 
 /**
- * Interaction pour upgrader le skill WaterBreathing vers le niveau X (ultime).
- * Requiert que le joueur possède déjà le skill WaterBreathing niveau C.
- * Oxygène illimité!
+ * Interaction to upgrade the WaterBreathing skill to level X (ultimate).
+ * Requires the player to already have the WaterBreathing skill at level C.
+ * Unlimited oxygen!
  */
 public class SkillWaterBreathingXInteraction extends SimpleInstantInteraction {
 
@@ -51,17 +51,22 @@ public class SkillWaterBreathingXInteraction extends SimpleInstantInteraction {
             return;
         }
 
-        // Les prérequis sont vérifiés par CheckWaterBreathingUpgradeInteraction
-        // Upgrade vers le niveau X (ultime) - oxygène illimité
-        WaterBreathingSkillComponent upgradedComponent = WaterBreathingSkillComponent.createLevelX();
+        // Prerequisites are verified by CheckWaterBreathingUpgradeInteraction
+        // Upgrade to level X (ultimate) - unlimited oxygen
+        WaterBreathingSkillComponent upgradedComponent =
+            WaterBreathingSkillComponent.createLevelX();
 
-        // Supprimer l'ancien component s'il existe
-        WaterBreathingSkillComponent existingComponent = commandBuffer.getComponent(
-            ref,
-            WaterBreathingSkillComponent.getComponentType()
-        );
+        // Remove the old component if it exists
+        WaterBreathingSkillComponent existingComponent =
+            commandBuffer.getComponent(
+                ref,
+                WaterBreathingSkillComponent.getComponentType()
+            );
         if (existingComponent != null) {
-            commandBuffer.removeComponent(ref, WaterBreathingSkillComponent.getComponentType());
+            commandBuffer.removeComponent(
+                ref,
+                WaterBreathingSkillComponent.getComponentType()
+            );
         }
 
         commandBuffer.addComponent(
@@ -71,7 +76,9 @@ public class SkillWaterBreathingXInteraction extends SimpleInstantInteraction {
         );
 
         player.sendMessage(
-            Message.raw("Water Breathing skill upgraded to ULTIMATE! Unlimited oxygen underwater!")
+            Message.raw(
+                "Water Breathing skill upgraded to ULTIMATE! Unlimited oxygen underwater!"
+            )
         );
     }
 }

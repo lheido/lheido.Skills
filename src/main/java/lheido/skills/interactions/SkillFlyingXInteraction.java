@@ -16,9 +16,9 @@ import javax.annotation.Nonnull;
 import lheido.skills.components.FlyingSkillComponent;
 
 /**
- * Interaction pour upgrader le skill Flying vers le niveau X (ultime).
- * Requiert que le joueur possède déjà le skill Flying niveau C.
- * Vol illimité sans cooldown!
+ * Interaction to upgrade the Flying skill to level X (ultimate).
+ * Requires the player to already have the Flying skill at level C.
+ * Unlimited flight with no cooldown!
  */
 public class SkillFlyingXInteraction extends SimpleInstantInteraction {
 
@@ -58,17 +58,21 @@ public class SkillFlyingXInteraction extends SimpleInstantInteraction {
             return;
         }
 
-        // Les prérequis sont vérifiés par CheckFlyingUpgradeInteraction
-        // Upgrade vers le niveau X (ultime) - vol illimité
-        FlyingSkillComponent upgradedComponent = FlyingSkillComponent.createLevelX();
+        // Prerequisites are verified by CheckFlyingUpgradeInteraction
+        // Upgrade to level X (ultimate) - unlimited flight
+        FlyingSkillComponent upgradedComponent =
+            FlyingSkillComponent.createLevelX();
 
-        // Supprimer l'ancien component s'il existe
+        // Remove the old component if it exists
         FlyingSkillComponent existingComponent = commandBuffer.getComponent(
             ref,
             FlyingSkillComponent.getComponentType()
         );
         if (existingComponent != null) {
-            commandBuffer.removeComponent(ref, FlyingSkillComponent.getComponentType());
+            commandBuffer.removeComponent(
+                ref,
+                FlyingSkillComponent.getComponentType()
+            );
         }
 
         commandBuffer.addComponent(
@@ -78,7 +82,9 @@ public class SkillFlyingXInteraction extends SimpleInstantInteraction {
         );
 
         player.sendMessage(
-            Message.raw("Flying skill upgraded to ULTIMATE! Unlimited flight, no cooldown!")
+            Message.raw(
+                "Flying skill upgraded to ULTIMATE! Unlimited flight, no cooldown!"
+            )
         );
     }
 }

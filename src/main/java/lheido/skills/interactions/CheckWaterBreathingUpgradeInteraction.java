@@ -17,15 +17,15 @@ import javax.annotation.Nonnull;
 import lheido.skills.components.WaterBreathingSkillComponent;
 
 /**
- * Interaction pour vérifier les prérequis d'upgrade du skill WaterBreathing.
- * Paramétrable via JSON avec RequiredLevel et TargetLevel.
+ * Interaction to check the upgrade prerequisites for the WaterBreathing skill.
+ * Configurable via JSON with RequiredLevel and TargetLevel.
  *
- * - RequiredLevel: Le niveau minimum requis (0 = aucun prérequis, pour WaterBreathing A)
- * - TargetLevel: Le niveau vers lequel on upgrade
+ * - RequiredLevel: The minimum required level (0 = no prerequisite, for WaterBreathing A)
+ * - TargetLevel: The level to upgrade to
  *
- * Échoue si:
- * - Le joueur n'a pas le niveau requis
- * - Le joueur a déjà le niveau cible ou supérieur
+ * Fails if:
+ * - The player does not have the required level
+ * - The player already has the target level or higher
  */
 public class CheckWaterBreathingUpgradeInteraction
     extends SimpleInstantInteraction
@@ -78,7 +78,7 @@ public class CheckWaterBreathingUpgradeInteraction
             return;
         }
 
-        // Récupérer le component WaterBreathing existant (peut être null)
+        // Get the existing WaterBreathing component (may be null)
         WaterBreathingSkillComponent existingComponent =
             commandBuffer.getComponent(
                 ref,
@@ -88,7 +88,7 @@ public class CheckWaterBreathingUpgradeInteraction
         int currentLevel =
             existingComponent != null ? existingComponent.getLevel() : 0;
 
-        // Vérifier si le joueur a le niveau requis
+        // Check if the player has the required level
         if (currentLevel < requiredLevel) {
             String message =
                 requiredLevel == 0
@@ -101,7 +101,7 @@ public class CheckWaterBreathingUpgradeInteraction
             return;
         }
 
-        // Vérifier si le joueur a déjà le niveau cible ou supérieur
+        // Check if the player already has the target level or higher
         if (currentLevel >= targetLevel) {
             String message =
                 targetLevel == 4
@@ -114,6 +114,6 @@ public class CheckWaterBreathingUpgradeInteraction
             return;
         }
 
-        // Prérequis validés, l'interaction suivante peut s'exécuter
+        // Prerequisites validated, the next interaction can execute
     }
 }

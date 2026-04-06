@@ -8,10 +8,10 @@ import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 /**
- * Component pour le skill WaterBreathing.
- * Attaché au player pour gérer la respiration sous-marine.
+ * Component for the WaterBreathing skill.
+ * Attached to the player to manage underwater breathing.
  *
- * Niveaux:
+ * Levels:
  * - A (1): +50% oxygen duration (multiplier 1.5)
  * - B (2): +100% oxygen duration (multiplier 2.0)
  * - C (3): +200% oxygen duration (multiplier 3.0)
@@ -20,26 +20,32 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 public class WaterBreathingSkillComponent implements Component<EntityStore> {
 
     // ============================================
-    // Constantes par niveau - Multiplicateur d'oxygène
+    // Per-level constants - Oxygen multiplier
     // ============================================
 
     public static final float LEVEL_A_MULTIPLIER = 1.5f;
     public static final float LEVEL_B_MULTIPLIER = 2.0f;
     public static final float LEVEL_C_MULTIPLIER = 3.0f;
-    public static final float LEVEL_X_MULTIPLIER = -1.0f; // -1 = illimité
+    public static final float LEVEL_X_MULTIPLIER = -1.0f; // -1 = unlimited
 
     public static final int LEVEL_X = 4;
 
     /**
-     * ComponentType pour accéder à ce component dans l'ECS.
+     * ComponentType to access this component in the ECS.
      */
-    private static volatile ComponentType<EntityStore, WaterBreathingSkillComponent> COMPONENT_TYPE;
+    private static volatile ComponentType<
+        EntityStore,
+        WaterBreathingSkillComponent
+    > COMPONENT_TYPE;
 
     /**
-     * Codec pour la sérialisation/désérialisation du component.
+     * Codec for serialization/deserialization of the component.
      */
     public static final BuilderCodec<WaterBreathingSkillComponent> CODEC =
-        BuilderCodec.builder(WaterBreathingSkillComponent.class, WaterBreathingSkillComponent::new)
+        BuilderCodec.builder(
+            WaterBreathingSkillComponent.class,
+            WaterBreathingSkillComponent::new
+        )
             .append(
                 new KeyedCodec<>("WaterBreathingLevel", Codec.INTEGER),
                 (data, value) -> data.level = value,
@@ -76,7 +82,10 @@ public class WaterBreathingSkillComponent implements Component<EntityStore> {
         COMPONENT_TYPE = componentType;
     }
 
-    public static ComponentType<EntityStore, WaterBreathingSkillComponent> getComponentType() {
+    public static ComponentType<
+        EntityStore,
+        WaterBreathingSkillComponent
+    > getComponentType() {
         return COMPONENT_TYPE;
     }
 
@@ -85,28 +94,32 @@ public class WaterBreathingSkillComponent implements Component<EntityStore> {
     // ============================================
 
     public static WaterBreathingSkillComponent createLevelA() {
-        WaterBreathingSkillComponent component = new WaterBreathingSkillComponent();
+        WaterBreathingSkillComponent component =
+            new WaterBreathingSkillComponent();
         component.setLevel(1);
         component.setOxygenMultiplier(LEVEL_A_MULTIPLIER);
         return component;
     }
 
     public static WaterBreathingSkillComponent createLevelB() {
-        WaterBreathingSkillComponent component = new WaterBreathingSkillComponent();
+        WaterBreathingSkillComponent component =
+            new WaterBreathingSkillComponent();
         component.setLevel(2);
         component.setOxygenMultiplier(LEVEL_B_MULTIPLIER);
         return component;
     }
 
     public static WaterBreathingSkillComponent createLevelC() {
-        WaterBreathingSkillComponent component = new WaterBreathingSkillComponent();
+        WaterBreathingSkillComponent component =
+            new WaterBreathingSkillComponent();
         component.setLevel(3);
         component.setOxygenMultiplier(LEVEL_C_MULTIPLIER);
         return component;
     }
 
     public static WaterBreathingSkillComponent createLevelX() {
-        WaterBreathingSkillComponent component = new WaterBreathingSkillComponent();
+        WaterBreathingSkillComponent component =
+            new WaterBreathingSkillComponent();
         component.setLevel(LEVEL_X);
         component.setOxygenMultiplier(LEVEL_X_MULTIPLIER);
         return component;
@@ -129,7 +142,7 @@ public class WaterBreathingSkillComponent implements Component<EntityStore> {
     // ============================================
 
     /**
-     * Vérifie si l'oxygène est illimité (niveau X).
+     * Checks if oxygen is unlimited (level X).
      */
     public boolean isUnlimitedOxygen() {
         return oxygenMultiplier < 0;
@@ -148,7 +161,7 @@ public class WaterBreathingSkillComponent implements Component<EntityStore> {
     }
 
     // ============================================
-    // Getters et Setters
+    // Getters and Setters
     // ============================================
 
     public int getLevel() {

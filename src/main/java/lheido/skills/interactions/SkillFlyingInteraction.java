@@ -19,11 +19,11 @@ import lheido.skills.components.FlyingSkillComponent;
 import lheido.skills.utils.MovementUtils;
 
 /**
- * Interaction pour débloquer le skill Flying.
- * Quand l'item est utilisé :
- * - Ajoute le FlyingSkillComponent au joueur
- * - Active canFly pour permettre le double-espace
- * Le FlyingSystem gère ensuite toute la logique de vol/cooldown.
+ * Interaction to unlock the Flying skill.
+ * When the item is used:
+ * - Adds the FlyingSkillComponent to the player
+ * - Enables canFly to allow double-space
+ * The FlyingSystem then handles all the flight/cooldown logic.
  */
 public class SkillFlyingInteraction extends SimpleInstantInteraction {
 
@@ -63,17 +63,17 @@ public class SkillFlyingInteraction extends SimpleInstantInteraction {
             return;
         }
 
-        // Créer le component avec les paramètres du niveau A
+        // Create the component with level A parameters
         FlyingSkillComponent component = FlyingSkillComponent.createLevelA();
 
-        // Ajouter le component au joueur
+        // Add the component to the player
         commandBuffer.addComponent(
             ref,
             FlyingSkillComponent.getComponentType(),
             component
         );
 
-        // Activer canFly pour permettre le double-espace
+        // Enable canFly to allow double-space
         PlayerRef playerRef = commandBuffer.getComponent(
             ref,
             PlayerRef.getComponentType()

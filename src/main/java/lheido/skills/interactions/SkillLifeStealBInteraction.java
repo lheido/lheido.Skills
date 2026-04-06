@@ -15,9 +15,9 @@ import javax.annotation.Nonnull;
 import lheido.skills.components.LifeStealSkillComponent;
 
 /**
- * Interaction pour upgrader le skill LifeSteal vers le niveau B.
- * Requiert que le joueur possède déjà le skill LifeSteal niveau A.
- * Améliore le vol de vie (10% au lieu de 5%).
+ * Interaction to upgrade the LifeSteal skill to level B.
+ * Requires the player to already have the LifeSteal skill at level A.
+ * Improves life steal (10% instead of 5%).
  */
 public class SkillLifeStealBInteraction extends SimpleInstantInteraction {
 
@@ -51,19 +51,23 @@ public class SkillLifeStealBInteraction extends SimpleInstantInteraction {
             return;
         }
 
-        // Les prérequis sont vérifiés par CheckLifeStealUpgradeInteraction
-        // Récupérer le component existant (garanti par le check)
+        // Prerequisites are verified by CheckLifeStealUpgradeInteraction
+        // Get the existing component (guaranteed by the check)
         LifeStealSkillComponent existingComponent = commandBuffer.getComponent(
             ref,
             LifeStealSkillComponent.getComponentType()
         );
 
-        // Upgrade vers le niveau B
-        LifeStealSkillComponent upgradedComponent = LifeStealSkillComponent.createLevelB();
+        // Upgrade to level B
+        LifeStealSkillComponent upgradedComponent =
+            LifeStealSkillComponent.createLevelB();
 
-        // Supprimer l'ancien et ajouter le nouveau
+        // Remove the old one and add the new one
         if (existingComponent != null) {
-            commandBuffer.removeComponent(ref, LifeStealSkillComponent.getComponentType());
+            commandBuffer.removeComponent(
+                ref,
+                LifeStealSkillComponent.getComponentType()
+            );
         }
 
         commandBuffer.addComponent(
@@ -73,7 +77,9 @@ public class SkillLifeStealBInteraction extends SimpleInstantInteraction {
         );
 
         player.sendMessage(
-            Message.raw("Life Steal skill upgraded to level 2! You recover 10% of damage dealt as health.")
+            Message.raw(
+                "Life Steal skill upgraded to level 2! You recover 10% of damage dealt as health."
+            )
         );
     }
 }

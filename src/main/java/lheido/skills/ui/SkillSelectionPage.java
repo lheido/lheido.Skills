@@ -10,96 +10,99 @@ import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import lheido.skills.components.ActiveSkillsComponent;
-import lheido.skills.utils.SkillIds;
-
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nonnull;
+import lheido.skills.components.ActiveSkillsComponent;
+import lheido.skills.utils.SkillIds;
 
 /**
- * Page interactive pour selectionner 3 skills actifs parmi les skills possedes.
- * 
- * L'utilisateur peut:
- * - Voir ses skills actuellement actifs (3 slots maximum)
- * - Selectionner un skill de la liste pour l'ajouter aux slots actifs
- * - Retirer un skill d'un slot actif
- * 
- * Les changements sont sauvegardes automatiquement.
+ * Interactive page to select 3 active skills from owned skills.
+ *
+ * The user can:
+ * - View their currently active skills (3 slots maximum)
+ * - Select a skill from the list to add it to active slots
+ * - Remove a skill from an active slot
+ *
+ * Changes are saved automatically.
  */
 public class SkillSelectionPage extends InteractiveCustomUIPage<EventAction> {
 
     // ============================================
-    // Constantes
+    // Constants
     // ============================================
-    
+
     private static final int MAX_ACTIVE_SKILLS = 3;
 
     // ============================================
-    // Etat de la page
+    // Page state
     // ============================================
-    
-    /** Map des skills possedes (prefix -> niveau) */
+
+    /** Map of owned skills (prefix -> level) */
     private final Map<String, Integer> ownedSkills;
-    
-    /** Liste des prefixes de skills possedes (pour l'ordre d'affichage) */
+
+    /** List of owned skill prefixes (for display order) */
     private final List<String> ownedSkillPrefixes;
-    
-    /** Les 3 skills actuellement actifs (prefixes, peut contenir des null) */
+
+    /** The 3 currently active skills (prefixes, may contain nulls) */
     private final String[] activeSkills;
 
     // ============================================
-    // Constructeur
+    // Constructor
     // ============================================
-    
+
     /**
-     * Cree une nouvelle page de selection de skills.
-     * 
-     * @param playerRef Reference au joueur
-     * @param ownedSkills Map des skills possedes (prefix -> niveau)
-     * @param currentActiveSkills Prefixes des skills actuellement actifs (peut etre null ou incomplet)
+     * Creates a new skill selection page.
+     *
+     * @param playerRef Reference to the player
+     * @param ownedSkills Map of owned skills (prefix -> level)
+     * @param currentActiveSkills Prefixes of currently active skills (can be null or incomplete)
      */
     public SkillSelectionPage(
-            @Nonnull PlayerRef playerRef,
-            @Nonnull Map<String, Integer> ownedSkills,
-            String[] currentActiveSkills) {
+        @Nonnull PlayerRef playerRef,
+        @Nonnull Map<String, Integer> ownedSkills,
+        String[] currentActiveSkills
+    ) {
         super(playerRef, CustomPageLifetime.CanDismiss, EventAction.CODEC);
-        
         this.ownedSkills = new HashMap<>(ownedSkills);
         this.ownedSkillPrefixes = new ArrayList<>(ownedSkills.keySet());
         Collections.sort(this.ownedSkillPrefixes);
         this.activeSkills = new String[MAX_ACTIVE_SKILLS];
-        
-        // Copier les skills actifs actuels (ce sont des prefixes)
+
+        // Copy current active skills (these are prefixes)
         if (currentActiveSkills != null) {
-            for (int i = 0; i < MAX_ACTIVE_SKILLS && i < currentActiveSkills.length; i++) {
+            for (
+                int i = 0;
+                i < MAX_ACTIVE_SKILLS && i < currentActiveSkills.length;
+                i++
+            ) {
                 this.activeSkills[i] = currentActiveSkills[i];
             }
         }
     }
 
     // ============================================
-    // Construction de l'UI
+    // UI Construction
     // ============================================
-    
+
     @Override
     public void build(
-            @Nonnull Ref<EntityStore> ref,
-            @Nonnull UICommandBuilder uiCommandBuilder,
-            @Nonnull UIEventBuilder uiEventBuilder,
-            @Nonnull Store<EntityStore> store) {
-        
-        // Charger le fichier UI principal
+        @Nonnull Ref<EntityStore> ref,
+        @Nonnull UICommandBuilder uiCommandBuilder,
+        @Nonnull UIEventBuilder uiEventBuilder,
+        @Nonnull Store<EntityStore> store
+    ) {
+        // Load the main UI file
         uiCommandBuilder.append("SkillSelectionPage.ui");
-        
-        // Remplir les slots actifs avec leur etat actuel et enregistrer les evenements remove
+
+        // Fill active slots with their current state and register remove events
         for (int i = 0; i < MAX_ACTIVE_SKILLS; i++) {
             updateActiveSlotUI(uiCommandBuilder, i);
-            
-            // Enregistrer l'evenement de clic sur le slot wrapper pour retirer le skill
+
+            // Register the click event on the slot wrapper to remove the skill
             String slotSelector = "#SlotWrapper" + i + " #Slot" + i;
             uiEventBuilder.addEventBinding(
                 CustomUIEventBindingType.Activating,
@@ -108,11 +111,11 @@ public class SkillSelectionPage extends InteractiveCustomUIPage<EventAction> {
                 false
             );
         }
-        
-        // Remplir la liste des skills disponibles
+
+        // Fill the list of available skills
         populateAvailableSkills(uiCommandBuilder, uiEventBuilder);
-        
-        // Afficher le message si aucun skill disponible
+
+        // Show message if no skills available
         if (ownedSkillPrefixes.isEmpty()) {
             uiCommandBuilder.set("#NoSkillsMessage.Visible", true);
             uiCommandBuilder.set("#SkillsList.Visible", false);
@@ -120,19 +123,20 @@ public class SkillSelectionPage extends InteractiveCustomUIPage<EventAction> {
     }
 
     // ============================================
-    // Gestion des evenements
+    // Event handling
     // ============================================
-    
+
     @Override
     public void handleDataEvent(
-            @Nonnull Ref<EntityStore> ref,
-            @Nonnull Store<EntityStore> store,
-            EventAction eventAction) {
+        @Nonnull Ref<EntityStore> ref,
+        @Nonnull Store<EntityStore> store,
+        EventAction eventAction
+    ) {
         super.handleDataEvent(ref, store, eventAction);
-        
+
         String data = eventAction.getData();
-        
-        // Parse le format "action:param" ou juste "action"
+
+        // Parse the format "action:param" or just "action"
         String action = data;
         String param = "";
         int colonIndex = data.indexOf(':');
@@ -142,29 +146,27 @@ public class SkillSelectionPage extends InteractiveCustomUIPage<EventAction> {
         }
 
         boolean changed = false;
-        
+
         switch (action) {
             case "select":
                 changed = handleSelectSkill(param);
                 break;
-                
             case "remove":
                 changed = handleRemoveSkill(parseSlotIndex(param));
                 break;
-                
             default:
                 break;
         }
-        
-        // Sauvegarder automatiquement si changement
+
+        // Auto-save if changed
         if (changed) {
             saveActiveSkills(ref, store);
         }
-        
-        // Mettre a jour l'UI apres chaque action
+
+        // Update the UI after each action
         refreshUI();
     }
-    
+
     private static int parseSlotIndex(String value) {
         if (value == null || value.isEmpty()) {
             return -1;
@@ -177,44 +179,48 @@ public class SkillSelectionPage extends InteractiveCustomUIPage<EventAction> {
     }
 
     // ============================================
-    // Logique metier
+    // Business logic
     // ============================================
-    
+
     /**
-     * Gere la selection d'un skill pour l'ajouter aux slots actifs.
-     * @param prefix Le prefix du skill (ex: "Skill_Flying_")
-     * @return true si un changement a ete effectue
+     * Handles the selection of a skill to add it to active slots.
+     * @param prefix The skill prefix (e.g. "Skill_Flying_")
+     * @return true if a change was made
      */
     private boolean handleSelectSkill(String prefix) {
         if (prefix == null || prefix.isEmpty()) {
             return false;
         }
-        
-        // Verifier si le skill est deja equipe
+
+        // Check if the skill is already equipped
         for (String activeSkill : activeSkills) {
             if (prefix.equals(activeSkill)) {
-                return false; // Deja equipe, ne rien faire
+                return false; // Already equipped, do nothing
             }
         }
-        
-        // Trouver le premier slot vide
+
+        // Find the first empty slot
         for (int i = 0; i < MAX_ACTIVE_SKILLS; i++) {
             if (activeSkills[i] == null || activeSkills[i].isEmpty()) {
                 activeSkills[i] = prefix;
                 return true;
             }
         }
-        
-        // Tous les slots sont pleins - ne rien faire
+
+        // All slots are full - do nothing
         return false;
     }
-    
+
     /**
-     * Retire un skill d'un slot actif.
-     * @return true si un changement a ete effectue
+     * Removes a skill from an active slot.
+     * @return true if a change was made
      */
     private boolean handleRemoveSkill(int slotIndex) {
-        if (slotIndex >= 0 && slotIndex < MAX_ACTIVE_SKILLS && activeSkills[slotIndex] != null) {
+        if (
+            slotIndex >= 0 &&
+            slotIndex < MAX_ACTIVE_SKILLS &&
+            activeSkills[slotIndex] != null
+        ) {
             activeSkills[slotIndex] = null;
             return true;
         }
@@ -222,38 +228,41 @@ public class SkillSelectionPage extends InteractiveCustomUIPage<EventAction> {
     }
 
     // ============================================
-    // Mise a jour de l'UI
+    // UI Update
     // ============================================
-    
+
     /**
-     * Rafraichit toute l'UI avec l'etat actuel.
+     * Refreshes the entire UI with the current state.
      */
     private void refreshUI() {
         UICommandBuilder builder = new UICommandBuilder();
-        
-        // Mettre a jour chaque slot actif
+
+        // Update each active slot
         for (int i = 0; i < MAX_ACTIVE_SKILLS; i++) {
             updateActiveSlotUI(builder, i);
         }
-        
+
         sendUpdate(builder);
     }
-    
+
     /**
-     * Met a jour l'affichage d'un slot actif.
-     * activeSkills contient des prefixes, on reconstruit l'ID complet pour l'affichage.
+     * Updates the display of an active slot.
+     * activeSkills contains prefixes, we rebuild the full ID for display.
      */
     private void updateActiveSlotUI(UICommandBuilder builder, int slotIndex) {
         String prefix = activeSkills[slotIndex];
         String slotSelector = "#SlotWrapper" + slotIndex + " #Slot" + slotIndex;
-        
+
         if (prefix != null && !prefix.isEmpty()) {
-            // Recuperer le niveau du skill pour ce prefix
+            // Get the skill level for this prefix
             Integer level = ownedSkills.get(prefix);
-            String fullSkillId = SkillIds.getSkillId(prefix, level != null ? level : 1);
-            
+            String fullSkillId = SkillIds.getSkillId(
+                prefix,
+                level != null ? level : 1
+            );
+
             if (fullSkillId != null) {
-                // Slot avec un skill - afficher l'item
+                // Slot with a skill - display the item
                 builder.set(slotSelector + " #Item.Visible", true);
                 builder.set(slotSelector + " #Item.ItemId", fullSkillId);
                 builder.set(slotSelector + " #Item.Quantity", 1);
@@ -261,50 +270,56 @@ public class SkillSelectionPage extends InteractiveCustomUIPage<EventAction> {
                 builder.set(slotSelector + " #Item.Visible", false);
             }
         } else {
-            // Slot vide - masquer l'ItemSlot
+            // Empty slot - hide the ItemSlot
             builder.set(slotSelector + " #Item.Visible", false);
         }
     }
-    
+
     /**
-     * Remplit la liste des skills disponibles.
+     * Fills the list of available skills.
      */
-    private void populateAvailableSkills(UICommandBuilder builder, UIEventBuilder eventBuilder) {
+    private void populateAvailableSkills(
+        UICommandBuilder builder,
+        UIEventBuilder eventBuilder
+    ) {
         final int SLOTS_PER_ROW = 5;
         int skillCount = ownedSkillPrefixes.size();
-        int rowCount = (skillCount + SLOTS_PER_ROW - 1) / SLOTS_PER_ROW; // Arrondi supérieur
-        
-        // Créer les lignes nécessaires
+        int rowCount = (skillCount + SLOTS_PER_ROW - 1) / SLOTS_PER_ROW; // Round up
+
+        // Create the necessary rows
         for (int row = 0; row < rowCount; row++) {
             builder.append("#SkillsList", "SkillRowTemplate.ui");
         }
-        
-        // Remplir chaque ligne avec les skills
+
+        // Fill each row with the skills
         for (int i = 0; i < skillCount; i++) {
             String prefix = ownedSkillPrefixes.get(i);
             Integer level = ownedSkills.get(prefix);
-            
-            // Reconstruire l'ID complet pour l'affichage (ex: "Skill_Flying_A")
-            String fullSkillId = SkillIds.getSkillId(prefix, level != null ? level : 1);
+
+            // Rebuild the full ID for display (e.g. "Skill_Flying_A")
+            String fullSkillId = SkillIds.getSkillId(
+                prefix,
+                level != null ? level : 1
+            );
             if (fullSkillId == null) {
                 continue;
             }
-            
+
             int rowIndex = i / SLOTS_PER_ROW;
             int slotInRow = i % SLOTS_PER_ROW;
-            
-            // Sélecteur de la ligne
+
+            // Row selector
             String rowSelector = "#SkillsList[" + rowIndex + "]";
-            
-            // Ajouter le template du skill dans la ligne
+
+            // Add the skill template to the row
             builder.append(rowSelector, "SkillSlotTemplate.ui");
-            
-            // Configurer l'item du slot
+
+            // Configure the slot item
             String slotSelector = rowSelector + "[" + slotInRow + "]";
             builder.set(slotSelector + " #Item.ItemId", fullSkillId);
             builder.set(slotSelector + " #Item.Quantity", 1);
-            
-            // Enregistrer l'événement de click - on envoie le PREFIX (pas l'ID complet)
+
+            // Register the click event - we send the PREFIX (not the full ID)
             eventBuilder.addEventBinding(
                 CustomUIEventBindingType.Activating,
                 slotSelector,
@@ -315,37 +330,47 @@ public class SkillSelectionPage extends InteractiveCustomUIPage<EventAction> {
     }
 
     // ============================================
-    // Sauvegarde
+    // Saving
     // ============================================
-    
+
     /**
-     * Sauvegarde les skills actifs dans le composant du joueur.
+     * Saves the active skills in the player's component.
      */
-    private void saveActiveSkills(Ref<EntityStore> ref, Store<EntityStore> store) {
-        // Recuperer la reference du joueur pour acceder aux composants
+    private void saveActiveSkills(
+        Ref<EntityStore> ref,
+        Store<EntityStore> store
+    ) {
+        // Get the player reference to access components
         Ref<EntityStore> playerEntityRef = playerRef.getReference();
         if (playerEntityRef == null) {
             return;
         }
-        
-        // Sauvegarder les skills actifs dans le composant du joueur
-        ActiveSkillsComponent component = store.getComponent(playerEntityRef, ActiveSkillsComponent.getComponentType());
+
+        // Save the active skills in the player's component
+        ActiveSkillsComponent component = store.getComponent(
+            playerEntityRef,
+            ActiveSkillsComponent.getComponentType()
+        );
         if (component != null) {
             component.setActiveSkills(activeSkills);
         } else {
-            // Creer le composant s'il n'existe pas
+            // Create the component if it doesn't exist
             ActiveSkillsComponent newComponent = new ActiveSkillsComponent();
             newComponent.setActiveSkills(activeSkills);
-            store.addComponent(playerEntityRef, ActiveSkillsComponent.getComponentType(), newComponent);
+            store.addComponent(
+                playerEntityRef,
+                ActiveSkillsComponent.getComponentType(),
+                newComponent
+            );
         }
     }
 
     // ============================================
     // Getters
     // ============================================
-    
+
     /**
-     * Retourne une copie des skills actifs.
+     * Returns a copy of the active skills.
      */
     public String[] getActiveSkills() {
         return activeSkills.clone();

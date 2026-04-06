@@ -21,13 +21,13 @@ import lheido.skills.hud.SkillBarHud.SlotState;
 import lheido.skills.utils.SkillIds;
 
 /**
- * Systeme ECS qui gere l'affichage de la SkillBar HUD.
- * 
- * Ce systeme met a jour la skillbar pour afficher les 3 skills actifs du joueur
- * avec leurs etats respectifs (READY, ACTIVE, COOLDOWN).
- * 
- * La skillbar remplace l'ancien FlyingSkillHud et centralise l'affichage
- * de tous les skills actifs.
+ * ECS system that manages the SkillBar HUD display.
+ *
+ * This system updates the skillbar to display the player's 3 active skills
+ * with their respective states (READY, ACTIVE, COOLDOWN).
+ *
+ * The skillbar replaces the old FlyingSkillHud and centralizes the display
+ * of all active skills.
  */
 public class SkillBarSystem extends EntityTickingSystem<EntityStore> {
 
@@ -42,7 +42,7 @@ public class SkillBarSystem extends EntityTickingSystem<EntityStore> {
 
     @Override
     public Query<EntityStore> getQuery() {
-        // Ce systeme s'execute pour toutes les entites avec ActiveSkillsComponent
+        // This system runs for all entities with ActiveSkillsComponent
         return ActiveSkillsComponent.getComponentType();
     }
 
@@ -56,7 +56,7 @@ public class SkillBarSystem extends EntityTickingSystem<EntityStore> {
     ) {
         Ref<EntityStore> entityRef = chunk.getReferenceTo(entityIndex);
 
-        // Recuperer le joueur
+        // Get the player
         Player player = commandBuffer.getComponent(
             entityRef,
             Player.getComponentType()
@@ -70,30 +70,30 @@ public class SkillBarSystem extends EntityTickingSystem<EntityStore> {
             return;
         }
 
-        // Recuperer le HudManager
+        // Get the HudManager
         HudManager hudManager = player.getHudManager();
         if (hudManager == null) {
             return;
         }
 
-        // Recuperer ou creer le SkillBarHud
+        // Get or create the SkillBarHud
         SkillBarHud skillBarHud = getOrCreateSkillBarHud(hudManager, playerRef);
         if (skillBarHud == null) {
             return;
         }
 
-        // Recuperer les skills actifs
+        // Get the active skills
         ActiveSkillsComponent activeSkills = commandBuffer.getComponent(
             entityRef,
             ActiveSkillsComponent.getComponentType()
         );
         if (activeSkills == null) {
-            // Pas de skills actifs - vider la skillbar
+            // No active skills - clear the skillbar
             clearSkillBar(skillBarHud);
             return;
         }
 
-        // Mettre a jour chaque slot
+        // Update each slot
         SlotInfo[] slotInfos = new SlotInfo[MAX_SLOTS];
         String[] skills = activeSkills.getActiveSkills();
 
@@ -106,16 +106,19 @@ public class SkillBarSystem extends EntityTickingSystem<EntityStore> {
     }
 
     /**
-     * Recupere le SkillBarHud existant ou en cree un nouveau.
+     * Gets the existing SkillBarHud or creates a new one.
      */
-    private SkillBarHud getOrCreateSkillBarHud(HudManager hudManager, PlayerRef playerRef) {
+    private SkillBarHud getOrCreateSkillBarHud(
+        HudManager hudManager,
+        PlayerRef playerRef
+    ) {
         CustomUIHud currentHud = hudManager.getCustomHud();
-        
+
         if (currentHud instanceof SkillBarHud existingHud) {
             return existingHud;
         }
 
-        // Creer un nouveau HUD
+        // Create a new HUD
         SkillBarHud newHud = new SkillBarHud(playerRef);
         hudManager.setCustomHud(playerRef, newHud);
         newHud.show();
@@ -123,7 +126,7 @@ public class SkillBarSystem extends EntityTickingSystem<EntityStore> {
     }
 
     /**
-     * Vide la skillbar (tous les slots vides).
+     * Clears the skillbar (all slots empty).
      */
     private void clearSkillBar(SkillBarHud skillBarHud) {
         SlotInfo[] emptySlots = new SlotInfo[MAX_SLOTS];
@@ -134,12 +137,12 @@ public class SkillBarSystem extends EntityTickingSystem<EntityStore> {
     }
 
     /**
-     * Construit les informations d'un slot en fonction du skill et de son etat.
-     * 
-     * @param skillPrefix Le prefix du skill (ex: "Skill_Flying_") ou null si slot vide
-     * @param entityRef Reference vers l'entite joueur
-     * @param commandBuffer Buffer pour acceder aux composants
-     * @return Les informations du slot
+     * Builds slot information based on the skill and its state.
+     *
+     * @param skillPrefix The skill prefix (e.g. "Skill_Flying_") or null if slot is empty
+     * @param entityRef Reference to the player entity
+     * @param commandBuffer Buffer to access components
+     * @return The slot information
      */
     private SlotInfo buildSlotInfo(
         String skillPrefix,
@@ -150,18 +153,18 @@ public class SkillBarSystem extends EntityTickingSystem<EntityStore> {
             return SlotInfo.empty();
         }
 
-        // Determiner le type de skill et recuperer son etat
+        // Determine the skill type and get its state
         if (SkillIds.isFlyingSkill(skillPrefix)) {
             return buildFlyingSlotInfo(skillPrefix, entityRef, commandBuffer);
         }
-        
-        // Pour les skills passifs (WaterBreathing, Stamina, etc.)
-        // Ils n'ont pas d'etat ACTIVE/COOLDOWN, donc toujours READY
+
+        // For passive skills (WaterBreathing, Stamina, etc.)
+        // They don't have ACTIVE/COOLDOWN state, so always READY
         return buildPassiveSlotInfo(skillPrefix, entityRef, commandBuffer);
     }
 
     /**
-     * Construit les informations d'un slot pour le skill Flying.
+     * Builds slot information for the Flying skill.
      */
     private SlotInfo buildFlyingSlotInfo(
         String skillPrefix,
@@ -174,12 +177,12 @@ public class SkillBarSystem extends EntityTickingSystem<EntityStore> {
         );
 
         if (flyingComp == null) {
-            // Skill equipe mais composant non trouve - afficher comme READY
+            // Skill equipped but component not found - display as READY
             String skillId = SkillIds.getSkillId(skillPrefix, 1);
             return SlotInfo.ready(skillId);
         }
 
-        // Construire l'ID complet du skill avec le niveau actuel
+        // Build the full skill ID with the current level
         String skillId = SkillIds.getFlyingSkillId(flyingComp.getLevel());
         if (skillId == null) {
             skillId = SkillIds.getSkillId(skillPrefix, 1);
@@ -191,7 +194,7 @@ public class SkillBarSystem extends EntityTickingSystem<EntityStore> {
             case READY -> SlotInfo.ready(skillId);
             case FLYING -> {
                 if (flyingComp.isUnlimitedFlight()) {
-                    // Vol illimite - pas de timer
+                    // Unlimited flight - no timer
                     yield SlotInfo.ready(skillId);
                 }
                 int remainingSeconds = (int) Math.ceil(
@@ -209,18 +212,18 @@ public class SkillBarSystem extends EntityTickingSystem<EntityStore> {
     }
 
     /**
-     * Construit les informations d'un slot pour un skill passif.
-     * Les skills passifs n'ont pas d'etat actif/cooldown.
+     * Builds slot information for a passive skill.
+     * Passive skills don't have active/cooldown state.
      */
     private SlotInfo buildPassiveSlotInfo(
         String skillPrefix,
         Ref<EntityStore> entityRef,
         CommandBuffer<EntityStore> commandBuffer
     ) {
-        // Recuperer le niveau du skill passif
+        // Get the passive skill level
         int level = getPassiveSkillLevel(skillPrefix, entityRef, commandBuffer);
         String skillId = SkillIds.getSkillId(skillPrefix, level);
-        
+
         if (skillId == null) {
             skillId = skillPrefix + "A"; // Fallback
         }
@@ -229,14 +232,14 @@ public class SkillBarSystem extends EntityTickingSystem<EntityStore> {
     }
 
     /**
-     * Recupere le niveau d'un skill passif.
+     * Gets the level of a passive skill.
      */
     private int getPassiveSkillLevel(
         String skillPrefix,
         Ref<EntityStore> entityRef,
         CommandBuffer<EntityStore> commandBuffer
     ) {
-        // Verifier chaque type de skill passif
+        // Check each passive skill type
         if (SkillIds.isWaterBreathingSkill(skillPrefix)) {
             var comp = commandBuffer.getComponent(
                 entityRef,
