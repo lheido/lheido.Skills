@@ -112,7 +112,7 @@ public class SkillBarSystem extends EntityTickingSystem<EntityStore> {
         HudManager hudManager,
         PlayerRef playerRef
     ) {
-        CustomUIHud currentHud = hudManager.getCustomHud();
+        CustomUIHud currentHud = hudManager.getCustomHud(SkillBarHud.HUD_KEY);
 
         if (currentHud instanceof SkillBarHud existingHud) {
             return existingHud;
@@ -120,7 +120,7 @@ public class SkillBarSystem extends EntityTickingSystem<EntityStore> {
 
         // Create a new HUD
         SkillBarHud newHud = new SkillBarHud(playerRef);
-        hudManager.setCustomHud(playerRef, newHud);
+        hudManager.addCustomHud(playerRef, newHud);
         newHud.show();
         return newHud;
     }

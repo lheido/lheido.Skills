@@ -1,18 +1,31 @@
 package lheido.skills.interactions;
 
 import com.hypixel.hytale.codec.builder.BuilderCodec;
+import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.component.CommandBuffer;
+import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.component.Ref;
+import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.protocol.InteractionState;
+import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.protocol.InteractionType;
+import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.server.core.Message;
+import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.server.core.entity.InteractionContext;
+import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.server.core.entity.entities.Player;
+import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.CooldownHandler;
+import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.SimpleInstantInteraction;
+import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import javax.annotation.Nonnull;
+import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import lheido.skills.components.FireResistanceSkillComponent;
+import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 
 /**
  * Interaction to unlock the FireResistance skill.
@@ -62,7 +75,7 @@ public class SkillFireResistanceInteraction extends SimpleInstantInteraction {
             component
         );
 
-        player.sendMessage(
+        sendMessage(player, 
             Message.raw(
                 "Fire Resistance skill unlocked! 25% fire damage reduction."
             )

@@ -1,20 +1,35 @@
 package lheido.skills.interactions;
 
 import com.hypixel.hytale.codec.Codec;
+import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.codec.KeyedCodec;
+import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
+import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.component.CommandBuffer;
+import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.component.Ref;
+import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.protocol.InteractionState;
+import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.protocol.InteractionType;
+import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.server.core.Message;
+import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.server.core.entity.InteractionContext;
+import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.server.core.entity.entities.Player;
+import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.CooldownHandler;
+import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.SimpleInstantInteraction;
+import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import javax.annotation.Nonnull;
+import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import lheido.skills.components.WaterBreathingSkillComponent;
+import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 
 /**
  * Interaction to check the upgrade prerequisites for the WaterBreathing skill.
@@ -96,7 +111,7 @@ public class CheckWaterBreathingUpgradeInteraction
                     : "You must have Water Breathing (" +
                       requiredLevel +
                       ") before upgrading!";
-            player.sendMessage(Message.raw(message));
+            sendMessage(player, Message.raw(message));
             interactionContext.getState().state = InteractionState.Failed;
             return;
         }
@@ -109,7 +124,7 @@ public class CheckWaterBreathingUpgradeInteraction
                     : "You already have Water Breathing level " +
                       targetLevel +
                       " or higher!";
-            player.sendMessage(Message.raw(message));
+            sendMessage(player, Message.raw(message));
             interactionContext.getState().state = InteractionState.Failed;
             return;
         }
