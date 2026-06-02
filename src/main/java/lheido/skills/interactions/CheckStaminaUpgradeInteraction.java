@@ -1,37 +1,23 @@
 package lheido.skills.interactions;
 
 import com.hypixel.hytale.codec.Codec;
-import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.codec.KeyedCodec;
-import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
-import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.component.CommandBuffer;
-import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.component.Ref;
-import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.logger.HytaleLogger;
-import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.protocol.InteractionState;
-import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.protocol.InteractionType;
-import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.server.core.Message;
-import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.server.core.entity.InteractionContext;
-import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.server.core.entity.entities.Player;
-import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.CooldownHandler;
-import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.SimpleInstantInteraction;
-import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import javax.annotation.Nonnull;
-import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
 import lheido.skills.components.StaminaSkillComponent;
 import static lheido.skills.utils.PlayerMessageUtils.sendMessage;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
 
 public class CheckStaminaUpgradeInteraction extends SimpleInstantInteraction {
 
@@ -83,6 +69,15 @@ public class CheckStaminaUpgradeInteraction extends SimpleInstantInteraction {
             return;
         }
 
+        PlayerRef playerRef = commandBuffer.getComponent(
+            ref,
+            PlayerRef.getComponentType()
+        );
+        if (playerRef == null) {
+            interactionContext.getState().state = InteractionState.Failed;
+            return;
+        }
+
         StaminaSkillComponent existingComponent = commandBuffer.getComponent(
             ref,
             StaminaSkillComponent.getComponentType()
@@ -96,13 +91,13 @@ public class CheckStaminaUpgradeInteraction extends SimpleInstantInteraction {
                 "You must have Stamina (" +
                 requiredLevel +
                 ") before upgrading!";
-            sendMessage(player, Message.raw(message));
+            sendMessage(playerRef, Message.raw(message));
             interactionContext.getState().state = InteractionState.Failed;
             return;
         }
 
         if (currentLevel >= targetLevel) {
-            sendMessage(player, 
+            sendMessage(playerRef, 
                 Message.raw("You already have this level or higher!")
             );
             interactionContext.getState().state = InteractionState.Failed;
